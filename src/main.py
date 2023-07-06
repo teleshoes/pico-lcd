@@ -69,3 +69,35 @@ if __name__=='__main__':
       status = wlan.ifconfig()
       print( 'ip = ' + status[0] )
       ipAddr = status[0]
+
+  addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+
+  s = socket.socket()
+  s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  s.bind(addr)
+  s.listen(1)
+
+  print('listening on', addr)
+
+  lcd.fill(0)
+  lcdFont.markup(""
+    + "!size=4!!color=green!"             + "CONNECTED\n"
+    + "!size=3!!color=blue!"              + "\nlistening on:\n"
+    + "!size=3!!color=green!!hspace=0.7!" + ipAddr
+  )
+  lcd.show()
+
+  while(1):
+    try:
+      cl, addr = s.accept()
+      print('client connected from', addr)
+      request = cl.recv(1024)
+      print(request)
+      cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+      cl.close()
+
+    except Exception as e:
+      print(e)
+      lcdFont.showText("MSG\nFAILED", pxPerDot=5, color=RED)
+      cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
+      cl.close()
