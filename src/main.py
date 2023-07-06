@@ -5,6 +5,8 @@ import network
 import time
 import socket
 
+import base64 #non-standard, must build micropython
+
 from lcd13 import LCD
 from lcdFont import LcdFont
 
@@ -93,6 +95,16 @@ if __name__=='__main__':
       print('client connected from', addr)
       request = cl.recv(1024)
       print(request)
+
+      msgBase64 = str(request).split()[1].strip('/')
+      msgBytesBase64 = msgBase64.encode("utf8")
+      msgBytes = base64.b64decode(msgBytesBase64)
+      msg = msgBytes.decode("utf8")
+
+      print("MESSAGE:\n" + msgBase64)
+
+      lcdFont.markup(msg)
+
       cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
       cl.close()
 
