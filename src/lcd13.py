@@ -1,3 +1,6 @@
+#original author:      Waveshare team
+#original author date: 2021-04-27
+#original license:     MIT
 
 from machine import Pin,SPI,PWM
 import framebuf
