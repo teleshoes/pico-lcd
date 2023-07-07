@@ -130,6 +130,7 @@ class LcdFont:
             i += 1 #skip '!'
           else:
             cmd, val = cmdVal
+            cmd = cmd.lower()
             if cmd == "color":
               if val == "red":
                 color = self.lcd.red
