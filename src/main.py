@@ -7,7 +7,7 @@ import socket
 
 import base64 #non-standard, must build micropython
 
-from lcd13 import LCD
+from lcd import LCD
 from lcdFont import LcdFont
 
 if __name__=='__main__':
