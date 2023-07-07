@@ -81,11 +81,24 @@ class LcdFont:
   def drawMarkup(self, markup, x=0, y=0, pxPerDot=5, color=None, hspace=1.0, vspace=1.0):
     #  markup syntax is:
     #    !cmd=val!
-    #  with '!!' for literal exclamation points
+    #        cmd    set the color to val
+    #        size   set the pixels-per-dot to size, font size is 8*size px (for 5x8 font)
+    #        x      set the left position for future text to val as absolute px on LCD
+    #        y      set the top position for future text to val as absolute px on LCD
+    #        hspace leave floor(5*hspace) pixels between each character (for 5x8 font)
+    #                 1.0 is the default, 0 means no space, 2.0 means wide
+    #        vspace leave floor(8*vspace) pixels between new lines (for 5x8 font)
+    #                 1.0 is the default, 0 means no space, 2.0 means wide
+    #    !n!
+    #        treated the same as a newline literal
+    #          moves the cursor down (8+vspace)*size px,
+    #          and resets the left to initial
+    #    !!
+    #        literal '!' character
     #  e.g.:
-    #      hello!size=6!!color=red!\nworld!!
+    #      hello!n!!size=6!!color=red!world!!
     #        looks similar to the following HTML:
-    #      hello<big><span style="color:red"><br/>world!</big></span>
+    #      hello<br/><span style="font-size:48px; color:red">world!</span>
     top = y
     for line in markup.split("\n"):
       left = x
