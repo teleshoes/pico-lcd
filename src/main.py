@@ -96,14 +96,23 @@ if __name__=='__main__':
       request = cl.recv(1024)
       print(request)
 
-      msgBase64 = str(request).split()[1].strip('/')
-      msgBytesBase64 = msgBase64.encode("utf8")
-      msgBytes = base64.b64decode(msgBytesBase64)
-      msg = msgBytes.decode("utf8")
+      cmdStr = str(request).split()[1].strip('/')
+      cmdArr = cmdStr.split("=", 1)
+      cmd = cmdArr[0]
+      val = None
+      if len(cmdArr) == 2:
+        val = cmdArr[1]
 
-      print("MESSAGE:\n" + msgBase64)
-
-      lcdFont.markup(msg)
+      if cmd == "text":
+        msgBase64 = val
+        msgBytesBase64 = msgBase64.encode("utf8")
+        msgBytes = base64.b64decode(msgBytesBase64)
+        msg = msgBytes.decode("utf8")
+        lcdFont.drawMarkup(msg)
+        lcd.show()
+        print("text: " + msg)
+      else:
+        raise(Exception("ERROR: could not parse payload"))
 
       cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
       cl.close()
