@@ -10,9 +10,13 @@ import base64 #non-standard, must build micropython
 from lcd import LCD
 from lcdFont import LcdFont
 
+LCD13 = {'width':240, 'height':240}
+
+lcdModule = LCD13
+
 if __name__=='__main__':
   LCD.INIT_PWM(65535)
-  lcd = LCD()
+  lcd = LCD(LCD13['width'], LCD13['height'])
   lcd.fill(0)
 
   lcdFont = LcdFont('font5x8.bin', lcd)

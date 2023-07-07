@@ -16,9 +16,9 @@ class LCD(framebuf.FrameBuffer):
         pwm.freq(1000)
         pwm.duty_u16(brightness) #max 65535
 
-    def __init__(self):
-        self.width = 240
-        self.height = 240
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
 
         self.cs = Pin(CS,Pin.OUT)
         self.rst = Pin(RST,Pin.OUT)
