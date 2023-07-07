@@ -47,11 +47,12 @@ class LCD(framebuf.FrameBuffer):
         super().__init__(self.buffer, self.width, self.height, framebuf.RGB565)
         self.init_display()
 
-        self.red   =   0x07E0
-        self.green =   0x001f
-        self.blue  =   0xf800
-        self.white =   0xffff
-        self.black =   0x0000
+        #RGB565        RRRRRGGG      GGGBBBBB
+        self.red   = 0b11100000 | (0b00000111 << 8)
+        self.blue  = 0b00000000 | (0b11111000 << 8)
+        self.green = 0b00011111 | (0b00000000 << 8)
+        self.white = 0b11111111 | (0b11111111 << 8)
+        self.black = 0b00000000 | (0b00000000 << 8)
 
     def setOrient(self, orient):
         self.orient = orient
