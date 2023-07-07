@@ -140,6 +140,8 @@ class LcdFont:
                 color = self.lcd.blue
               elif val == "white":
                 color = self.lcd.white
+              elif val == "black":
+                color = self.lcd.black
             elif cmd == "size":
               pxPerDot = int(val)
             elif cmd == "x":
