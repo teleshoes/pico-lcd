@@ -123,6 +123,10 @@ class LcdFont:
                 color = self.lcd.white
             elif cmd == "size":
               pxPerDot = int(val)
+            elif cmd == "x":
+              left = int(val)
+            elif cmd == "y":
+              top = int(val)
             elif cmd == "hspace":
               hspace = float(val)
             elif cmd == "vspace":
