@@ -107,6 +107,8 @@ if __name__=='__main__':
         lcd.fill(0)
         lcd.show()
         print("clear")
+      elif cmd == "show":
+        lcd.show()
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
         if cmd == "ctext" or cmd == "ctextbuf":
           lcd.fill(0)
