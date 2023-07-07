@@ -103,7 +103,11 @@ if __name__=='__main__':
       if len(cmdArr) == 2:
         val = cmdArr[1]
 
-      if cmd == "text":
+      if cmd == "clear":
+        lcd.fill(0)
+        lcd.show()
+        print("clear")
+      elif cmd == "text":
         msgBase64 = val
         msgBytesBase64 = msgBase64.encode("utf8")
         msgBytes = base64.b64decode(msgBytesBase64)
