@@ -48,9 +48,9 @@ class LCD(framebuf.FrameBuffer):
         self.init_display()
 
         #RGB565        RRRRRGGG      GGGBBBBB
-        self.red   = 0b11100000 | (0b00000111 << 8)
-        self.blue  = 0b00000000 | (0b11111000 << 8)
-        self.green = 0b00011111 | (0b00000000 << 8)
+        self.red   = 0b11111000 | (0b00000000 << 8)
+        self.green = 0b00000111 | (0b11100000 << 8)
+        self.blue  = 0b00000000 | (0b00011111 << 8)
         self.white = 0b11111111 | (0b11111111 << 8)
         self.black = 0b00000000 | (0b00000000 << 8)
 
