@@ -107,7 +107,9 @@ if __name__=='__main__':
         lcd.fill(0)
         lcd.show()
         print("clear")
-      elif cmd == "text":
+      elif cmd == "text" or cmd == "ctext":
+        if cmd == "ctext":
+          lcd.fill(0)
         msgBase64 = val
         msgBytesBase64 = msgBase64.encode("utf8")
         msgBytes = base64.b64decode(msgBytesBase64)
