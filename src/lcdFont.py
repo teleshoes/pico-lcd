@@ -105,6 +105,11 @@ class LcdFont:
             self.drawChar('!', left, top, pxPerDot, color)
             left += int((self.fontWidth+hspace)*pxPerDot)
             i += 2 #skip '!!'
+          elif len(cmdVal) == 1 and cmdVal[0] == "n":
+            # !n! is a newline
+            top += int((self.fontHeight+vspace)*pxPerDot)
+            left = x
+            i = end+1 #skip '!n!'
           elif len(cmdVal) != 2:
             print("WARNING: invalid markup\n" + markup)
             self.drawChar('!', left, top, pxPerDot, color)
