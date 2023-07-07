@@ -11,14 +11,27 @@ SCK = 10
 CS = 9
 
 class LCD(framebuf.FrameBuffer):
+    # mode bits
+    #  0x08 RGB/BGR
+    #  0x20 rotate 90 degrees
+    #  0x40 mirror X
+    #  0x80 mirror Y
+    MODE_PX_RGB        = 0b00000000
+    MODE_PX_BGR        = 0b00001000
+    MODE_ORIENT_NORMAL = 0b01100000
+    MODE_ORIENT_ROT90  = 0b00000000
+    MODE_ORIENT_ROT180 = 0b10100000
+    MODE_ORIENT_ROT270 = 0b11000000
+
     def INIT_PWM(brightness):
         pwm = PWM(Pin(BL))
         pwm.freq(1000)
         pwm.duty_u16(brightness) #max 65535
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, orient=MODE_ORIENT_NORMAL, pixelOrder=MODE_PX_RGB):
         self.width = width
         self.height = height
+        self.mode = orient | pixelOrder
 
         self.cs = Pin(CS,Pin.OUT)
         self.rst = Pin(RST,Pin.OUT)
@@ -60,7 +73,7 @@ class LCD(framebuf.FrameBuffer):
         self.rst(1)
 
         self.write_cmd(0x36)
-        self.write_data(0x70)
+        self.write_data(self.mode)
 
         self.write_cmd(0x3A)
         self.write_data(0x05)

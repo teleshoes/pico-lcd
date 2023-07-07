@@ -16,7 +16,7 @@ lcdModule = LCD13
 
 if __name__=='__main__':
   LCD.INIT_PWM(65535)
-  lcd = LCD(LCD13['width'], LCD13['height'])
+  lcd = LCD(LCD13['width'], LCD13['height'], orient=LCD.MODE_ORIENT_NORMAL)
   lcd.fill(0)
 
   lcdFont = LcdFont('font5x8.bin', lcd)
