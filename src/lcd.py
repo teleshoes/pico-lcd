@@ -31,7 +31,8 @@ class LCD(framebuf.FrameBuffer):
     def __init__(self, width, height, orient=MODE_ORIENT_NORMAL, pixelOrder=MODE_PX_RGB):
         self.width = width
         self.height = height
-        self.mode = orient | pixelOrder
+        self.orient = orient
+        self.pixelOrder = pixelOrder
 
         self.cs = Pin(CS,Pin.OUT)
         self.rst = Pin(RST,Pin.OUT)
@@ -51,6 +52,11 @@ class LCD(framebuf.FrameBuffer):
         self.blue  =   0xf800
         self.white =   0xffff
         self.black =   0x0000
+
+    def setOrient(self, orient):
+        self.orient = orient
+        self.write_cmd(0x36)
+        self.write_data(self.orient | self.pixelOrder)
 
     def write_cmd(self, cmd):
         self.cs(1)
@@ -73,7 +79,7 @@ class LCD(framebuf.FrameBuffer):
         self.rst(1)
 
         self.write_cmd(0x36)
-        self.write_data(self.mode)
+        self.write_data(self.orient | self.pixelOrder)
 
         self.write_cmd(0x3A)
         self.write_data(0x05)
