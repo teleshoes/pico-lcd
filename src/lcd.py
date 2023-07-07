@@ -158,14 +158,14 @@ class LCD(framebuf.FrameBuffer):
         self.write_cmd(0x2A)
         self.write_data(0x00)
         self.write_data(0x00)
-        self.write_data(0x00)
-        self.write_data(0xef)
+        self.write_data(int((self.width-1) / 256))
+        self.write_data(int((self.width-1) % 256))
 
         self.write_cmd(0x2B)
         self.write_data(0x00)
         self.write_data(0x00)
-        self.write_data(0x00)
-        self.write_data(0xEF)
+        self.write_data(int((self.height-1) / 256))
+        self.write_data(int((self.height-1) % 256))
 
         self.write_cmd(0x2C)
 
