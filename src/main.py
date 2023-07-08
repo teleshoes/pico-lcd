@@ -14,6 +14,7 @@ ORIENT = LCD.MODE_ORIENT_NORMAL
 PX_ORDER = LCD.MODE_PX_RGB
 
 LCD_CONF_1_3 = {'width':240, 'height':240, 'orient':ORIENT, 'px':PX_ORDER}
+LCD_CONF_2_0 = {'width':320, 'height':240, 'orient':ORIENT, 'px':PX_ORDER}
 
 LCD_CONF = LCD_CONF_1_3
 
