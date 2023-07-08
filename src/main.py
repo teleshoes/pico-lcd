@@ -23,8 +23,7 @@ if __name__=='__main__':
   lcd = LCD(LCD_CONF['width'], LCD_CONF['height'],
     LCD_CONF['orient'], LCD_CONF['px'], LCD_CONF['lowRam'])
 
-  lcd.fill(0)
-  lcd.show()
+  lcd.fillShow(lcd.black)
 
   lcdFont = LcdFont('font5x8.bin', lcd)
   lcdFont.setup()
@@ -92,8 +91,7 @@ if __name__=='__main__':
 
   print('listening on', addr)
 
-  lcd.fill(lcd.black)
-  lcd.show()
+  lcd.fillShow(lcd.black)
 
   lcdFont.markup(""
     + "!size=4!!color=green!"             + "CONNECTED\n"
@@ -117,8 +115,7 @@ if __name__=='__main__':
         val = cmdArr[1]
 
       if cmd == "clear":
-        lcd.fill(0)
-        lcd.show()
+        lcd.fillShow(lcd.black)
         print("clear")
       elif cmd == "show":
         lcd.show()
@@ -135,7 +132,7 @@ if __name__=='__main__':
         lcd.setOrient(LCD.MODE_ORIENT_NORMAL)
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
         if cmd == "ctext" or cmd == "ctextbuf":
-          lcd.fill(0)
+          lcd.fill(lcd.black)
         msgBase64 = val
         msgBytesBase64 = msgBase64.encode("utf8")
         msgBytes = base64.b64decode(msgBytesBase64)

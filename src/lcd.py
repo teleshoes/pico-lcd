@@ -181,8 +181,32 @@ class LCD(framebuf.FrameBuffer):
 
         self.write_cmd(0x29)
 
+    def fillShow(self, color):
+        self.prepareLCDForBuffer()
 
-    def show(self):
+        for i in range(len(self.buffer)):
+          self.buffer[i] = color
+
+        if self.lowRam:
+          if color == 0:
+            for i in range(len(self.lowRamBuffer)):
+              self.lowRamBuffer[i] = 0
+          else:
+            rgb332 = color
+            rgb565 = RGB332_TO_RGB565[rgb332]
+            chunkSize = len(self.buffer) / self.lowRamChunkCount
+            for i in range(chunkSize):
+              self.lowRamBuffer[i*2 + 0] = rgb565 >> 8
+              self.lowRamBuffer[i*2 + 1] = rgb565 & 0xff
+
+          for i in range(self.lowRamChunkCount):
+            self.spi.write(self.lowRamBuffer)
+        else:
+          self.spi.write(self.buffer)
+
+        self.cs(1)
+
+    def prepareLCDForBuffer(self):
         self.write_cmd(0x2A)
         self.write_data(0x00)
         self.write_data(0x00)
@@ -200,6 +224,9 @@ class LCD(framebuf.FrameBuffer):
         self.cs(1)
         self.dc(1)
         self.cs(0)
+
+    def show(self):
+        self.prepareLCDForBuffer()
 
         if self.lowRam:
           chunkSize = len(self.buffer) / self.lowRamChunkCount
