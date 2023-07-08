@@ -22,7 +22,9 @@ if __name__=='__main__':
   LCD.INIT_PWM(65535)
   lcd = LCD(LCD_CONF['width'], LCD_CONF['height'],
     LCD_CONF['orient'], LCD_CONF['px'], LCD_CONF['lowRam'])
+
   lcd.fill(0)
+  lcd.show()
 
   lcdFont = LcdFont('font5x8.bin', lcd)
   lcdFont.setup()
