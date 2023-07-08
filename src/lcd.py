@@ -3,6 +3,8 @@ import framebuf
 import time
 import os
 
+from rgb332_to_rgb565 import RGB332_TO_RGB565
+
 BL = 13
 DC = 8
 RST = 12
@@ -48,10 +50,12 @@ class LCD(framebuf.FrameBuffer):
 
         if self.lowRam:
             #1) limit colors to RGB332 color profile, pretending to use framebuf GS8
-            #2) write a quarter of the screen at a time onto the screen
-            #3) saves 25% of ram, and is MUCH MUCH MUCH slower
+            #2) convert chunks of the screen on the fly when writing data
+            #3) cuts RAM usage by 37.5%
+            #4) MUCH MUCH MUCH slower
+            self.lowRamChunkCount = 8
             self.buffer = bytearray(self.height * self.width)
-            self.lowRamBuffer = bytearray(int(self.height * self.width / 2))
+            self.lowRamBuffer = bytearray(int(len(self.buffer)*2/self.lowRamChunkCount))
             self.colorProfile = framebuf.GS8
         else:
             self.buffer = bytearray(self.height * self.width * 2)
@@ -177,21 +181,19 @@ class LCD(framebuf.FrameBuffer):
 
         self.write_cmd(0x29)
 
-    def scaleBits(self, num, srcBitSize, destBitSize):
-      return int((num*(2**destBitSize-1) + 2**(srcBitSize-1) - 1) / (2**srcBitSize - 1))
 
     def show(self):
         self.write_cmd(0x2A)
         self.write_data(0x00)
         self.write_data(0x00)
-        self.write_data(int((self.width-1) / 256))
-        self.write_data(int((self.width-1) % 256))
+        self.write_data(int((self.width-1) >> 8))
+        self.write_data(int((self.width-1) & 0xff))
 
         self.write_cmd(0x2B)
         self.write_data(0x00)
         self.write_data(0x00)
-        self.write_data(int((self.height-1) / 256))
-        self.write_data(int((self.height-1) % 256))
+        self.write_data(int((self.height-1) >> 8))
+        self.write_data(int((self.height-1) & 0xff))
 
         self.write_cmd(0x2C)
 
@@ -200,24 +202,15 @@ class LCD(framebuf.FrameBuffer):
         self.cs(0)
 
         if self.lowRam:
-          chunk = len(self.buffer) / 4
-          for chunkNum in range(4):
-            for i in range(chunk):
-              i = int(i)
-              pxData = self.buffer[int(chunk*chunkNum + i)]
-              red3   = (pxData & 0b11100000) >> 5
-              green3 = (pxData & 0b00011100) >> 2
-              blue2  = (pxData & 0b00000011)
+          chunkSize = len(self.buffer) / self.lowRamChunkCount
+          for chunkIdx in range(self.lowRamChunkCount):
+            chunkStart = int(chunkIdx*chunkSize)
+            for i in range(chunkSize):
+              rgb332 = self.buffer[chunkStart + i]
+              rgb565 = RGB332_TO_RGB565[rgb332]
 
-              red5 = self.scaleBits(red3, 3, 5)
-              green6 = self.scaleBits(green3, 3, 6)
-              blue5 = self.scaleBits(blue2, 2, 5)
-
-              rgb565_byte1 = (red5 << 3) | (green6 >> 3)
-              rgb565_byte2 = ((green6 & 0b000111) << 5) | (blue5)
-
-              self.lowRamBuffer[i*2+0] = rgb565_byte1
-              self.lowRamBuffer[i*2+1] = rgb565_byte2
+              self.lowRamBuffer[i*2+0] = rgb565 >> 8
+              self.lowRamBuffer[i*2+1] = rgb565 & 0x00ff
             self.spi.write(self.lowRamBuffer)
         else:
           self.spi.write(self.buffer)
