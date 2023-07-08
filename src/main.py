@@ -10,13 +10,17 @@ import base64 #non-standard, must build micropython
 from lcd import LCD
 from lcdFont import LcdFont
 
-LCD13 = {'width':240, 'height':240}
+ORIENT = LCD.MODE_ORIENT_NORMAL
+PX_ORDER = LCD.MODE_PX_RGB
 
-lcdModule = LCD13
+LCD_CONF_1_3 = {'width':240, 'height':240, 'orient':ORIENT, 'px':PX_ORDER}
+
+LCD_CONF = LCD_CONF_1_3
 
 if __name__=='__main__':
   LCD.INIT_PWM(65535)
-  lcd = LCD(LCD13['width'], LCD13['height'], orient=LCD.MODE_ORIENT_NORMAL)
+  lcd = LCD(LCD_CONF['width'], LCD_CONF['height'],
+    LCD_CONF['orient'], LCD_CONF['px'])
   lcd.fill(0)
 
   lcdFont = LcdFont('font5x8.bin', lcd)
