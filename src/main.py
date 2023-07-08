@@ -92,7 +92,9 @@ if __name__=='__main__':
 
   print('listening on', addr)
 
-  lcd.fill(0)
+  lcd.fill(lcd.black)
+  lcd.show()
+
   lcdFont.markup(""
     + "!size=4!!color=green!"             + "CONNECTED\n"
     + "!size=3!!color=blue!"              + "\nlistening on:\n"
