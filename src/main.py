@@ -13,15 +13,15 @@ from lcdFont import LcdFont
 ORIENT = LCD.MODE_ORIENT_NORMAL
 PX_ORDER = LCD.MODE_PX_RGB
 
-LCD_CONF_1_3 = {'width':240, 'height':240, 'orient':ORIENT, 'px':PX_ORDER}
-LCD_CONF_2_0 = {'width':320, 'height':240, 'orient':ORIENT, 'px':PX_ORDER}
+LCD_CONF_1_3 = {'width':240, 'height':240, 'orient':ORIENT, 'px':PX_ORDER, 'lowRam':False}
+LCD_CONF_2_0 = {'width':320, 'height':240, 'orient':ORIENT, 'px':PX_ORDER, 'lowRam':True}
 
 LCD_CONF = LCD_CONF_1_3
 
 if __name__=='__main__':
   LCD.INIT_PWM(65535)
   lcd = LCD(LCD_CONF['width'], LCD_CONF['height'],
-    LCD_CONF['orient'], LCD_CONF['px'])
+    LCD_CONF['orient'], LCD_CONF['px'], LCD_CONF['lowRam'])
   lcd.fill(0)
 
   lcdFont = LcdFont('font5x8.bin', lcd)

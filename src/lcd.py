@@ -28,11 +28,13 @@ class LCD(framebuf.FrameBuffer):
         pwm.freq(1000)
         pwm.duty_u16(brightness) #max 65535
 
-    def __init__(self, width, height, orient=MODE_ORIENT_NORMAL, pixelOrder=MODE_PX_RGB):
+    def __init__(self, width, height,
+                 orient=MODE_ORIENT_NORMAL, pixelOrder=MODE_PX_RGB, lowRam=False):
         self.width = width
         self.height = height
         self.orient = orient
         self.pixelOrder = pixelOrder
+        self.lowRam = lowRam
 
         self.cs = Pin(CS,Pin.OUT)
         self.rst = Pin(RST,Pin.OUT)
@@ -43,16 +45,36 @@ class LCD(framebuf.FrameBuffer):
         self.spi = SPI(1,100000_000,polarity=0, phase=0,sck=Pin(SCK),mosi=Pin(MOSI),miso=None)
         self.dc = Pin(DC,Pin.OUT)
         self.dc(1)
-        self.buffer = bytearray(self.height * self.width * 2)
-        super().__init__(self.buffer, self.width, self.height, framebuf.RGB565)
+
+        if self.lowRam:
+            #1) limit colors to RGB332 color profile, pretending to use framebuf GS8
+            #2) write a quarter of the screen at a time onto the screen
+            #3) saves 25% of ram, and is MUCH MUCH MUCH slower
+            self.buffer = bytearray(self.height * self.width)
+            self.lowRamBuffer = bytearray(int(self.height * self.width / 2))
+            self.colorProfile = framebuf.GS8
+        else:
+            self.buffer = bytearray(self.height * self.width * 2)
+            self.colorProfile = framebuf.RGB565
+
+        super().__init__(self.buffer, self.width, self.height, self.colorProfile)
+
         self.init_display()
 
-        #RGB565        RRRRRGGG      GGGBBBBB
-        self.red   = 0b11111000 | (0b00000000 << 8)
-        self.green = 0b00000111 | (0b11100000 << 8)
-        self.blue  = 0b00000000 | (0b00011111 << 8)
-        self.white = 0b11111111 | (0b11111111 << 8)
-        self.black = 0b00000000 | (0b00000000 << 8)
+        if self.lowRam:
+            #RGB332        RRRGGGBB
+            self.red   = 0b11100000
+            self.green = 0b00011100
+            self.blue  = 0b00000011
+            self.white = 0b11111111
+            self.black = 0b00000000
+        else:
+            #RGB565        RRRRRGGG      GGGBBBBB
+            self.red   = 0b11111000 | (0b00000000 << 8)
+            self.green = 0b00000111 | (0b11100000 << 8)
+            self.blue  = 0b00000000 | (0b00011111 << 8)
+            self.white = 0b11111111 | (0b11111111 << 8)
+            self.black = 0b00000000 | (0b00000000 << 8)
 
     def setOrient(self, orient):
         self.orient = orient
@@ -155,6 +177,9 @@ class LCD(framebuf.FrameBuffer):
 
         self.write_cmd(0x29)
 
+    def scaleBits(self, num, srcBitSize, destBitSize):
+      return int((num*(2**destBitSize-1) + 2**(srcBitSize-1) - 1) / (2**srcBitSize - 1))
+
     def show(self):
         self.write_cmd(0x2A)
         self.write_data(0x00)
@@ -173,5 +198,27 @@ class LCD(framebuf.FrameBuffer):
         self.cs(1)
         self.dc(1)
         self.cs(0)
-        self.spi.write(self.buffer)
+
+        if self.lowRam:
+          chunk = len(self.buffer) / 4
+          for chunkNum in range(4):
+            for i in range(chunk):
+              i = int(i)
+              pxData = self.buffer[int(chunk*chunkNum + i)]
+              red3   = (pxData & 0b11100000) >> 5
+              green3 = (pxData & 0b00011100) >> 2
+              blue2  = (pxData & 0b00000011)
+
+              red5 = self.scaleBits(red3, 3, 5)
+              green6 = self.scaleBits(green3, 3, 6)
+              blue5 = self.scaleBits(blue2, 2, 5)
+
+              rgb565_byte1 = (red5 << 3) | (green6 >> 3)
+              rgb565_byte2 = ((green6 & 0b000111) << 5) | (blue5)
+
+              self.lowRamBuffer[i*2+0] = rgb565_byte1
+              self.lowRamBuffer[i*2+1] = rgb565_byte2
+            self.spi.write(self.lowRamBuffer)
+        else:
+          self.spi.write(self.buffer)
         self.cs(1)
