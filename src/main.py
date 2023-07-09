@@ -104,10 +104,10 @@ if __name__=='__main__':
     try:
       cl, addr = s.accept()
       print('client connected from', addr)
-      request = cl.recv(1024)
-      print(request)
+      requestFirstLine = cl.readline()
+      requestOther = cl.recv(1024)
 
-      cmdStr = str(request).split()[1].strip('/')
+      cmdStr = str(requestFirstLine).split()[1].strip('/')
       cmdArr = cmdStr.split("=", 1)
       cmd = cmdArr[0]
       val = None
