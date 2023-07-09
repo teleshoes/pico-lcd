@@ -109,7 +109,7 @@ class LCD(framebuf.FrameBuffer):
         self.write_data(self.orient | self.pixelOrder)
 
         self.write_cmd(0x3A)
-        self.write_data(0x05)
+        self.write_data(0x05) #0x05 RGB565, 0x03 RGB444
 
         self.write_cmd(0xB2)
         self.write_data(0x0C)
