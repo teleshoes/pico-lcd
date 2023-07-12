@@ -46,6 +46,10 @@ class LcdFont:
     self.fontHandle.seek(asciiIndex * self.bytesPerChar + 2)
     return ustruct.unpack('B'*self.bytesPerChar, self.fontHandle.read(self.bytesPerChar))
 
+  # charStr    a string containing a single character
+  # (x, y)     the top-left corner of the character in pixels
+  # size       pixels-per-dot of the font (characterHeight = fontHeight * pxPerDot)
+  # color      color in the colorspace of the lcd
   def drawChar(self, charStr, x, y, size, color):
     fontCharBytes = self.getFontCharBytes(charStr)
     byteIndex = 0
