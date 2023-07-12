@@ -246,8 +246,8 @@ sub main(@){
     my $msg = $messages[$i];
     $msg = "!size=$size!$msg" if defined $size;
     $msg = "!color=$color!$msg" if defined $color;
-    $msg = "!hspace=$hspace!$msg" if defined $hspace;
-    $msg = "!vspace=$vspace!$msg" if defined $vspace;
+    $msg = "!hspace=$hspace!$msg" if defined $hspace and $hspace != 1.0;
+    $msg = "!vspace=$vspace!$msg" if defined $vspace and $vspace != 1.0;
     $msg = "!x=$x!$msg" if defined $x;
     $msg = "!y=$y!$msg" if defined $y;
 
