@@ -8,6 +8,12 @@ my $EXEC = basename $0;
 
 my $DEVICE_CONFIG_FILE = "$ENV{HOME}/.config/pico-lcd.conf";
 
+my $SPLIT_LINES_BIG_CHAR_LIMIT = 800; #limit seems to be 860-905
+
+my $SPLIT_LINES_BIG_ONLY = "big-only";
+my $SPLIT_LINES_ALWAYS = "always";
+my $SPLIT_LINES_NEVER = "never";
+
 my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
@@ -72,6 +78,14 @@ my $USAGE = "Usage:
         -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
         -base64-encode TEXT_LINE as TEXT_LINE_B64
         -run: curl http://<IP_ADDRESS>/text=TEXT_LINE_B64
+    --no-lines
+      never split lines as in --lines
+    --lines-big-only
+      if TEXT is $SPLIT_LINES_BIG_CHAR_LIMIT chars or more:
+        same as: --lines
+      otherwise:
+        same as: --no-lines
+      (this is the default)
 ";
 
 sub main(@){
@@ -79,7 +93,7 @@ sub main(@){
   my $devName = undef;
   my $text = "";
   my $isClear = 1;
-  my $isLines = 0;
+  my $splitLines = $SPLIT_LINES_BIG_ONLY;
   my ($color, $size, $hspace, $vspace, $x, $y);
   while(@_ > 0){
     my $arg = shift @_;
@@ -101,7 +115,11 @@ sub main(@){
     }elsif($arg =~ /^--(default-dev)$/){
       $devName = undef;
     }elsif($arg =~ /^(--lines)$/){
-      $isLines = 1;
+      $splitLines = $SPLIT_LINES_ALWAYS;
+    }elsif($arg =~ /^(--no-lines)$/){
+      $splitLines = $SPLIT_LINES_NEVER;
+    }elsif($arg =~ /^(--lines-big-only)$/){
+      $splitLines = $SPLIT_LINES_BIG_ONLY;
     }elsif($arg =~ /^--color=(.+)$/){
       $color = $1;
     }elsif($arg =~ /^--size=(.+)$/){
@@ -140,6 +158,17 @@ sub main(@){
       my $dev = defined $devName ? $devName : "any dev";
       die "ERROR: could not find IP address for $dev in $DEVICE_CONFIG_FILE\n";
     }
+  }
+
+  my $charsTotal = length $text;
+
+  my $isLines;
+  if($splitLines eq $SPLIT_LINES_ALWAYS){
+    $isLines = 1;
+  }elsif($splitLines eq $SPLIT_LINES_BIG_ONLY){
+    $isLines = $charsTotal > $SPLIT_LINES_BIG_CHAR_LIMIT ? 1 : 0;
+  }else{
+    $isLines = 0;
   }
 
 
