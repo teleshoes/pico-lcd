@@ -21,10 +21,16 @@ class LCD(framebuf.FrameBuffer):
     #  0x80 mirror Y
     MODE_PX_RGB        = 0b00000000
     MODE_PX_BGR        = 0b00001000
+
     MODE_ORIENT_NORMAL = 0b01100000
     MODE_ORIENT_ROT90  = 0b00000000
     MODE_ORIENT_ROT180 = 0b10100000
     MODE_ORIENT_ROT270 = 0b11000000
+
+    MODE_REFRESH_BOT   = 0b00000000
+    MODE_REFRESH_TOP   = 0b00010000
+    MODE_REFRESH_LEFT  = 0b00000000
+    MODE_REFRESH_RIGHT = 0b00000100
 
     def INIT_PWM(brightness):
         pwm = PWM(Pin(BL))
@@ -86,8 +92,13 @@ class LCD(framebuf.FrameBuffer):
 
     def setOrient(self, orient):
         self.orient = orient
+        self.setLCDMadctlMode()
+
+    def setLCDMadctlMode(self):
         self.write_cmd(0x36)
-        self.write_data(self.orient | self.pixelOrder)
+        self.write_data(
+          self.orient | self.pixelOrder
+          | LCD.MODE_REFRESH_TOP | LCD.MODE_REFRESH_LEFT)
 
     def write_cmd(self, cmd):
         self.cs(1)
@@ -109,8 +120,7 @@ class LCD(framebuf.FrameBuffer):
         self.rst(0)
         self.rst(1)
 
-        self.write_cmd(0x36)
-        self.write_data(self.orient | self.pixelOrder)
+        self.setLCDMadctlMode()
 
         self.write_cmd(0x3A)
         self.write_data(0x05) #0x05 RGB565, 0x03 RGB444
