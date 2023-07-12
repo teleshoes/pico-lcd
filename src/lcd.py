@@ -32,6 +32,10 @@ class LCD(framebuf.FrameBuffer):
     MODE_REFRESH_LEFT  = 0b00000000
     MODE_REFRESH_RIGHT = 0b00000100
 
+    LCD_COLOR_PROFILE_RGB444 = 0x03
+    LCD_COLOR_PROFILE_RGB565 = 0x05
+    LCD_COLOR_PROFILE_RGB666 = 0x06
+
     def INIT_PWM(brightness):
         pwm = PWM(Pin(BL))
         pwm.freq(1000)
@@ -101,6 +105,28 @@ class LCD(framebuf.FrameBuffer):
           self.orient | self.pixelOrder
           | LCD.MODE_REFRESH_TOP | LCD.MODE_REFRESH_LEFT)
 
+    def setLCDInvertColors(self, invertColors):
+      if invertColors:
+        self.write_cmd(0x20)
+      else:
+        self.write_cmd(0x21)
+
+    def setLCDDisplayOn(self, isOn):
+      if isOn:
+        self.write_cmd(0x29)
+      else:
+        self.write_cmd(0x28)
+
+    def setLCDSleep(self, isSleep):
+      if isSleep:
+        self.write_cmd(0x10)
+      else:
+        self.write_cmd(0x11)
+
+    def setLCDColorProfile(self, lcdColorProfile):
+      self.write_cmd(0x3A)
+      self.write_data(lcdColorProfile)
+
     def write_cmd(self, cmd):
         self.cs(1)
         self.dc(0)
@@ -123,8 +149,7 @@ class LCD(framebuf.FrameBuffer):
 
         self.setLCDMadctlMode()
 
-        self.write_cmd(0x3A)
-        self.write_data(0x05) #0x05 RGB565, 0x03 RGB444
+        self.setLCDColorProfile(LCD.LCD_COLOR_PROFILE_RGB565)
 
         self.write_cmd(0xB2)
         self.write_data(0x0C)
@@ -190,11 +215,9 @@ class LCD(framebuf.FrameBuffer):
         self.write_data(0x20)
         self.write_data(0x23)
 
-        self.write_cmd(0x21)
-
-        self.write_cmd(0x11)
-
-        self.write_cmd(0x29)
+        self.setLCDInvertColors(False)
+        self.setLCDSleep(False)
+        self.setLCDDisplayOn(True)
 
     def fillShow(self, color):
         self.prepareLCDForBuffer()
