@@ -4,6 +4,7 @@
 import network
 import time
 import socket
+import gc
 
 import base64 #non-standard, must build micropython
 
@@ -102,6 +103,10 @@ if __name__=='__main__':
 
   while(1):
     try:
+      #something allocates memory that GC is not aware of
+      mem = gc.mem_free()
+      gc.collect()
+
       cl, addr = s.accept()
       print('client connected from', addr)
       requestFirstLine = cl.readline()
