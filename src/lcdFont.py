@@ -126,59 +126,60 @@ class LcdFont:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
     self.cursorSet(x, y, x, y, size, color, hspace, vspace)
 
-    for line in markup.split("\n"):
-      i=0
-      while i < len(line):
-        ch = line[i]
-        if ch == "!":
-          end = line.find('!', i+1)
-          if end < i:
-            print("WARNING: invalid markup\n" + markup)
-            cmdVal = []
-          else:
-            cmdVal = line[i+1:end].split("=")
-
-          if len(cmdVal) == 1 and cmdVal[0] == "":
-            # '!!' is literal '!'
-            self.cursorDrawChar('!')
-            i += 2 #skip '!!'
-          elif len(cmdVal) == 1 and cmdVal[0] == "n":
-            # !n! is a newline
-            self.cursorNewLine()
-            i = end+1 #skip '!n!'
-          elif len(cmdVal) != 2:
-            print("WARNING: invalid markup\n" + markup)
-            self.cursorDrawChar('!')
-            i += 1 #skip '!'
-          else:
-            cmd, val = cmdVal
-            cmd = cmd.lower()
-            if cmd == "color":
-              if val == "red":
-                self.cursor['color'] = self.lcd.red
-              elif val == "green":
-                self.cursor['color'] = self.lcd.green
-              elif val == "blue":
-                self.cursor['color'] = self.lcd.blue
-              elif val == "white":
-                self.cursor['color'] = self.lcd.white
-              elif val == "black":
-                self.cursor['color'] = self.lcd.black
-            elif cmd == "size":
-              self.cursor['size'] = int(val)
-            elif cmd == "x":
-              self.cursor[x] = int(val)
-            elif cmd == "y":
-              self.cursor[y] = int(val)
-            elif cmd == "hspace":
-              self.cursor['hspace'] = float(val)
-            elif cmd == "vspace":
-              self.cursor['vspace'] = float(val)
-            i = end+1 #skip '!cmd=val!'
+    i=0
+    while i < len(markup):
+      ch = markup[i]
+      if ch == "!":
+        end = markup.find('!', i+1)
+        if end < i:
+          print("WARNING: invalid markup\n" + markup)
+          cmdVal = []
         else:
-          self.cursorDrawChar(ch)
-          i += 1
-      self.cursorNewLine()
+          cmdVal = markup[i+1:end].split("=")
+
+        if len(cmdVal) == 1 and cmdVal[0] == "":
+          # '!!' is literal '!'
+          self.cursorDrawChar('!')
+          i += 2 #skip '!!'
+        elif len(cmdVal) == 1 and cmdVal[0] == "n":
+          # !n! is a newline
+          self.cursorNewLine()
+          i = end+1 #skip '!n!'
+        elif len(cmdVal) != 2:
+          print("WARNING: invalid markup\n" + markup)
+          self.cursorDrawChar('!')
+          i += 1 #skip '!'
+        else:
+          cmd, val = cmdVal
+          cmd = cmd.lower()
+          if cmd == "color":
+            if val == "red":
+              self.cursor['color'] = self.lcd.red
+            elif val == "green":
+              self.cursor['color'] = self.lcd.green
+            elif val == "blue":
+              self.cursor['color'] = self.lcd.blue
+            elif val == "white":
+              self.cursor['color'] = self.lcd.white
+            elif val == "black":
+              self.cursor['color'] = self.lcd.black
+          elif cmd == "size":
+            self.cursor['size'] = int(val)
+          elif cmd == "x":
+            self.cursor[x] = int(val)
+          elif cmd == "y":
+            self.cursor[y] = int(val)
+          elif cmd == "hspace":
+            self.cursor['hspace'] = float(val)
+          elif cmd == "vspace":
+            self.cursor['vspace'] = float(val)
+          i = end+1 #skip '!cmd=val!'
+      elif ch == "\n":
+        self.cursorNewLine()
+        i += 1
+      else:
+        self.cursorDrawChar(ch)
+        i += 1
 
   def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(0)
