@@ -134,21 +134,19 @@ class LcdFont:
         if end < i:
           print("WARNING: invalid markup\n" + markup)
           cmdVal = []
+          end = i #skip just the one '!' character
         else:
           cmdVal = markup[i+1:end].split("=")
 
         if len(cmdVal) == 1 and cmdVal[0] == "":
           # '!!' is literal '!'
           self.cursorDrawChar('!')
-          i += 2 #skip '!!'
         elif len(cmdVal) == 1 and cmdVal[0] == "n":
           # !n! is a newline
           self.cursorNewLine()
-          i = end+1 #skip '!n!'
         elif len(cmdVal) != 2:
           print("WARNING: invalid markup\n" + markup)
           self.cursorDrawChar('!')
-          i += 1 #skip '!'
         else:
           cmd, val = cmdVal
           cmd = cmd.lower()
@@ -173,7 +171,7 @@ class LcdFont:
             self.cursor['hspace'] = float(val)
           elif cmd == "vspace":
             self.cursor['vspace'] = float(val)
-          i = end+1 #skip '!cmd=val!'
+        i = end+1 #skip '!CMDVALSTR!'
       elif ch == "\n":
         self.cursorNewLine()
         i += 1
