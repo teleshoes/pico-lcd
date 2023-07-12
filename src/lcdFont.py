@@ -35,18 +35,18 @@ class LcdFont:
       self.bytesPerChar = None
       self.ready = False
 
-  def getCharGridWidth(self, pxPerDot):
-    return int( self.lcd.width / ((self.fontWidth+1)*pxPerDot))
+  def getCharGridWidth(self, size):
+    return int( self.lcd.width / ((self.fontWidth+1)*size))
 
-  def getCharGridHeight(self, pxPerDot):
-    return int(self.lcd.height / ((self.fontHeight+1)*pxPerDot))
+  def getCharGridHeight(self, size):
+    return int(self.lcd.height / ((self.fontHeight+1)*size))
 
   def getFontCharBytes(self, charStr):
     asciiIndex = ord(charStr)
     self.fontHandle.seek(asciiIndex * self.bytesPerChar + 2)
     return ustruct.unpack('B'*self.bytesPerChar, self.fontHandle.read(self.bytesPerChar))
 
-  def drawChar(self, charStr, left, top, pxPerDot, color):
+  def drawChar(self, charStr, left, top, size, color):
     fontCharBytes = self.getFontCharBytes(charStr)
     byteIndex = 0
     bitIndex = 0
@@ -62,23 +62,23 @@ class LcdFont:
         dotBit = byte >> bitIndex & 0x1
         bitIndex += 1
         if dotBit == 1:
-          self.lcd.rect(left + chX*pxPerDot, top + chY*pxPerDot, pxPerDot, pxPerDot, color, True)
+          self.lcd.rect(left + chX*size, top + chY*size, size, size, color, True)
 
-  def drawText(self, text, x=0, y=0, pxPerDot=5, color=None, hspace=1.0, vspace=1.0):
+  def drawText(self, text, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     top = y
     for line in text.split("\n"):
       left = x
       for charStr in line:
-        self.drawChar(charStr, left, top, pxPerDot, color)
-        left += int((self.fontWidth+hspace)*pxPerDot)
-      top += int((self.fontHeight+vspace)*pxPerDot)
+        self.drawChar(charStr, left, top, size, color)
+        left += int((self.fontWidth+hspace)*size)
+      top += int((self.fontHeight+vspace)*size)
 
-  def text(self, text, x=0, y=0, pxPerDot=5, color=None, hspace=1.0, vspace=1.0):
+  def text(self, text, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(0)
-    self.drawText(text, x, y, pxPerDot, color, hspace, vspace)
+    self.drawText(text, x, y, size, color, hspace, vspace)
     self.lcd.show()
 
-  def drawMarkup(self, markup, x=0, y=0, pxPerDot=5, color=None, hspace=1.0, vspace=1.0):
+  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     #  markup syntax is:
     #    !cmd=val!
     #        cmd    set the color to val
@@ -115,18 +115,18 @@ class LcdFont:
 
           if len(cmdVal) == 1 and cmdVal[0] == "":
             # '!!' is literal '!'
-            self.drawChar('!', left, top, pxPerDot, color)
-            left += int((self.fontWidth+hspace)*pxPerDot)
+            self.drawChar('!', left, top, size, color)
+            left += int((self.fontWidth+hspace)*size)
             i += 2 #skip '!!'
           elif len(cmdVal) == 1 and cmdVal[0] == "n":
             # !n! is a newline
-            top += int((self.fontHeight+vspace)*pxPerDot)
+            top += int((self.fontHeight+vspace)*size)
             left = x
             i = end+1 #skip '!n!'
           elif len(cmdVal) != 2:
             print("WARNING: invalid markup\n" + markup)
-            self.drawChar('!', left, top, pxPerDot, color)
-            left += int((self.fontWidth+hspace)*pxPerDot)
+            self.drawChar('!', left, top, size, color)
+            left += int((self.fontWidth+hspace)*size)
             i += 1 #skip '!'
           else:
             cmd, val = cmdVal
@@ -143,7 +143,7 @@ class LcdFont:
               elif val == "black":
                 color = self.lcd.black
             elif cmd == "size":
-              pxPerDot = int(val)
+              size = int(val)
             elif cmd == "x":
               left = int(val)
             elif cmd == "y":
@@ -154,12 +154,12 @@ class LcdFont:
               vspace = float(val)
             i = end+1 #skip '!cmd=val!'
         else:
-          self.drawChar(ch, left, top, pxPerDot, color)
-          left += int((self.fontWidth+hspace)*pxPerDot)
+          self.drawChar(ch, left, top, size, color)
+          left += int((self.fontWidth+hspace)*size)
           i += 1
-      top += int((self.fontHeight+vspace)*pxPerDot)
+      top += int((self.fontHeight+vspace)*size)
 
-  def markup(self, markup, x=0, y=0, pxPerDot=5, color=None, hspace=1.0, vspace=1.0):
+  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(0)
-    self.drawMarkup(markup, x, y, pxPerDot, color, hspace, vspace)
+    self.drawMarkup(markup, x, y, size, color, hspace, vspace)
     self.lcd.show()

@@ -154,6 +154,6 @@ if __name__=='__main__':
 
     except Exception as e:
       print(e)
-      lcdFont.text("MSG\nFAILED", pxPerDot=5, color=lcd.red)
+      lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
       cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
       cl.close()
