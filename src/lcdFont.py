@@ -138,15 +138,18 @@ class LcdFont:
 
   def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     #  markup syntax is:
-    #    !cmd=val!
-    #        cmd    set the color to val
-    #        size   set the pixels-per-dot to size, font size is 8*size px (for 5x8 font)
-    #        x      set the left position for future text to val as absolute px on LCD
-    #        y      set the top position for future text to val as absolute px on LCD
-    #        hspace leave floor(5*hspace) pixels between each character (for 5x8 font)
-    #                 1.0 is the default, 0 means no space, 2.0 means wide
-    #        vspace leave floor(8*vspace) pixels between new lines (for 5x8 font)
-    #                 1.0 is the default, 0 means no space, 2.0 means wide
+    #    !CMD=VAL!
+    #      CMD=COLOR  set the color to COLOR
+    #      CMD=SIZE   set the pixels-per-dot to SIZE
+    #                   for 5x8 font, font size in px is: 8*SIZE
+    #      CMD=X      set the left position of cursor to X as absolute px on LCD
+    #      CMD=Y      set the top position of cursor to Y as absolute px on LCD
+    #      CMD=HSPACE leave floor(HSPACE*SIZE) dots between each character
+    #                   any non-negative number, 1.0=default, 0=no space, 2.0=wide
+    #                   for 5x8 font, total width of a char in px is: SIZE*(5+HSPACE)
+    #      CMD=VSPACE leave floor(VSPACE*SIZE) dots between lines
+    #                   any non-negative number, 1.0=default, 0=no space, 2.0=wide
+    #                   for 5x8 font, total height of a line in px is: SIZE*(8+VSPACE)
     #    !n!
     #        treated the same as a newline literal
     #          moves the cursor down (8+vspace)*size px,
@@ -157,6 +160,7 @@ class LcdFont:
     #      hello!n!!size=6!!color=red!world!!
     #        looks similar to the following HTML:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
+
     self.cursorSet(x, y, x, y, size, color, hspace, vspace)
     prevVals = {}
 
