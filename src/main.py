@@ -133,8 +133,6 @@ if __name__=='__main__':
           lcd.setOrient(LCD.MODE_ORIENT_ROT180)
         elif val == "inverted-portrait" or val == "90":
           lcd.setOrient(LCD.MODE_ORIENT_ROT90)
-      elif cmd == "rot90":
-        lcd.setOrient(LCD.MODE_ORIENT_NORMAL)
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
         if cmd == "ctext" or cmd == "ctextbuf":
           lcd.fill(lcd.black)
