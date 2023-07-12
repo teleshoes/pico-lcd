@@ -43,9 +43,9 @@ class LCD(framebuf.FrameBuffer):
         self.rst = Pin(RST,Pin.OUT)
 
         self.cs(1)
-        self.spi = SPI(1)
-        self.spi = SPI(1,1000_000)
-        self.spi = SPI(1,100000_000,polarity=0, phase=0,sck=Pin(SCK),mosi=Pin(MOSI),miso=None)
+
+        self.spi = SPI(1, 100000_000, polarity=0, phase=0, sck=Pin(SCK), mosi=Pin(MOSI), miso=None)
+
         self.dc = Pin(DC,Pin.OUT)
         self.dc(1)
 
