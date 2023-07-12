@@ -150,6 +150,11 @@ class LcdFont:
     #      CMD=VSPACE leave floor(VSPACE*SIZE) dots between lines
     #                   any non-negative number, 1.0=default, 0=no space, 2.0=wide
     #                   for 5x8 font, total height of a line in px is: SIZE*(8+VSPACE)
+    #    !CMD=prev!
+    #        if VAL is 'prev', restore the value of CMD before the last change
+    #        e.g.:   !color=white! A !color=blue! B !color=prev! C
+    #                  is the same as:
+    #                !color=white! A !color=blue! B !color=white! C
     #    !n!
     #        treated the same as a newline literal
     #          moves the cursor down (8+vspace)*size px,
