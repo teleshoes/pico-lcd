@@ -95,14 +95,8 @@ class LcdFont:
           self.lcd.rect(x + chX*size, y + chY*size, size, size, color, True)
 
   def drawText(self, text, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
-    startX = x
-    startY = y
-    for line in text.split("\n"):
-      for charStr in line:
-        self.drawChar(charStr, x, y, size, color)
-        x += int((self.fontWidth+hspace)*size)
-      x = startX
-      y += int((self.fontHeight+vspace)*size)
+    self.cursorSet(x, y, x, y, size, color, hspace, vspace)
+    self.cursorDrawText(text)
 
   def text(self, text, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(0)
