@@ -158,6 +158,7 @@ class LcdFont:
     #        looks similar to the following HTML:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
     self.cursorSet(x, y, x, y, size, color, hspace, vspace)
+    prevVals = {}
 
     i=0
     while i < len(markup):
@@ -193,7 +194,15 @@ class LcdFont:
           self.cursorNewLine()
         elif cmd in self.cursor and len(val) > 0:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
-          self.cursor[cmd] = self.maybeReadCmdVal(cmd, val, self.cursor[cmd])
+          if val == "prev":
+            if cmd in prevVals:
+              print("PREV: " + str(cmd) + " resetting to " + str(prevVals[cmd]))
+              self.cursor[cmd] = prevVals[cmd]
+            else:
+              print("WARNING: ignoring 'prev' value without previous value\n" + markup)
+          else:
+            prevVals[cmd] = self.cursor[cmd]
+            self.cursor[cmd] = self.maybeReadCmdVal(cmd, val, self.cursor[cmd])
         else:
           # unknown command, just draw the full markup segment
           print("WARNING: invalid markup (unknown command)\n" + markup)
