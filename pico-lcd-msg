@@ -227,7 +227,7 @@ sub main(@){
     my $height = ($FONT_BASE_HEIGHT+$vspace)*$size;
     my $offset = 0;
     for my $line(@lines){
-      push @messages, "!y=$offset!$line";
+      push @messages, "!x=0!!y=$offset!$line";
       $offset += $height;
     }
   }else{
