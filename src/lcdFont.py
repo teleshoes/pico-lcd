@@ -103,6 +103,39 @@ class LcdFont:
     self.drawText(text, x, y, size, color, hspace, vspace)
     self.lcd.show()
 
+  def maybeReadCmdVal(self, cmd, valStr, defaultVal):
+    if cmd == "color":
+      return self.maybeReadColor(valStr, defaultVal)
+    elif cmd == "size" or cmd == "x" or cmd == "y":
+      return self.maybeReadInt(valStr, defaultVal)
+    elif cmd == "hspace" or cmd == "vspace":
+      return self.maybeReadFloat(valStr, defaultVal)
+    else:
+      return defaultVal
+  def maybeReadColor(self, valStr, defaultVal):
+    if valStr == "red":
+       return self.lcd.red
+    elif valStr == "green":
+       return self.lcd.green
+    elif valStr == "blue":
+       return self.lcd.blue
+    elif valStr == "white":
+       return self.lcd.white
+    elif valStr == "black":
+       return self.lcd.black
+    else:
+       return defaultVal
+  def maybeReadInt(self, valStr, defaultVal):
+    try:
+      return int(valStr)
+    except:
+      return defaultVal
+  def maybeReadFloat(self, valStr, defaultVal):
+    try:
+      return float(valStr)
+    except:
+      return defaultVal
+
   def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     #  markup syntax is:
     #    !cmd=val!
@@ -160,27 +193,7 @@ class LcdFont:
           self.cursorNewLine()
         elif cmd in self.cursor and len(val) > 0:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
-          if cmd == "color":
-            if val == "red":
-              self.cursor['color'] = self.lcd.red
-            elif val == "green":
-              self.cursor['color'] = self.lcd.green
-            elif val == "blue":
-              self.cursor['color'] = self.lcd.blue
-            elif val == "white":
-              self.cursor['color'] = self.lcd.white
-            elif val == "black":
-              self.cursor['color'] = self.lcd.black
-          elif cmd == "size":
-            self.cursor['size'] = int(val)
-          elif cmd == "x":
-            self.cursor[x] = int(val)
-          elif cmd == "y":
-            self.cursor[y] = int(val)
-          elif cmd == "hspace":
-            self.cursor['hspace'] = float(val)
-          elif cmd == "vspace":
-            self.cursor['vspace'] = float(val)
+          self.cursor[cmd] = self.maybeReadCmdVal(cmd, val, self.cursor[cmd])
         else:
           # unknown command, just draw the full markup segment
           print("WARNING: invalid markup (unknown command)\n" + markup)
