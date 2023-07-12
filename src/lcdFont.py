@@ -46,7 +46,7 @@ class LcdFont:
     self.fontHandle.seek(asciiIndex * self.bytesPerChar + 2)
     return ustruct.unpack('B'*self.bytesPerChar, self.fontHandle.read(self.bytesPerChar))
 
-  def drawChar(self, charStr, left, top, size, color):
+  def drawChar(self, charStr, x, y, size, color):
     fontCharBytes = self.getFontCharBytes(charStr)
     byteIndex = 0
     bitIndex = 0
@@ -62,16 +62,17 @@ class LcdFont:
         dotBit = byte >> bitIndex & 0x1
         bitIndex += 1
         if dotBit == 1:
-          self.lcd.rect(left + chX*size, top + chY*size, size, size, color, True)
+          self.lcd.rect(x + chX*size, y + chY*size, size, size, color, True)
 
   def drawText(self, text, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
-    top = y
+    startX = x
+    startY = y
     for line in text.split("\n"):
-      left = x
       for charStr in line:
-        self.drawChar(charStr, left, top, size, color)
-        left += int((self.fontWidth+hspace)*size)
-      top += int((self.fontHeight+vspace)*size)
+        self.drawChar(charStr, x, y, size, color)
+        x += int((self.fontWidth+hspace)*size)
+      x = startX
+      y += int((self.fontHeight+vspace)*size)
 
   def text(self, text, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(0)
@@ -99,9 +100,9 @@ class LcdFont:
     #      hello!n!!size=6!!color=red!world!!
     #        looks similar to the following HTML:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
-    top = y
+    startX = x
+    startY = y
     for line in markup.split("\n"):
-      left = x
       i=0
       while i < len(line):
         ch = line[i]
@@ -115,18 +116,18 @@ class LcdFont:
 
           if len(cmdVal) == 1 and cmdVal[0] == "":
             # '!!' is literal '!'
-            self.drawChar('!', left, top, size, color)
-            left += int((self.fontWidth+hspace)*size)
+            self.drawChar('!', x, y, size, color)
+            x += int((self.fontWidth+hspace)*size)
             i += 2 #skip '!!'
           elif len(cmdVal) == 1 and cmdVal[0] == "n":
             # !n! is a newline
-            top += int((self.fontHeight+vspace)*size)
-            left = x
+            x = startX
+            y += int((self.fontHeight+vspace)*size)
             i = end+1 #skip '!n!'
           elif len(cmdVal) != 2:
             print("WARNING: invalid markup\n" + markup)
-            self.drawChar('!', left, top, size, color)
-            left += int((self.fontWidth+hspace)*size)
+            self.drawChar('!', x, y, size, color)
+            x += int((self.fontWidth+hspace)*size)
             i += 1 #skip '!'
           else:
             cmd, val = cmdVal
@@ -145,19 +146,20 @@ class LcdFont:
             elif cmd == "size":
               size = int(val)
             elif cmd == "x":
-              left = int(val)
+              x = int(val)
             elif cmd == "y":
-              top = int(val)
+              y = int(val)
             elif cmd == "hspace":
               hspace = float(val)
             elif cmd == "vspace":
               vspace = float(val)
             i = end+1 #skip '!cmd=val!'
         else:
-          self.drawChar(ch, left, top, size, color)
-          left += int((self.fontWidth+hspace)*size)
+          self.drawChar(ch, x, y, size, color)
+          x += int((self.fontWidth+hspace)*size)
           i += 1
-      top += int((self.fontHeight+vspace)*size)
+      x = startX
+      y += int((self.fontHeight+vspace)*size)
 
   def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(0)
