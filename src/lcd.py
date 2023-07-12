@@ -142,7 +142,6 @@ class LCD(framebuf.FrameBuffer):
         self.cs(1)
 
     def init_display(self):
-        """Initialize dispaly"""
         self.rst(1)
         self.rst(0)
         self.rst(1)
@@ -151,6 +150,7 @@ class LCD(framebuf.FrameBuffer):
 
         self.setLCDColorProfile(LCD.LCD_COLOR_PROFILE_RGB565)
 
+        #porch
         self.write_cmd(0xB2)
         self.write_data(0x0C)
         self.write_data(0x0C)
@@ -158,31 +158,40 @@ class LCD(framebuf.FrameBuffer):
         self.write_data(0x33)
         self.write_data(0x33)
 
+        #gate control
         self.write_cmd(0xB7)
         self.write_data(0x35)
 
+        #VCOM
         self.write_cmd(0xBB)
         self.write_data(0x19)
 
+        #LCM Control
         self.write_cmd(0xC0)
         self.write_data(0x2C)
 
+        #VDV and VRH enable (0=NVM, 1=command)
         self.write_cmd(0xC2)
         self.write_data(0x01)
 
+        #VRH
         self.write_cmd(0xC3)
         self.write_data(0x12)
 
+        #VDV
         self.write_cmd(0xC4)
         self.write_data(0x20)
 
+        #VCOM offset
         self.write_cmd(0xC6)
         self.write_data(0x0F)
 
+        #PWR control
         self.write_cmd(0xD0)
         self.write_data(0xA4)
         self.write_data(0xA1)
 
+        #Positive Voltage Gamma control
         self.write_cmd(0xE0)
         self.write_data(0xD0)
         self.write_data(0x04)
@@ -199,6 +208,7 @@ class LCD(framebuf.FrameBuffer):
         self.write_data(0x1F)
         self.write_data(0x23)
 
+        #Negative Voltage Gamma control
         self.write_cmd(0xE1)
         self.write_data(0xD0)
         self.write_data(0x04)
