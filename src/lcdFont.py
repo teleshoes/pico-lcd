@@ -132,24 +132,34 @@ class LcdFont:
       if ch == "!":
         end = markup.find('!', i+1)
         if end < i:
-          print("WARNING: invalid markup\n" + markup)
-          cmdVal = []
+          #unmatched '!'
+          print("WARNING: invalid markup (unmatched '!')\n" + markup)
+          cmdValStr = "" #treat same as '!!'
           end = i #skip just the one '!' character
         else:
-          cmdVal = markup[i+1:end].split("=")
+          cmdValStr = markup[i+1:end]
 
-        if len(cmdVal) == 1 and cmdVal[0] == "":
-          # '!!' is literal '!'
-          self.cursorDrawChar('!')
-        elif len(cmdVal) == 1 and cmdVal[0] == "n":
-          # !n! is a newline
-          self.cursorNewLine()
-        elif len(cmdVal) != 2:
-          print("WARNING: invalid markup\n" + markup)
-          self.cursorDrawChar('!')
+        cmdVal = cmdValStr.split("=")
+
+        if len(cmdVal) == 1:
+          cmd = cmdVal[0].lower()
+          val = ""
+        elif len(cmdVal) == 2:
+          cmd = cmdVal[0].lower()
+          val = cmdVal[1]
         else:
-          cmd, val = cmdVal
-          cmd = cmd.lower()
+          #bad cmd=val format, treat as unknown command
+          cmd = None
+          val = None
+
+        if cmd == "":
+          # '!!' => literal '!'
+          self.cursorDrawChar('!')
+        elif cmd == "n":
+          # '!n!' => newline
+          self.cursorNewLine()
+        elif cmd in self.cursor and len(val) > 0:
+          # '!CMD=VAL!' => manipulate cursor without drawing anything
           if cmd == "color":
             if val == "red":
               self.cursor['color'] = self.lcd.red
@@ -171,6 +181,11 @@ class LcdFont:
             self.cursor['hspace'] = float(val)
           elif cmd == "vspace":
             self.cursor['vspace'] = float(val)
+        else:
+          # unknown command, just draw the full markup segment
+          print("WARNING: invalid markup (unknown command)\n" + markup)
+          self.cursorDrawText('!' + cmdValStr + '!')
+
         i = end+1 #skip '!CMDVALSTR!'
       elif ch == "\n":
         self.cursorNewLine()
