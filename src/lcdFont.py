@@ -16,6 +16,7 @@ class LcdFont:
     self.bitsPerChar = None
     self.bytesPerChar = None
     self.ready = False
+    self.cursor = None
 
   def setup(self):
     if not self.ready:
@@ -45,6 +46,31 @@ class LcdFont:
     asciiIndex = ord(charStr)
     self.fontHandle.seek(asciiIndex * self.bytesPerChar + 2)
     return ustruct.unpack('B'*self.bytesPerChar, self.fontHandle.read(self.bytesPerChar))
+
+  def cursorSet(self, startX, startY, x, y, size, color, hspace, vspace):
+    self.cursor = {
+      "startX": startX,
+      "startY": startY,
+      "x" : x,
+      "y" : y,
+      "size": size,
+      "color": color,
+      "hspace": hspace,
+      "vspace": vspace
+    }
+  def cursorDrawChar(self, charStr):
+    self.drawChar(charStr,
+      self.cursor['x'], self.cursor['y'], self.cursor['size'], self.cursor['color'])
+    self.cursor['x'] += int(self.cursor['size'] * (self.fontWidth + self.cursor['hspace']))
+  def cursorNewLine(self):
+    self.cursor['x'] = self.cursor['startX']
+    self.cursor['y'] += int(self.cursor['size'] * (self.fontHeight + self.cursor['vspace']))
+  def cursorDrawText(self, text):
+    for ch in text:
+      if ch == "\n":
+        self.cursorNewLine()
+      else:
+        self.cursorDrawChar(ch)
 
   # charStr    a string containing a single character
   # (x, y)     the top-left corner of the character in pixels
