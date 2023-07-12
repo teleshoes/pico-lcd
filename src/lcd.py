@@ -93,6 +93,7 @@ class LCD(framebuf.FrameBuffer):
     def setOrient(self, orient):
         self.orient = orient
         self.setLCDMadctlMode()
+        self.show()
 
     def setLCDMadctlMode(self):
         self.write_cmd(0x36)
