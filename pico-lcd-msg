@@ -1,0 +1,196 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use File::Basename qw(basename);
+use MIME::Base64 qw(encode_base64);
+
+my $EXEC = basename $0;
+
+my $DEVICE_CONFIG_FILE = "$ENV{HOME}/.config/pico-lcd.conf";
+
+my $USAGE = "Usage:
+  $EXEC -h | --help
+    show this message
+
+  $EXEC [OPTS] clear
+    -same as: $EXEC [OPTS] --clear --text=\"\"
+
+  $EXEC [OPTS] --text=TEXT
+    -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
+    -base64 encode TEXT as TEXT_B64
+    -run: curl http://<IP_ADDRESS>/text=TEXT_B64
+
+  $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
+    -combine WORD_OR_FILE args into TEXT
+      -if WORD_OR_FILE is a file:
+        -append contents of WORD_OR_FILE to TEXT
+      -otherwise:
+        -replace '\\n' with literal newline in WORD_OR_FILE
+        -if TEXT is not empty, append a space character
+        -append ARG to TEXT
+    -same as: $EXEC --text=TEXT
+
+  OPTS
+    --ip=IP_ADDRESS
+      use IP_ADDRESS in calls to curl
+    --dev=DEV_NAME
+      -parse contents of $DEVICE_CONFIG_FILE
+      -find line that matches this device: DEV_NAME = IP_ADDRESS
+      -same as: --ip=IP_ADDRESS
+    --default-dev
+      -parse contents of $DEVICE_CONFIG_FILE
+      -find first line that matches any device: DEV_NAME = IP_ADDRESS
+      -same as: --ip=IP_ADDRESS
+      (this is the default)
+
+    --clear
+      if TEXT is empty:
+        -run: curl http://<IP_ADDRESS>/clear
+    --noclear
+
+    --color=COLOR
+      prefix all TEXT with '!color=COLOR!' before base64-encoding
+    --size=SIZE
+      prefix all TEXT with '!size=SIZE!' before base64-encoding
+    --hspace=HSPACE
+      prefix all TEXT with '!hspace=HSPACE!' before base64-encoding
+    --vspace=VSPACE
+      prefix all TEXT with '!vspace=VSPACE!' before base64-encoding
+    --x=X
+      prefix all TEXT with '!x=X!' before base64-encoding
+    --y=Y
+      prefix all TEXT with '!y=Y!' before base64-encoding
+
+    --lines
+      -split TEXT into lines, TEXT_LINE
+      -for each TEXT_LINE:
+        -calculate the OFFSET for each line
+          -first line is OFFSET=0
+          -add SIZE*8 for each subsequent line
+          -assume SIZE=5 if not given
+        -prefix each TEXT_LINE with '!y=OFFSET!'
+        -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
+        -base64-encode TEXT_LINE as TEXT_LINE_B64
+        -run: curl http://<IP_ADDRESS>/text=TEXT_LINE_B64
+";
+
+sub main(@){
+  my $ipAddr = undef;
+  my $devName = undef;
+  my $text = "";
+  my $isClear = 1;
+  my $isLines = 0;
+  my ($color, $size, $hspace, $vspace, $x, $y);
+  while(@_ > 0){
+    my $arg = shift @_;
+    if($arg =~ /^(-h|--help)$/){
+      print $USAGE;
+      exit 0;
+    }elsif($arg =~ /^(clear)$/ and $text eq ""){
+      $isClear = 1;
+    }elsif($arg =~ /^(--clear)$/){
+      $isClear = 1;
+    }elsif($arg =~ /^(--no-clear)$/){
+      $isClear = 0;
+    }elsif($arg =~ /^--text=(.+)$/){
+      $text = $1;
+    }elsif($arg =~ /^--ip=(.+)$/){
+      $ipAddr = $1
+    }elsif($arg =~ /^--dev=(\w+)$/){
+      $devName = $1;
+    }elsif($arg =~ /^--(default-dev)$/){
+      $devName = undef;
+    }elsif($arg =~ /^(--lines)$/){
+      $isLines = 1;
+    }elsif($arg =~ /^--color=(.+)$/){
+      $color = $1;
+    }elsif($arg =~ /^--size=(.+)$/){
+      $size = $1;
+    }elsif($arg =~ /^--hspace=(.+)$/){
+      $hspace = $1;
+    }elsif($arg =~ /^--vspace=(.+)$/){
+      $vspace = $1;
+    }elsif($arg =~ /^--x=(.+)$/){
+      $x = $1;
+    }elsif($arg =~ /^--y=(.+)$/){
+      $y = $1;
+    }elsif(-f $arg){
+      open FH, "< $arg" or die "ERROR: could not read $arg\n$!\n";
+      my $contents = join '', <FH>;
+      close FH;
+      $text .= $contents;
+    }else{
+      $text .= " " if $text ne "";
+      $text .= $arg;
+    }
+  }
+
+  if(not defined $ipAddr){
+    my @lines = `cat $DEVICE_CONFIG_FILE 2>/dev/null`;
+    for my $line(@lines){
+      if($line =~ /^\s*(\w+)\s*=\s*(\d+\.\d+\.\d+\.\d+)$/){
+        my ($cfgDevName, $cfgDevIP) = ($1, $2);
+        if(not defined $devName or (lc $devName eq lc $cfgDevName)){
+          $ipAddr = $cfgDevIP;
+          last;
+        }
+      }
+    }
+    if(not defined $ipAddr){
+      my $dev = defined $devName ? $devName : "any dev";
+      die "ERROR: could not find IP address for $dev in $DEVICE_CONFIG_FILE\n";
+    }
+  }
+
+
+  my @messages;
+  if($isLines){
+    my $fontHt = 8;
+    my $vspaceVal = defined $vspace ? $vspace : 1;
+    my $sizeVal = defined $size ? $size : 5;
+
+    my $height = ($fontHt+$vspaceVal)*$sizeVal;
+    my @lines = split /\n/, $text;
+    my $offset = 0;
+    for my $line(@lines){
+      push @messages, "!y=$offset!$line";
+      $offset += $height;
+    }
+  }else{
+    if(length $text > 0){
+      @messages = ($text);
+    }
+  }
+
+  @messages = grep {length $_ > 0} @messages;
+
+  if($isClear and @messages == 0){
+    system "curl", "http://$ipAddr/clear";
+  }
+
+  for(my $i=0; $i<@messages; $i++){
+    my $msg = $messages[$i];
+    $msg = "!size=$size!$msg" if defined $size;
+    $msg = "!color=$color!$msg" if defined $color;
+    $msg = "!hspace=$hspace!$msg" if defined $hspace;
+    $msg = "!vspace=$vspace!$msg" if defined $vspace;
+    $msg = "!x=$x!$msg" if defined $x;
+    $msg = "!y=$y!$msg" if defined $y;
+
+    print "$msg\n";
+
+    my $cmd = "text";
+    if($i < $#messages){
+      $cmd .= "buf"; #do not call show until last message
+    }
+    if($i == 0 and $isClear){
+      $cmd = "c$cmd"; #do ctext* to clear before adding text to buffer
+    }
+
+    my $b64 = encode_base64($msg);
+    $b64 =~ s/\n//g;
+    system "curl", "http://$ipAddr/$cmd=$b64";
+  }
+}
+
+&main(@ARGV);
