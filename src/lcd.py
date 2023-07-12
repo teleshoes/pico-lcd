@@ -1,7 +1,8 @@
 from machine import Pin,SPI,PWM
 import framebuf
-import time
+import gc
 import os
+import time
 
 from rgb332_to_rgb565 import RGB332_TO_RGB565
 
@@ -47,6 +48,9 @@ class LCD(framebuf.FrameBuffer):
         self.spi = SPI(1,100000_000,polarity=0, phase=0,sck=Pin(SCK),mosi=Pin(MOSI),miso=None)
         self.dc = Pin(DC,Pin.OUT)
         self.dc(1)
+
+        #something is allocating memory GC is not aware of, so be explicit
+        gc.collect()
 
         if self.lowRam:
             #1) limit colors to RGB332 color profile, pretending to use framebuf GS8
