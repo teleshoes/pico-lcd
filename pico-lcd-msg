@@ -14,6 +14,12 @@ my $SPLIT_LINES_BIG_ONLY = "big-only";
 my $SPLIT_LINES_ALWAYS = "always";
 my $SPLIT_LINES_NEVER = "never";
 
+my $DEFAULT_LCD_WIDTH = 240;
+my $DEFAULT_LCD_HEIGHT = 240;
+
+my $FONT_BASE_HEIGHT = 8;
+my $FONT_BASE_WIDTH = 5;
+
 my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
@@ -58,6 +64,8 @@ my $USAGE = "Usage:
       prefix all TEXT with '!color=COLOR!' before base64-encoding
     --size=SIZE
       prefix all TEXT with '!size=SIZE!' before base64-encoding
+        (this is the number of pixels per dot, in a 5-dot by 8-dot font)
+      NOTE: the default is to calculate the largest SIZE that fits all characters
     --hspace=HSPACE
       prefix all TEXT with '!hspace=HSPACE!' before base64-encoding
     --vspace=VSPACE
@@ -66,6 +74,11 @@ my $USAGE = "Usage:
       prefix all TEXT with '!x=X!' before base64-encoding
     --y=Y
       prefix all TEXT with '!y=Y!' before base64-encoding
+
+    --lcd-width=WIDTH_PX
+      select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
+    --lcd-height=HEIGHT_PX
+      select a SIZE based on HEIGHT_PX, VSPACE, and number of lines in TEXT
 
     --lines
       -split TEXT into lines, TEXT_LINE
@@ -94,6 +107,8 @@ sub main(@){
   my $text = "";
   my $isClear = 1;
   my $splitLines = $SPLIT_LINES_BIG_ONLY;
+  my $lcdWidthPx = $DEFAULT_LCD_WIDTH;
+  my $lcdHeightPx = $DEFAULT_LCD_HEIGHT;
   my ($color, $size, $hspace, $vspace, $x, $y);
   while(@_ > 0){
     my $arg = shift @_;
@@ -114,6 +129,10 @@ sub main(@){
       $devName = $1;
     }elsif($arg =~ /^--(default-dev)$/){
       $devName = undef;
+    }elsif($arg =~ /^--lcd-width=(\d+)$/){
+      $lcdWidthPx = $1;
+    }elsif($arg =~ /^--lcd-height=(\d+)$/){
+      $lcdHeightPx = $1;
     }elsif($arg =~ /^(--lines)$/){
       $splitLines = $SPLIT_LINES_ALWAYS;
     }elsif($arg =~ /^(--no-lines)$/){
@@ -171,15 +190,41 @@ sub main(@){
     $isLines = 0;
   }
 
+  #remove '\r' chars
+  $text =~ s/\r\n/\n/g;
+  $text =~ s/\r/\n/g;
+
+  #replace '!n!' markup with newlines
+  $text =~ s/&/&amp;/g;
+  $text =~ s/!!/&exc;/g;
+  $text =~ s/!n!/\n/g;
+  $text =~ s/&exc;/!/g;
+  $text =~ s/&amp;/&/g;
+
+  my @lines = split /\n/, $text;
+
+  my $charsH = @lines;
+  my $charsW = 0;
+  for my $line(@lines){
+    $charsW = length $line if length $line > $charsW;
+  }
+
+  $vspace = 1 if not defined $vspace;
+  $hspace = 1 if not defined $hspace;
+
+  #select the largest size that will fit all characters,
+  #  vertically and horizontally,
+  #  or 1 if they cannot fit
+  if(not defined $size){
+    my $hSize = int($lcdWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
+    my $vSize = int($lcdHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
+    $size = $hSize < $vSize ? $hSize : $vSize;
+    $size = 1 if $size < 1;
+  }
 
   my @messages;
   if($isLines){
-    my $fontHt = 8;
-    my $vspaceVal = defined $vspace ? $vspace : 1;
-    my $sizeVal = defined $size ? $size : 5;
-
-    my $height = ($fontHt+$vspaceVal)*$sizeVal;
-    my @lines = split /\n/, $text;
+    my $height = ($FONT_BASE_HEIGHT+$vspace)*$size;
     my $offset = 0;
     for my $line(@lines){
       push @messages, "!y=$offset!$line";
