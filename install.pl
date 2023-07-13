@@ -9,7 +9,6 @@ my @files = qw(
   src/lcdFont.py
   src/lcd.py
   src/main.py
-  src/rgb332_to_rgb565.py
 );
 
 sub main(@){
