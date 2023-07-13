@@ -211,8 +211,14 @@ sub main(@){
 
   #replace '!n!' markup with newlines
   $text =~ s/&/&amp;/g;
-  $text =~ s/!!/&exc;/g;
-  $text =~ s/!n!/\n/g;
+  while($text =~ /!([^!]*)!/){
+    my $cmd = $1;
+    if($cmd eq "n"){
+      $text =~ s/!$cmd!/\n/;
+    }else{
+      $text =~ s/!$cmd!/&exc;$cmd&exc;/;
+    }
+  }
   $text =~ s/&exc;/!/g;
   $text =~ s/&amp;/&/g;
 
