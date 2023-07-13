@@ -6,8 +6,6 @@ import gc
 import os
 import time
 
-from rgb332_to_rgb565 import RGB332_TO_RGB565
-
 BL = 13
 DC = 8
 RST = 12
