@@ -11,18 +11,15 @@ import base64 #non-standard, must build micropython
 from lcd import LCD
 from lcdFont import LcdFont
 
-ORIENT = LCD.MODE_ORIENT_NORMAL
-PX_ORDER = LCD.MODE_PX_RGB
+ROTATION = LCD.MODE_ROTATION_NORMAL
 
-LCD_CONF_1_3 = {'width':240, 'height':240, 'orient':ORIENT, 'px':PX_ORDER, 'lowRam':False}
-LCD_CONF_2_0 = {'width':320, 'height':240, 'orient':ORIENT, 'px':PX_ORDER, 'lowRam':True}
+LCD_CONF_1_3 = {'width':240, 'height':240, 'rotation':ROTATION}
+LCD_CONF_2_0 = {'width':320, 'height':240, 'rotation':ROTATION}
 
 LCD_CONF = LCD_CONF_1_3
 
 if __name__=='__main__':
-  LCD.INIT_PWM(65535)
-  lcd = LCD(LCD_CONF['width'], LCD_CONF['height'],
-    LCD_CONF['orient'], LCD_CONF['px'], LCD_CONF['lowRam'])
+  lcd = LCD(LCD_CONF['width'], LCD_CONF['height'], LCD_CONF['rotation'])
 
   lcd.fillShow(lcd.black)
 
@@ -124,15 +121,15 @@ if __name__=='__main__':
         print("clear")
       elif cmd == "show":
         lcd.show()
-      elif cmd == "orient":
+      elif cmd == "orient" or cmd == "rotation":
         if val == "landscape" or val == "0" or val == "normal" or val == "default":
-          lcd.setOrient(LCD.MODE_ORIENT_NORMAL)
+          lcd.setRotation(LCD.MODE_ROTATION_NORMAL)
         elif val == "portrait" or val == "270" or val == "-90":
-          lcd.setOrient(LCD.MODE_ORIENT_ROT270)
+          lcd.setRotation(LCD.MODE_ROTATION_ROT270)
         elif val == "inverted-landscape" or val == "180":
-          lcd.setOrient(LCD.MODE_ORIENT_ROT180)
+          lcd.setRotation(LCD.MODE_ROTATION_ROT180)
         elif val == "inverted-portrait" or val == "90":
-          lcd.setOrient(LCD.MODE_ORIENT_ROT90)
+          lcd.setRotation(LCD.MODE_ROTATION_ROT90)
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
         if cmd == "ctext" or cmd == "ctextbuf":
           lcd.fill(lcd.black)
