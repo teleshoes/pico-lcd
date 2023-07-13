@@ -205,7 +205,6 @@ class LcdFont:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
           if val == "prev":
             if cmd in prevVals:
-              print("PREV: " + str(cmd) + " resetting to " + str(prevVals[cmd]))
               self.cursor[cmd] = prevVals[cmd]
             else:
               print("WARNING: ignoring 'prev' value without previous value\n" + markup)
