@@ -27,6 +27,18 @@ my $USAGE = "Usage:
   $EXEC [OPTS] clear
     -same as: $EXEC [OPTS] --clear --text=\"\"
 
+  $EXEC [OPTS] --orient=ORIENT
+    -run: curl http://<IP_ADDRESS>/orient=ORIENT
+      ORIENT
+        landscape | 0 | normal | default
+          set rotation to 0 degrees
+        portrait | 270 | -90
+          set rotation to 270 degrees
+        inverted-landscape | 180
+          set rotation to 180 degrees
+        inverted-portrait | 90
+          set rotateion to 90 degrees
+
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -base64 encode TEXT as TEXT_B64
@@ -106,6 +118,7 @@ sub main(@){
   my $devName = undef;
   my $text = "";
   my $isClear = 1;
+  my $orient = undef;
   my $splitLines = $SPLIT_LINES_BIG_ONLY;
   my $lcdWidthPx = $DEFAULT_LCD_WIDTH;
   my $lcdHeightPx = $DEFAULT_LCD_HEIGHT;
@@ -117,6 +130,8 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(clear)$/ and $text eq ""){
       $isClear = 1;
+    }elsif($arg =~ /^--orient=(.+)$/){
+      $orient = $1;
     }elsif($arg =~ /^(--clear)$/){
       $isClear = 1;
     }elsif($arg =~ /^(--no-clear)$/){
@@ -237,6 +252,14 @@ sub main(@){
   }
 
   @messages = grep {length $_ > 0} @messages;
+
+  if(defined $orient){
+    system "curl", "http://$ipAddr/orient=$orient";
+
+    if(@messages == 0){
+      exit 0;
+    }
+  }
 
   if($isClear and @messages == 0){
     system "curl", "http://$ipAddr/clear";
