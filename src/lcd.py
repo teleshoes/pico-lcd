@@ -123,7 +123,7 @@ class LCD():
       if fill:
         self.lcd.fill_rect(x, y, w, h, color)
       else:
-        self.lcd.rect(x, y, w, h)
+        self.lcd.rect(x, y, w, h, color)
     else:
       self.framebuf.rect(x, y, w, h, color, fill)
 
