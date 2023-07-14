@@ -262,7 +262,7 @@ sub main(@){
   @messages = grep {length $_ > 0} @messages;
 
   if(defined $orient){
-    system "curl", "http://$ipAddr/orient=$orient";
+    system "curl", "--no-progress-meter", "http://$ipAddr/orient=$orient";
 
     if(@messages == 0){
       exit 0;
@@ -270,7 +270,7 @@ sub main(@){
   }
 
   if($isClear and @messages == 0){
-    system "curl", "http://$ipAddr/clear";
+    system "curl", "--no-progress-meter", "http://$ipAddr/clear";
   }
 
   for(my $i=0; $i<@messages; $i++){
@@ -294,7 +294,7 @@ sub main(@){
 
     my $b64 = encode_base64($msg);
     $b64 =~ s/\n//g;
-    system "curl", "http://$ipAddr/$cmd=$b64";
+    system "curl", "--no-progress-meter", "http://$ipAddr/$cmd=$b64";
   }
 }
 
