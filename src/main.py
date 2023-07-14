@@ -29,6 +29,13 @@ LCD_CONF = LCD_CONF_1_3
 if __name__=='__main__':
   lcd = LCD(LCD_CONF)
 
+  try:
+    with open("last-rotation-degrees.txt", "r") as fh:
+      degrees = int(fh.readline())
+      lcd.setRotationDegrees(degrees)
+  except:
+    pass
+
   lcdFont = LcdFont('font5x8.bin', lcd)
   lcdFont.setup()
 
@@ -128,14 +135,23 @@ if __name__=='__main__':
       elif cmd == "show":
         lcd.show()
       elif cmd == "orient" or cmd == "rotation":
+        degrees = None
         if val == "landscape" or val == "0" or val == "normal" or val == "default":
-          lcd.setRotationDegrees(0)
+          degrees = 0
         elif val == "portrait" or val == "270" or val == "-90":
-          lcd.setRotationDegrees(270)
+          degrees = 270
         elif val == "inverted-landscape" or val == "180":
-          lcd.setRotationDegrees(180)
+          degrees = 180
         elif val == "inverted-portrait" or val == "90":
-          lcd.setRotationDegrees(90)
+          degrees = 90
+
+        if degrees != None:
+          lcd.setRotationDegrees(degrees)
+          try:
+            with open("last-rotation-degrees.txt", "w") as fh:
+              fh.write(str(degrees) + "\n")
+          except:
+            pass
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
         if cmd == "ctext" or cmd == "ctextbuf":
           lcd.fill(lcd.black)
