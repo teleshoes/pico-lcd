@@ -51,6 +51,9 @@ class LCD():
 
     self.tft.init()
 
+    # blank entire memory, not just display size
+    self.fill_mem_blank()
+
     self.buffer = None
     self.framebuf = None
 
@@ -264,12 +267,23 @@ class LCD():
     self.spi.write(data)
     self.cs(1)
 
+  def fill_mem_blank(self):
+    self.set_window(0, 320, 0, 240)
+    self.write_cmd(0x2C)
+
+    buf = bytearray(int(320*240*2 / 32))
+    for i in range(0, 32):
+      self.write_data(buf)
+    buf = None
+
   def set_full_window(self):
     xStart = self.rotCfg['X']
     xEnd = self.rotCfg['W'] + self.rotCfg['X'] - 1
     yStart = self.rotCfg['Y']
     yEnd = self.rotCfg['H'] + self.rotCfg['Y'] - 1
+    self.set_window(xStart, xEnd, yStart, yEnd)
 
+  def set_window(self, xStart, xEnd, yStart, yEnd):
     self.write_cmd(0x2A)
     self.write_data(bytearray([xStart >> 8, xStart & 0xff, xEnd >> 8, xEnd & 0xff]))
 

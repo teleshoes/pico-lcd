@@ -29,8 +29,6 @@ LCD_CONF = LCD_CONF_2_0
 if __name__=='__main__':
   lcd = LCD(LCD_CONF)
 
-  lcd.fillShow(lcd.black)
-
   lcdFont = LcdFont('font5x8.bin', lcd)
   lcdFont.setup()
 
