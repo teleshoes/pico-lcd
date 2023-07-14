@@ -128,7 +128,8 @@ class LCD():
       self.framebuf.rect(x, y, w, h, color, fill)
 
   def fillShow(self, color):
-    self.tft.fill(color)
+    self.fill(color)
+    self.show()
 
   def write_cmd(self, cmd):
     self.cs(1)
