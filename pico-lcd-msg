@@ -67,6 +67,9 @@ my $USAGE = "Usage:
       -same as: --ip=IP_ADDRESS
       (this is the default)
 
+    -q | --quiet
+      do not print messages sent with curl
+
     --clear
       if TEXT is empty:
         -run: curl http://<IP_ADDRESS>/clear
@@ -115,6 +118,7 @@ my $USAGE = "Usage:
 
 sub main(@){
   my $ipAddr = undef;
+  my $quiet = 0;
   my $devName = undef;
   my $text = "";
   my $isClear = 1;
@@ -128,6 +132,8 @@ sub main(@){
     if($arg =~ /^(-h|--help)$/){
       print $USAGE;
       exit 0;
+    }elsif($arg =~ /^(-q|--quiet)$/){
+      $quiet = 1;
     }elsif($arg =~ /^(clear)$/ and $text eq ""){
       $isClear = 1;
     }elsif($arg =~ /^--orient=(.+)$/){
@@ -282,7 +288,7 @@ sub main(@){
     $msg = "!x=$x!$msg" if defined $x;
     $msg = "!y=$y!$msg" if defined $y;
 
-    print "$msg\n";
+    print "$msg\n" unless $quiet;
 
     my $cmd = "text";
     if($i < $#messages){
