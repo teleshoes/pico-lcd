@@ -11,15 +11,23 @@ import base64 #non-standard, must build micropython
 from lcd import LCD
 from lcdFont import LcdFont
 
-ROTATION = LCD.MODE_ROTATION_NORMAL
+LCD_CONF_1_3 = [
+  {'DEG':  0, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
+  {'DEG': 90, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
+  {'DEG':180, 'W':240, 'H':240, 'X': 80, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
+  {'DEG':270, 'W':240, 'H':240, 'X':  0, 'Y': 80, 'MY':1, 'MX':1, 'MV':0},
+]
+LCD_CONF_2_0 = [
+  {'DEG':  0, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
+  {'DEG': 90, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
+  {'DEG':180, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
+  {'DEG':270, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
+]
 
-LCD_CONF_1_3 = {'width':240, 'height':240, 'rotation':ROTATION}
-LCD_CONF_2_0 = {'width':320, 'height':240, 'rotation':ROTATION}
-
-LCD_CONF = LCD_CONF_1_3
+LCD_CONF = LCD_CONF_2_0
 
 if __name__=='__main__':
-  lcd = LCD(LCD_CONF['width'], LCD_CONF['height'], LCD_CONF['rotation'])
+  lcd = LCD(LCD_CONF)
 
   lcd.fillShow(lcd.black)
 
@@ -123,13 +131,13 @@ if __name__=='__main__':
         lcd.show()
       elif cmd == "orient" or cmd == "rotation":
         if val == "landscape" or val == "0" or val == "normal" or val == "default":
-          lcd.setRotation(LCD.MODE_ROTATION_NORMAL)
+          lcd.setRotationDegrees(0)
         elif val == "portrait" or val == "270" or val == "-90":
-          lcd.setRotation(LCD.MODE_ROTATION_ROT270)
+          lcd.setRotationDegrees(270)
         elif val == "inverted-landscape" or val == "180":
-          lcd.setRotation(LCD.MODE_ROTATION_ROT180)
+          lcd.setRotationDegrees(180)
         elif val == "inverted-portrait" or val == "90":
-          lcd.setRotation(LCD.MODE_ROTATION_ROT90)
+          lcd.setRotationDegrees(90)
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
         if cmd == "ctext" or cmd == "ctextbuf":
           lcd.fill(lcd.black)
