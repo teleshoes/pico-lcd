@@ -146,9 +146,9 @@ class LCD():
 
   def set_full_window(self):
     xStart = self.rotCfg['X']
-    xEnd = self.rotCfg['W'] + self.rotCfg['X']
+    xEnd = self.rotCfg['W'] + self.rotCfg['X'] - 1
     yStart = self.rotCfg['Y']
-    yEnd = self.rotCfg['H'] + self.rotCfg['Y']
+    yEnd = self.rotCfg['H'] + self.rotCfg['Y'] - 1
 
     self.write_cmd(0x2A)
     self.write_data(bytearray([xStart >> 8, xStart & 0xff, xEnd >> 8, xEnd & 0xff]))
