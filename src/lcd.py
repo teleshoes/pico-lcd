@@ -154,6 +154,82 @@ class LCD():
     else:
       self.framebuf.line(x1, y1, x2, y2, c)
 
+  def circle(self, centerX, centerY, radius, color, fill=True, quadrantMask=0b1111):
+    self.ellipse(centerX, centerY, radius, radius, color, fill, quadrantMask)
+
+  def ellipse(self, centerX, centerY, radiusX, radiusY, color, fill=True, quadrantMask=0b1111):
+    if self.framebuf != None:
+      self.framebuf.ellipse(centerX, centerY, radiusX, radiusY, color, fill, quadrantMask)
+      return
+
+    #adapted from micropython mod_framebuf.c
+    two_xrsq = 2 * radiusX * radiusX
+    two_yrsq = 2 * radiusY * radiusY
+
+    #first set of points, y' > -1
+    curX = radiusX
+    curY = 0
+    xchange = radiusY * radiusY * (1 - 2 * radiusX)
+    ychange = radiusX * radiusX
+    ellipse_error = 0
+    stoppingx = two_yrsq * radiusX
+    stoppingy = 0
+    while stoppingx >= stoppingy:
+      self.draw_ellipse_points(centerX, centerY, curX, curY, color, fill, quadrantMask)
+      curY += 1
+      stoppingy += two_xrsq
+      ellipse_error += ychange
+      ychange += two_xrsq
+      if 2 * ellipse_error + xchange > 0:
+        curX -= 1
+        stoppingx -= two_yrsq
+        ellipse_error += xchange
+        xchange += two_yrsq
+
+    #second set of points, y' < -1
+    curX = 0
+    curY = radiusY
+    xchange = radiusY * radiusY
+    ychange = radiusX * radiusX * (1 - 2 * radiusY)
+    ellipse_error = 0
+    stoppingx = 0
+    stoppingy = two_xrsq * radiusY
+    while stoppingx <= stoppingy:
+      self.draw_ellipse_points(centerX, centerY, curX, curY, color, fill, quadrantMask)
+      curX += 1
+      stoppingx += two_yrsq
+      ellipse_error += xchange
+      xchange += two_yrsq
+      if 2 * ellipse_error + ychange > 0:
+        curY -= 1
+        stoppingy -= two_xrsq
+        ellipse_error += ychange
+        ychange += two_xrsq
+
+  def draw_ellipse_points(self, centerX, centerY, x, y, color, fill, quadrantMask):
+    #adapted from micropython mod_framebuf.c
+    q1 = 0b0001 & quadrantMask
+    q2 = 0b0010 & quadrantMask
+    q3 = 0b0100 & quadrantMask
+    q4 = 0b1000 & quadrantMask
+    if q1 and fill:
+      self.fill_rect(centerX, centerY - y, x + 1, 1, color)
+    if q2 and fill:
+      self.fill_rect(centerX - x, centerY - y, x + 1, 1, color)
+    if q3 and fill:
+      self.fill_rect(centerX - x, centerY + y, x + 1, 1, color)
+    if q4 and fill:
+      self.fill_rect(centerX, centerY + y, x + 1, 1, color)
+
+    if q1 and not fill:
+      self.pixel(centerX + x, centerY - y, color)
+    if q2 and not fill:
+      self.pixel(centerX - x, centerY - y, color)
+    if q3 and not fill:
+      self.pixel(centerX - x, centerY + y, color)
+    if q4 and not fill:
+      self.pixel(centerX + x, centerY + y, color)
+
   def fillShow(self, color):
     self.fill(color)
     self.show()
