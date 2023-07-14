@@ -24,7 +24,7 @@ LCD_CONF_2_0 = [
   {'DEG':270, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
 ]
 
-LCD_CONF = LCD_CONF_2_0
+LCD_CONF = LCD_CONF_1_3
 
 if __name__=='__main__':
   lcd = LCD(LCD_CONF)
