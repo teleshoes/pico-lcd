@@ -130,6 +130,30 @@ class LCD():
   def fill_rect(self, x, y, w, h, color):
     self.rect(x, y, w, h, color, True)
 
+  def pixel(self, x, y, color):
+    if self.framebuf == None:
+      self.tft.pixel(x, y, color)
+    else:
+      self.framebuf.pixel(x, y, color)
+
+  def hline(self, x, y, w, c):
+    if self.framebuf == None:
+      self.tft.hline(x, y, w, c)
+    else:
+      self.framebuf.hline(x, y, w, c)
+
+  def vline(self, x, y, w, c):
+    if self.framebuf == None:
+      self.tft.vline(x, y, w, c)
+    else:
+      self.framebuf.vline(x, y, w, c)
+
+  def line(self, x1, y1, x2, y2, c):
+    if self.framebuf == None:
+      self.tft.line(x1, y1, x2, y2, c)
+    else:
+      self.framebuf.line(x1, y1, x2, y2, c)
+
   def fillShow(self, color):
     self.fill(color)
     self.show()
