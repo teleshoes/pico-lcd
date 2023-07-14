@@ -230,6 +230,25 @@ class LCD():
     if q4 and not fill:
       self.pixel(centerX + x, centerY + y, color)
 
+  # coords is an even-sized flat array of points describing closed, convex polygon
+  #       e.g.: array('h', [x0, y0, x1, y1...])
+  # NOTE:
+  #   fill=True is implemented only WITH framebuf
+  #   rotateRad/rotateCX/rotateCY is implemented only WITHOUT framebuf
+  def poly(self, coords, x, y, color, fill=False, rotateRad=0, rotateCX=0, rotateCY=0):
+    if self.framebuf == None:
+      if fill:
+        print("WARNING: 'fill' is not implemented in poly() for st7789_mpy")
+      polygonXYPairs = []
+      for i in range(0, len(coords), 2):
+        polygonXYPairs.append((coords[i], coords[i+1]))
+
+      self.tft.polygon(polygonXYPairs, x, y, color, rotateRad, rotateCX, rotateCY)
+    else:
+      if rotateRad != 0:
+        print("WARNING: 'rotateRad' is not implemented in poly() for framebuf")
+      self.framebuf.poly(x, y, coords, color, fill)
+
   def fillShow(self, color):
     self.fill(color)
     self.show()
