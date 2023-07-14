@@ -127,6 +127,9 @@ class LCD():
     else:
       self.framebuf.rect(x, y, w, h, color, fill)
 
+  def fill_rect(self, x, y, w, h, color):
+    self.rect(x, y, w, h, color, True)
+
   def fillShow(self, color):
     self.fill(color)
     self.show()
