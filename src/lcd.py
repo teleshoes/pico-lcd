@@ -51,27 +51,28 @@ class LCD():
 
     self.tft.init()
 
-    self.initFramebufMaybe()
+    self.buffer = None
+    self.framebuf = None
 
-  def initFramebufMaybe(self):
+    gc.collect()
     try:
-      self.buffer = None
-      self.framebuf = None
-
-      gc.collect()
-
       self.buffer = bytearray(self.rotCfg['W'] * self.rotCfg['H'] * 2)
-      self.framebuf = framebuf.FrameBuffer(
-        self.buffer, self.rotCfg['W'], self.rotCfg['H'], framebuf.RGB565)
     except:
-      print("WARNING: COULD NOT ALLOCATE BUFFER, SKIPPING FRAME BUFFER\n")
+      print("WARNING: COULD NOT ALLOCATE BUFFER, DISABLING FRAMEBUF\n")
       self.buffer = None
-      self.framebuf = None
 
-    if self.framebuf != None:
-      self.set_full_window()
+    self.initFramebuf()
 
     self.initColors()
+
+  def initFramebuf(self):
+    if self.buffer != None:
+      self.framebuf = framebuf.FrameBuffer(
+        self.buffer, self.rotCfg['W'], self.rotCfg['H'], framebuf.RGB565)
+
+      self.set_full_window()
+    else:
+      self.framebuf = None
 
   def initColors(self):
     if self.framebuf == None:
@@ -101,15 +102,11 @@ class LCD():
         break
 
   def setRotationIdx(self, rotationIdx):
-    (oldW, oldH) = (self.rotCfg['W'], self.rotCfg['H'])
     self.rotationIdx = rotationIdx
     self.rotCfg = self.conf[rotationIdx]
     self.tft.rotation(self.rotationIdx)
-    (newW, newH) = (self.rotCfg['W'], self.rotCfg['H'])
 
-    if self.framebuf != None and (oldW != newW or oldH != newH):
-      self.initFramebufMaybe()
-
+    self.initFramebuf()
     self.show()
 
   def fill(self, color):
