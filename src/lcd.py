@@ -44,12 +44,12 @@ class LCD():
     self.backlight = machine.Pin(CS, machine.Pin.OUT)
     self.reset = machine.Pin(RST, machine.Pin.OUT)
 
-    self.lcd = st7789.ST7789(
+    self.tft = st7789.ST7789(
       self.spi, self.rotCfg['H'], self.rotCfg['W'],
       rotation=self.rotationIdx, rotations=self.rotationsArr,
       reset=self.reset, dc=self.dc, cs=self.cs, backlight=self.backlight)
 
-    self.lcd.init()
+    self.tft.init()
 
     self.initFramebufMaybe()
 
@@ -104,7 +104,7 @@ class LCD():
     (oldW, oldH) = (self.rotCfg['W'], self.rotCfg['H'])
     self.rotationIdx = rotationIdx
     self.rotCfg = self.conf[rotationIdx]
-    self.lcd.rotation(self.rotationIdx)
+    self.tft.rotation(self.rotationIdx)
     (newW, newH) = (self.rotCfg['W'], self.rotCfg['H'])
 
     if self.framebuf != None and (oldW != newW or oldH != newH):
@@ -114,21 +114,21 @@ class LCD():
 
   def fill(self, color):
     if self.framebuf == None:
-      self.lcd.fill(color)
+      self.tft.fill(color)
     else:
       self.framebuf.fill(color)
 
   def rect(self, x, y, w, h, color, fill=True):
     if self.framebuf == None:
       if fill:
-        self.lcd.fill_rect(x, y, w, h, color)
+        self.tft.fill_rect(x, y, w, h, color)
       else:
-        self.lcd.rect(x, y, w, h, color)
+        self.tft.rect(x, y, w, h, color)
     else:
       self.framebuf.rect(x, y, w, h, color, fill)
 
   def fillShow(self, color):
-    self.lcd.fill(color)
+    self.tft.fill(color)
 
   def write_cmd(self, cmd):
     self.cs(1)
