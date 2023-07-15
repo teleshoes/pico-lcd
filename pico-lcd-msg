@@ -88,6 +88,10 @@ my $USAGE = "Usage:
     --y=Y
       prefix all TEXT with '!y=Y!'
 
+    --buttons
+      fetch button press counts and print them
+      (implies --noclear, give --clear again to clear)
+
     --lcd-width=WIDTH_PX
       select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
     --lcd-height=HEIGHT_PX
@@ -118,6 +122,7 @@ sub main(@){
   my $quiet = 0;
   my $devName = undef;
   my $text = "";
+  my $isButtons = 0;
   my $isClear = 1;
   my $orient = undef;
   my $splitLines = $SPLIT_LINES_BIG_ONLY;
@@ -133,6 +138,9 @@ sub main(@){
       $quiet = 1;
     }elsif($arg =~ /^(clear)$/ and $text eq ""){
       $isClear = 1;
+    }elsif($arg =~ /^(-b|--buttons)$/){
+      $isButtons = 1;
+      $isClear = 0;
     }elsif($arg =~ /^--orient=(.+)$/){
       $orient = $1;
     }elsif($arg =~ /^(--clear)$/){
@@ -270,6 +278,10 @@ sub main(@){
     if(@messages == 0){
       exit 0;
     }
+  }
+
+  if($isButtons){
+    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "buttons";
   }
 
   if($isClear and @messages == 0){
