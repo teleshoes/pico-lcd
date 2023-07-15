@@ -52,7 +52,7 @@ def main():
   )
   lcd.show()
 
-  while(1):
+  while True:
     try:
       #something allocates memory that GC is not aware of
       mem = gc.mem_free()
@@ -107,8 +107,9 @@ def main():
       try:
         print(e)
         lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
-        cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
-        cl.close()
+        if cl != None:
+          cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
+          cl.close()
       except:
         pass
 
