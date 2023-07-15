@@ -39,61 +39,7 @@ def main():
   lcdFont = LcdFont('font5x8.bin', lcd)
   lcdFont.setup()
 
-  networks = []
-  with open("wifi-conf.txt", "r") as fh:
-    for line in fh:
-      idx = line.find("=")
-      if idx > 0:
-        ssid = line[:idx].strip()
-        password = line[idx+1:].strip()
-        networks.append([ssid, password])
-
-  connected = False
-  connectedSSID = None
-
-  wlan = network.WLAN(network.STA_IF)
-  wlan.active(True)
-
-  while not connected:
-    for ssidPassword in networks:
-      ssid = ssidPassword[0]
-      password = ssidPassword[1]
-
-      try:
-        wlan.connect(ssid, password)
-      except Exception as e:
-        print(str(e))
-
-      lcdFont.markup(""
-        + "!size=4!!color=green!" + "WAITING\n"
-        + "!size=4!!color=green!" + "FOR WIFI\n"
-        + "!size=4!!color=white!" + "--------\n"
-        + "!size=2!!color=blue!"  + ssid
-      )
-
-      max_wait = 10
-      while max_wait > 0:
-          if wlan.status() < 0 or wlan.status() >= 3:
-              break
-          max_wait -= 1
-          print('waiting for connection...')
-          time.sleep(1)
-
-      if wlan.status() == 3:
-        connected = True
-        connectedSSID = ssid
-        break
-
-  ipAddr = None
-  if not connected:
-      lcdFont.markup("!size=7!!color=red!" + "FAILED\nWIFI")
-      raise RuntimeError('network connection failed')
-
-  else:
-      print('connected')
-      status = wlan.ifconfig()
-      print( 'ip = ' + status[0] )
-      ipAddr = status[0]
+  wlan = connectToWifi(lcdFont)
 
   s = getSocket()
 
@@ -102,7 +48,7 @@ def main():
   lcdFont.markup(""
     + "!size=4!!color=green!"             + "CONNECTED\n"
     + "!size=3!!color=blue!"              + "\nlistening on:\n"
-    + "!size=3!!color=green!!hspace=0.7!" + ipAddr
+    + "!size=3!!color=green!!hspace=0.7!" + wlan.ifconfig()[0]
   )
   lcd.show()
 
@@ -169,6 +115,64 @@ def main():
       lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
       cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
       cl.close()
+
+def connectToWifi(lcdFont):
+  networks = []
+  with open("wifi-conf.txt", "r") as fh:
+    for line in fh:
+      idx = line.find("=")
+      if idx > 0:
+        ssid = line[:idx].strip()
+        password = line[idx+1:].strip()
+        networks.append([ssid, password])
+
+  connected = False
+  connectedSSID = None
+
+  wlan = network.WLAN(network.STA_IF)
+  wlan.active(True)
+
+  while not connected:
+    for ssidPassword in networks:
+      ssid = ssidPassword[0]
+      password = ssidPassword[1]
+
+      try:
+        wlan.connect(ssid, password)
+      except Exception as e:
+        print(str(e))
+
+      lcdFont.markup(""
+        + "!size=4!!color=green!" + "WAITING\n"
+        + "!size=4!!color=green!" + "FOR WIFI\n"
+        + "!size=4!!color=white!" + "--------\n"
+        + "!size=2!!color=blue!"  + ssid
+      )
+
+      max_wait = 10
+      while max_wait > 0:
+          if wlan.status() < 0 or wlan.status() >= 3:
+              break
+          max_wait -= 1
+          print('waiting for connection...')
+          time.sleep(1)
+
+      if wlan.status() == 3:
+        connected = True
+        connectedSSID = ssid
+        break
+
+  ipAddr = None
+  if not connected:
+      lcdFont.markup("!size=7!!color=red!" + "FAILED\nWIFI")
+      raise RuntimeError('network connection failed')
+
+  else:
+      print('connected')
+      status = wlan.ifconfig()
+      print( 'ip = ' + status[0] )
+      ipAddr = status[0]
+  return wlan
 
 def getSocket():
   addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
