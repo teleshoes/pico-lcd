@@ -28,7 +28,7 @@ my $USAGE = "Usage:
     -same as: $EXEC [OPTS] --clear --text=\"\"
 
   $EXEC [OPTS] --orient=ORIENT
-    -run: curl http://<IP_ADDRESS>/orient=ORIENT
+    -run: curl http://<IP_ADDRESS> --data 'orient=ORIENT'
       ORIENT
         landscape | 0 | normal | default
           set rotation to 0 degrees
@@ -42,7 +42,7 @@ my $USAGE = "Usage:
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -base64 encode TEXT as TEXT_B64
-    -run: curl http://<IP_ADDRESS>/text=TEXT_B64
+    -run: curl http://<IP_ADDRESS> --data 'text=TEXT_B64'
 
   $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
     -combine WORD_OR_FILE args into TEXT
@@ -72,7 +72,7 @@ my $USAGE = "Usage:
 
     --clear
       if TEXT is empty:
-        -run: curl http://<IP_ADDRESS>/clear
+        -run: curl http://<IP_ADDRESS> --data 'clear'
     --noclear
 
     --color=COLOR
@@ -105,7 +105,7 @@ my $USAGE = "Usage:
         -prefix each TEXT_LINE with '!y=OFFSET!'
         -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
         -base64-encode TEXT_LINE as TEXT_LINE_B64
-        -run: curl http://<IP_ADDRESS>/text=TEXT_LINE_B64
+        -run: curl http://<IP_ADDRESS> --data 'text=TEXT_LINE_B64'
     --no-lines
       never split lines as in --lines
     --lines-big-only
@@ -268,7 +268,7 @@ sub main(@){
   @messages = grep {length $_ > 0} @messages;
 
   if(defined $orient){
-    system "curl", "--no-progress-meter", "http://$ipAddr/orient=$orient";
+    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "orient=$orient";
 
     if(@messages == 0){
       exit 0;
@@ -276,7 +276,7 @@ sub main(@){
   }
 
   if($isClear and @messages == 0){
-    system "curl", "--no-progress-meter", "http://$ipAddr/clear";
+    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "clear";
   }
 
   for(my $i=0; $i<@messages; $i++){
@@ -300,7 +300,7 @@ sub main(@){
 
     my $b64 = encode_base64($msg);
     $b64 =~ s/\n//g;
-    system "curl", "--no-progress-meter", "http://$ipAddr/$cmd=$b64";
+    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "$cmd=$b64";
   }
 }
 
