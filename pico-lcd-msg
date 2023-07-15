@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 use File::Basename qw(basename);
-use MIME::Base64 qw(encode_base64);
 
 my $EXEC = basename $0;
 
@@ -41,8 +40,7 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
-    -base64 encode TEXT as TEXT_B64
-    -run: curl http://<IP_ADDRESS> --data 'text=TEXT_B64'
+    -run: curl http://<IP_ADDRESS> --data 'text=TEXT'
 
   $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
     -combine WORD_OR_FILE args into TEXT
@@ -76,19 +74,19 @@ my $USAGE = "Usage:
     --noclear
 
     --color=COLOR
-      prefix all TEXT with '!color=COLOR!' before base64-encoding
+      prefix all TEXT with '!color=COLOR!'
     --size=SIZE
-      prefix all TEXT with '!size=SIZE!' before base64-encoding
+      prefix all TEXT with '!size=SIZE!'
         (this is the number of pixels per dot, in a 5-dot by 8-dot font)
       NOTE: the default is to calculate the largest SIZE that fits all characters
     --hspace=HSPACE
-      prefix all TEXT with '!hspace=HSPACE!' before base64-encoding
+      prefix all TEXT with '!hspace=HSPACE!'
     --vspace=VSPACE
-      prefix all TEXT with '!vspace=VSPACE!' before base64-encoding
+      prefix all TEXT with '!vspace=VSPACE!'
     --x=X
-      prefix all TEXT with '!x=X!' before base64-encoding
+      prefix all TEXT with '!x=X!'
     --y=Y
-      prefix all TEXT with '!y=Y!' before base64-encoding
+      prefix all TEXT with '!y=Y!'
 
     --lcd-width=WIDTH_PX
       select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
@@ -104,8 +102,7 @@ my $USAGE = "Usage:
           -assume SIZE=5 if not given
         -prefix each TEXT_LINE with '!y=OFFSET!'
         -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
-        -base64-encode TEXT_LINE as TEXT_LINE_B64
-        -run: curl http://<IP_ADDRESS> --data 'text=TEXT_LINE_B64'
+        -run: curl http://<IP_ADDRESS> --data 'text=TEXT_LINE'
     --no-lines
       never split lines as in --lines
     --lines-big-only
@@ -298,9 +295,7 @@ sub main(@){
       $cmd = "c$cmd"; #do ctext* to clear before adding text to buffer
     }
 
-    my $b64 = encode_base64($msg);
-    $b64 =~ s/\n//g;
-    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "$cmd=$b64";
+    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "$cmd=$msg";
   }
 }
 
