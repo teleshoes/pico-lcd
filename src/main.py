@@ -31,12 +31,9 @@ LCD_CONF = LCD_CONF_1_3
 def main():
   lcd = LCD(LCD_CONF["layouts"])
 
-  try:
-    with open("last-rotation-degrees.txt", "r") as fh:
-      degrees = int(fh.readline())
-      lcd.setRotationDegrees(degrees)
-  except:
-    pass
+  degrees = readLastRotationDegrees()
+  if degrees != None:
+    lcd.setRotationDegrees(degrees)
 
   lcdFont = LcdFont('font5x8.bin', lcd)
   lcdFont.setup()
@@ -83,11 +80,7 @@ def main():
 
         if degrees != None:
           lcd.setRotationDegrees(degrees)
-          try:
-            with open("last-rotation-degrees.txt", "w") as fh:
-              fh.write(str(degrees) + "\n")
-          except:
-            pass
+          writeLastRotationDegrees(lcd.getRotationDegrees())
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
         print("text: " + val)
         if cmd == "ctext" or cmd == "ctextbuf":
@@ -154,6 +147,25 @@ def readCommandRequest(cl):
     val = cmdArr[1].decode("utf8")
 
   return (cmd, val)
+
+def readLastRotationDegrees():
+  return readFileInt("last-rotation-degrees.txt")
+def writeLastRotationDegrees(degrees):
+  writeFile("last-rotation-degrees.txt", str(degrees) + "\n")
+
+def readFileInt(file):
+  try:
+    with open(file, "r") as fh:
+      return int(fh.readline())
+  except:
+    return None
+
+def writeFile(file, contents):
+  try:
+    with open(file, "w") as fh:
+      fh.write(contents)
+  except:
+    pass
 
 def connectToWifi(lcdFont):
   networks = []

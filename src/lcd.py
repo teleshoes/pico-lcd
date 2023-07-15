@@ -98,6 +98,9 @@ class LCD():
     bLo = h & 0xff
     return (bLo << 8) | (bHi & 0xff)
 
+  def getRotationDegrees(self):
+    return self.rotCfg['DEG']
+
   def setRotationDegrees(self, degrees):
     for rotationIdx in range(0, len(self.layouts)):
       if self.layouts[rotationIdx]['DEG'] == degrees:
