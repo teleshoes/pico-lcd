@@ -42,6 +42,7 @@ def buttonPressed(pin, btnName, controller):
   controller['btnLastPress'][btnName] = nowTicks
 
   print("PRESSED: " + btnName + " " + str(pin))
+  controller['btnCount'][btnName] += 1
 
   if btnName == "B2" or btnName == "A":
     controller['lcd'].setRotationNext()
@@ -63,7 +64,7 @@ def main():
   s = getSocket()
 
   controller = {
-    'btnLastPress': {},
+    'btnLastPress': {}, 'btnCount': {},
     'lcd': lcd, 'lcdFont': lcdFont,
     'wlan': wlan, 'socket': s
   }
@@ -71,6 +72,7 @@ def main():
   for btnName in LCD_CONF['buttons']:
     gpioPin = LCD_CONF['buttons'][btnName]
     controller['btnLastPress'][btnName] = None
+    controller['btnCount'][btnName] = 0
     pin = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
     pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
       lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
