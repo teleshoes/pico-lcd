@@ -95,14 +95,7 @@ def main():
       print( 'ip = ' + status[0] )
       ipAddr = status[0]
 
-  addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-
-  s = socket.socket()
-  s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-  s.bind(addr)
-  s.listen(1)
-
-  print('listening on', addr)
+  s = getSocket()
 
   lcd.fillShow(lcd.black)
 
@@ -176,6 +169,17 @@ def main():
       lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
       cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
       cl.close()
+
+def getSocket():
+  addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+
+  s = socket.socket()
+  s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  s.bind(addr)
+  s.listen(1)
+
+  print('listening on', addr)
+  return s
 
 if __name__=='__main__':
   main()
