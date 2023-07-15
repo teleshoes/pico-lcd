@@ -36,9 +36,10 @@ LCD_CONF = LCD_CONF_1_3
 def buttonPressed(pin, btnName, controller):
   #debounce 0.1s
   nowTicks = time.ticks_ms()
-  if time.ticks_diff(nowTicks, controller['lastPress'][btnName]) < 100:
+  lastPress = controller['btnLastPress'][btnName]
+  if lastPress != None and time.ticks_diff(nowTicks, lastPress) < 100:
     return
-  controller['lastPress'][btnName] = nowTicks
+  controller['btnLastPress'][btnName] = nowTicks
 
   print("PRESSED: " + btnName + " " + str(pin))
 
@@ -61,11 +62,15 @@ def main():
 
   s = getSocket()
 
-  controller = {'lcd': lcd, 'lastPress': {}, 'lcdFont': lcdFont, 'wlan': wlan, 'socket': s}
+  controller = {
+    'btnLastPress': {},
+    'lcd': lcd, 'lcdFont': lcdFont,
+    'wlan': wlan, 'socket': s
+  }
 
   for btnName in LCD_CONF['buttons']:
     gpioPin = LCD_CONF['buttons'][btnName]
-    controller['lastPress'][btnName] = time.ticks_ms()
+    controller['btnLastPress'][btnName] = None
     pin = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
     pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
       lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
