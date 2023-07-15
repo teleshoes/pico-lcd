@@ -26,7 +26,7 @@ LCD_CONF_2_0 = [
 
 LCD_CONF = LCD_CONF_1_3
 
-if __name__=='__main__':
+def main():
   lcd = LCD(LCD_CONF)
 
   try:
@@ -176,3 +176,6 @@ if __name__=='__main__':
       lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
       cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
       cl.close()
+
+if __name__=='__main__':
+  main()
