@@ -42,6 +42,10 @@ def buttonPressed(pin, btnName, controller):
 
   print("PRESSED: " + btnName + " " + str(pin))
 
+  if btnName == "B2" or btnName == "A":
+    controller['lcd'].setRotationNext()
+    writeLastRotationDegrees(controller['lcd'].getRotationDegrees())
+
 
 def main():
   lcd = LCD(LCD_CONF["layouts"])
