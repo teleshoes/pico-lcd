@@ -107,6 +107,9 @@ class LCD():
         self.setRotationIdx(rotationIdx)
         break
 
+  def setRotationNext(self):
+    self.setRotationIdx((self.rotationIdx + 1) % len(self.layouts))
+
   def setRotationIdx(self, rotationIdx):
     self.rotationIdx = rotationIdx
     self.rotCfg = self.layouts[rotationIdx]
