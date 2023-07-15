@@ -18,14 +18,14 @@ MADCTL_MH  = 0 #0:refresh-left-to-right  1:refresh-right-to-left
 MADCTL_RGB = 0 #0:RGB                    1:BGR
 
 class LCD():
-  def __init__(self, conf):
-    self.conf = conf
+  def __init__(self, layouts):
+    self.layouts = layouts
     self.rotationIdx = 0
-    self.rotCfg = self.conf[self.rotationIdx]
+    self.rotCfg = self.layouts[self.rotationIdx]
 
     self.rotationsArr = []
-    for i in range(0, len(self.conf)):
-      rot = self.conf[i]
+    for i in range(0, len(self.layouts)):
+      rot = self.layouts[i]
       rot['MADCTL'] = (0
         | rot['MY']  << 7 #0:nothing  1:mirror row address
         | rot['MX']  << 6 #0:nothing  1:mirror col address
@@ -99,14 +99,14 @@ class LCD():
     return (bLo << 8) | (bHi & 0xff)
 
   def setRotationDegrees(self, degrees):
-    for rotationIdx in range(0, len(self.conf)):
-      if self.conf[rotationIdx]['DEG'] == degrees:
+    for rotationIdx in range(0, len(self.layouts)):
+      if self.layouts[rotationIdx]['DEG'] == degrees:
         self.setRotationIdx(rotationIdx)
         break
 
   def setRotationIdx(self, rotationIdx):
     self.rotationIdx = rotationIdx
-    self.rotCfg = self.conf[rotationIdx]
+    self.rotCfg = self.layouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
 
     self.initFramebuf()
