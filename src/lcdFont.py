@@ -65,6 +65,14 @@ class LcdFont:
   def cursorNewLine(self):
     self.cursor['x'] = self.cursor['startX']
     self.cursor['y'] += int(self.cursor['size'] * (self.fontHeight + self.cursor['vspace']))
+  def cursorHline(self):
+    color = self.cursor['color']
+    if color == None:
+      color = self.defaultColor
+    self.lcd.hline(self.cursor['startX'], self.cursor['y'],
+      self.lcd.getWidth(), color)
+    self.cursor['x'] = self.cursor['startX']
+    self.cursor['y'] += 1
   def cursorDrawText(self, text):
     for ch in text:
       if ch == "\n":
@@ -201,6 +209,9 @@ class LcdFont:
         elif cmd == "n":
           # '!n!' => newline
           self.cursorNewLine()
+        elif cmd == "hline" or cmd == "hl" or cmd == "hr":
+          # '!hr!' => hline
+          self.cursorHline()
         elif cmd in self.cursor and len(val) > 0:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
           if val == "prev":
