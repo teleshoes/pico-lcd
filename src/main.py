@@ -98,11 +98,19 @@ def main():
 
       (cmd, val) = readCommandRequest(cl)
 
+      out = ""
+
       if cmd == "clear":
         lcd.fillShow(lcd.black)
         print("clear")
       elif cmd == "show":
         lcd.show()
+      elif cmd == "buttons":
+        for btnName in sorted(controller['btnCount']):
+          if len(out) > 0:
+            out += ", "
+          out += btnName + "=" + str(controller['btnCount'][btnName])
+        out += "\n"
       elif cmd == "orient" or cmd == "rotation":
         degrees = None
         if val == "landscape" or val == "0" or val == "normal" or val == "default":
@@ -127,7 +135,7 @@ def main():
       else:
         raise(Exception("ERROR: could not parse payload"))
 
-      cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
+      cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n' + out)
       cl.close()
 
     except Exception as e:
