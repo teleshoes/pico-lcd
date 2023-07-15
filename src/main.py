@@ -108,11 +108,32 @@ def main():
         pass
 
 def readCommandRequest(cl):
-  line = b""
-  while line != b"\r\n":
-    line = cl.readline()
+  cl.settimeout(0.25)
 
-  data = cl.recv(1024)
+  #read content length, skip to POST data
+  line = ""
+  contentLen = None
+  while line != b'\r\n':
+    try:
+      if line.startswith(b"Content-Length: "):
+        lenStr = line[16:]
+      contentLen = int(lenStr)
+    except Exception as e:
+      pass
+
+    try:
+      line = cl.readline()
+    except:
+      line = ""
+
+  data = b""
+  while len(data) < contentLen:
+    try:
+      chunk = cl.recv(1024)
+    except:
+      chunk = None
+    if chunk != None:
+      data += chunk
 
   cmdArr = data.split(b'=', 1)
   cmd = cmdArr[0].decode("utf8")
