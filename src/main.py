@@ -114,15 +114,17 @@ def main():
         pass
 
 def readCommandRequest(cl):
-  requestFirstLine = cl.readline()
-  requestOther = cl.recv(1024)
+  line = b""
+  while line != b"\r\n":
+    line = cl.readline()
 
-  cmdStr = str(requestFirstLine).split()[1].strip('/')
-  cmdArr = cmdStr.split("=", 1)
-  cmd = cmdArr[0]
+  data = cl.recv(1024)
+
+  cmdArr = data.split(b'=', 1)
+  cmd = cmdArr[0].decode("utf8")
   val = None
   if len(cmdArr) == 2:
-    val = cmdArr[1]
+    val = cmdArr[1].decode("utf8")
 
   return (cmd, val)
 
