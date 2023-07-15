@@ -7,7 +7,7 @@ my $EXEC = basename $0;
 
 my $DEVICE_CONFIG_FILE = "$ENV{HOME}/.config/pico-lcd.conf";
 
-my $SPLIT_LINES_BIG_CHAR_LIMIT = 800; #limit seems to be 860-905
+my $SPLIT_LINES_BIG_CHAR_LIMIT = 3000;
 
 my $SPLIT_LINES_BIG_ONLY = "big-only";
 my $SPLIT_LINES_ALWAYS = "always";
