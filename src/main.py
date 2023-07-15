@@ -5,11 +5,14 @@ import network
 import time
 import socket
 import gc
+import machine
 
 from lcd import LCD
 from lcdFont import LcdFont
 
 LCD_CONF_1_3 = {
+  "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
+              'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
   "layouts": [
     {'DEG':  0, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
     {'DEG': 90, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
@@ -18,6 +21,7 @@ LCD_CONF_1_3 = {
   ],
 }
 LCD_CONF_2_0 = {
+  "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
   "layouts": [
     {'DEG':  0, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
     {'DEG': 90, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
@@ -27,6 +31,17 @@ LCD_CONF_2_0 = {
 }
 
 LCD_CONF = LCD_CONF_1_3
+
+
+def buttonPressed(pin, btnName, controller):
+  #debounce 0.1s
+  nowTicks = time.ticks_ms()
+  if time.ticks_diff(nowTicks, controller['lastPress'][btnName]) < 100:
+    return
+  controller['lastPress'][btnName] = nowTicks
+
+  print("PRESSED: " + btnName + " " + str(pin))
+
 
 def main():
   lcd = LCD(LCD_CONF["layouts"])
@@ -41,6 +56,16 @@ def main():
   wlan = connectToWifi(lcdFont)
 
   s = getSocket()
+
+  controller = {'lcd': lcd, 'lastPress': {}, 'lcdFont': lcdFont, 'wlan': wlan, 'socket': s}
+
+  for btnName in LCD_CONF['buttons']:
+    gpioPin = LCD_CONF['buttons'][btnName]
+    controller['lastPress'][btnName] = time.ticks_ms()
+    pin = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
+    pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
+      lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
+    ))
 
   lcd.fillShow(lcd.black)
 
