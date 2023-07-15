@@ -109,6 +109,7 @@ def main():
 
 def readCommandRequest(cl):
   cl.settimeout(0.25)
+  start_ms = time.ticks_ms()
 
   #read content length, skip to POST data
   line = ""
@@ -126,6 +127,11 @@ def readCommandRequest(cl):
     except:
       line = ""
 
+    if time.ticks_ms() - start_ms > 5000:
+      print("WARNING: max timeout reading from socket exceeded")
+      break
+
+  start_ms = time.ticks_ms()
   data = b""
   while len(data) < contentLen:
     try:
@@ -134,6 +140,9 @@ def readCommandRequest(cl):
       chunk = None
     if chunk != None:
       data += chunk
+    if time.ticks_ms() - start_ms > 5000:
+      print("WARNING: max timeout reading from socket exceeded")
+      break
 
   cmdArr = data.split(b'=', 1)
   cmd = cmdArr[0].decode("utf8")
