@@ -6,8 +6,6 @@ import time
 import socket
 import gc
 
-import base64 #non-standard, must build micropython
-
 from lcd import LCD
 from lcdFont import LcdFont
 
@@ -87,16 +85,12 @@ def main():
           except:
             pass
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
+        print("text: " + val)
         if cmd == "ctext" or cmd == "ctextbuf":
           lcd.fill(lcd.black)
-        msgBase64 = val
-        msgBytesBase64 = msgBase64.encode("utf8")
-        msgBytes = base64.b64decode(msgBytesBase64)
-        msg = msgBytes.decode("utf8")
-        lcdFont.drawMarkup(msg)
+        lcdFont.drawMarkup(val)
         if cmd == "text" or cmd == "ctext":
           lcd.show()
-        print("text: " + msg)
       else:
         raise(Exception("ERROR: could not parse payload"))
 
