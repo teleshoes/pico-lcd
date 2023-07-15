@@ -71,6 +71,11 @@ class LCD():
 
     self.initColors()
 
+  def getWidth(self):
+    return self.rotCfg['W']
+  def getHeight(self):
+    return self.rotCfg['H']
+
   def getFramebufSize(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
