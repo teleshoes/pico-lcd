@@ -50,13 +50,15 @@ if __name__=='__main__':
 
   connected = False
   connectedSSID = None
+
+  wlan = network.WLAN(network.STA_IF)
+  wlan.active(True)
+
   while not connected:
     for ssidPassword in networks:
       ssid = ssidPassword[0]
       password = ssidPassword[1]
 
-      wlan = network.WLAN(network.STA_IF)
-      wlan.active(True)
       try:
         wlan.connect(ssid, password)
       except Exception as e:
