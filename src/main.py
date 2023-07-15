@@ -60,15 +60,8 @@ def main():
 
       cl, addr = s.accept()
       print('client connected from', addr)
-      requestFirstLine = cl.readline()
-      requestOther = cl.recv(1024)
 
-      cmdStr = str(requestFirstLine).split()[1].strip('/')
-      cmdArr = cmdStr.split("=", 1)
-      cmd = cmdArr[0]
-      val = None
-      if len(cmdArr) == 2:
-        val = cmdArr[1]
+      (cmd, val) = readCommandRequest(cl)
 
       if cmd == "clear":
         lcd.fillShow(lcd.black)
@@ -115,6 +108,19 @@ def main():
       lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
       cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
       cl.close()
+
+def readCommandRequest(cl):
+  requestFirstLine = cl.readline()
+  requestOther = cl.recv(1024)
+
+  cmdStr = str(requestFirstLine).split()[1].strip('/')
+  cmdArr = cmdStr.split("=", 1)
+  cmd = cmdArr[0]
+  val = None
+  if len(cmdArr) == 2:
+    val = cmdArr[1]
+
+  return (cmd, val)
 
 def connectToWifi(lcdFont):
   networks = []
