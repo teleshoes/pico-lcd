@@ -32,6 +32,10 @@ LCD_CONF_2_0 = {
 
 LCD_CONF = LCD_CONF_1_3
 
+#use only a portion of the screen for framebuf
+FRAMEBUF_MAX_W = None
+FRAMEBUF_MAX_H = None
+
 
 def buttonPressed(pin, btnName, controller):
   #debounce 0.1s
@@ -50,7 +54,7 @@ def buttonPressed(pin, btnName, controller):
 
 
 def main():
-  lcd = LCD(LCD_CONF["layouts"])
+  lcd = LCD(LCD_CONF["layouts"], FRAMEBUF_MAX_W, FRAMEBUF_MAX_H)
 
   degrees = readLastRotationDegrees()
   if degrees != None:

@@ -18,9 +18,11 @@ MADCTL_MH  = 0 #0:refresh-left-to-right  1:refresh-right-to-left
 MADCTL_RGB = 0 #0:RGB                    1:BGR
 
 class LCD():
-  def __init__(self, layouts):
+  def __init__(self, layouts, framebufMaxW=None, framebufMaxH=None):
     self.layouts = layouts
     self.rotationIdx = 0
+    self.framebufMaxW = framebufMaxW
+    self.framebufMaxH = framebufMaxH
     self.rotCfg = self.layouts[self.rotationIdx]
 
     self.rotationsArr = []
@@ -59,7 +61,8 @@ class LCD():
 
     gc.collect()
     try:
-      self.buffer = bytearray(self.rotCfg['W'] * self.rotCfg['H'] * 2)
+      (bufW, bufH) = self.getFramebufSize()
+      self.buffer = bytearray(bufW * bufH * 2)
     except:
       print("WARNING: COULD NOT ALLOCATE BUFFER, DISABLING FRAMEBUF\n")
       self.buffer = None
@@ -68,10 +71,20 @@ class LCD():
 
     self.initColors()
 
+  def getFramebufSize(self):
+    bufW = self.rotCfg['W']
+    bufH = self.rotCfg['H']
+    if self.framebufMaxW != None and bufW > self.framebufMaxW:
+      bufW = self.framebufMaxW
+    if self.framebufMaxH != None and bufH > self.framebufMaxH:
+      bufH = self.framebufMaxH
+    return (bufW, bufH)
+
   def initFramebuf(self):
     if self.buffer != None:
+      (bufW, bufH) = self.getFramebufSize()
       self.framebuf = framebuf.FrameBuffer(
-        self.buffer, self.rotCfg['W'], self.rotCfg['H'], framebuf.RGB565)
+        self.buffer, bufW, bufH, framebuf.RGB565)
 
       self.set_full_window()
     else:
@@ -115,6 +128,8 @@ class LCD():
     self.rotCfg = self.layouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
 
+    if self.framebufMaxW != None or self.framebufMaxH != None:
+      self.fill_mem_blank()
     self.initFramebuf()
     self.show()
 
@@ -283,10 +298,12 @@ class LCD():
     buf = None
 
   def set_full_window(self):
+    (bufW, bufH) = self.getFramebufSize()
     xStart = self.rotCfg['X']
-    xEnd = self.rotCfg['W'] + self.rotCfg['X'] - 1
+    xEnd = bufW + self.rotCfg['X'] - 1
     yStart = self.rotCfg['Y']
-    yEnd = self.rotCfg['H'] + self.rotCfg['Y'] - 1
+    yEnd = bufH + self.rotCfg['Y'] - 1
+
     self.set_window(xStart, xEnd, yStart, yEnd)
 
   def set_window(self, xStart, xEnd, yStart, yEnd):
