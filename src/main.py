@@ -104,10 +104,13 @@ def main():
       cl.close()
 
     except Exception as e:
-      print(e)
-      lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
-      cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
-      cl.close()
+      try:
+        print(e)
+        lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
+        cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
+        cl.close()
+      except:
+        pass
 
 def readCommandRequest(cl):
   requestFirstLine = cl.readline()
