@@ -27,7 +27,7 @@ my $USAGE = "Usage:
     -same as: $EXEC [OPTS] --clear --text=\"\"
 
   $EXEC [OPTS] --orient=ORIENT
-    -run: curl http://<IP_ADDRESS> --data 'orient=ORIENT'
+    -run: curl http://<IP_ADDRESS>/orient?orient=ORIENT'
       ORIENT
         landscape | 0 | normal | default
           set rotation to 0 degrees
@@ -40,7 +40,7 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
-    -run: curl http://<IP_ADDRESS> --data 'text=TEXT'
+    -run: curl http://<IP_ADDRESS>/text --data 'TEXT'
 
   $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
     -combine WORD_OR_FILE args into TEXT
@@ -70,7 +70,7 @@ my $USAGE = "Usage:
 
     --clear
       if TEXT is empty:
-        -run: curl http://<IP_ADDRESS> --data 'clear'
+        -run: curl http://<IP_ADDRESS>/clear
     --noclear
 
     --color=COLOR
@@ -106,7 +106,7 @@ my $USAGE = "Usage:
           -assume SIZE=5 if not given
         -prefix each TEXT_LINE with '!y=OFFSET!'
         -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
-        -run: curl http://<IP_ADDRESS> --data 'text=TEXT_LINE'
+        -run: curl http://<IP_ADDRESS>/text 'TEXT_LINE'
     --no-lines
       never split lines as in --lines
     --lines-big-only
@@ -273,7 +273,7 @@ sub main(@){
   @messages = grep {length $_ > 0} @messages;
 
   if(defined $orient){
-    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "orient=$orient";
+    system "curl", "--no-progress-meter", "http://$ipAddr/orient?orient=$orient";
 
     if(@messages == 0){
       exit 0;
@@ -281,11 +281,11 @@ sub main(@){
   }
 
   if($isButtons){
-    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "buttons";
+    system "curl", "--no-progress-meter", "http://$ipAddr/buttons";
   }
 
   if($isClear and @messages == 0){
-    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "clear";
+    system "curl", "--no-progress-meter", "http://$ipAddr/clear";
   }
 
   for(my $i=0; $i<@messages; $i++){
@@ -307,7 +307,7 @@ sub main(@){
       $cmd = "c$cmd"; #do ctext* to clear before adding text to buffer
     }
 
-    system "curl", "--no-progress-meter", "http://$ipAddr", "--data", "$cmd=$msg";
+    system "curl", "--no-progress-meter", "http://$ipAddr/$cmd", "--data", "$msg";
   }
 }
 
