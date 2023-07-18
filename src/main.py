@@ -100,7 +100,7 @@ def main():
       cl, addr = s.accept()
       print('client connected from', addr)
 
-      (cmd, val) = readCommandRequest(cl)
+      (cmd, params, data) = readCommandRequest(cl)
 
       out = ""
 
@@ -116,6 +116,8 @@ def main():
           out += btnName + "=" + str(controller['btnCount'][btnName])
         out += "\n"
       elif cmd == "orient" or cmd == "rotation":
+        val = params['orient']
+
         degrees = None
         if val == "landscape" or val == "0" or val == "normal" or val == "default":
           degrees = 0
@@ -130,6 +132,7 @@ def main():
           lcd.setRotationDegrees(degrees)
           writeLastRotationDegrees(lcd.getRotationDegrees())
       elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
+        val = data.decode("utf8")
         print("text: " + val)
         if cmd == "ctext" or cmd == "ctextbuf":
           lcd.fill(lcd.black)
@@ -156,10 +159,28 @@ def readCommandRequest(cl):
   cl.settimeout(0.25)
   start_ms = time.ticks_ms()
 
-  #read content length, skip to POST data
+  #read URL params + content length, skip to POST data
   line = ""
-  contentLen = None
+  contentLen = 0
+  cmd = None
+  params = {}
   while line != b'\r\n':
+    if line.startswith("POST /") or line.startswith("GET /"):
+      segments = line.decode("utf8").split(" ")
+      urlStr = segments[1]
+      urlStr = urlStr[1:] #remove /
+      cmdParamsStr = urlStr.split("?")
+      if len(cmdParamsStr) == 2:
+        cmd = cmdParamsStr[0]
+        paramsStr = cmdParamsStr[1]
+      elif len(cmdParamsStr) == 1:
+        cmd = cmdParamsStr[0]
+        paramsStr = ""
+      for keyValPair in paramsStr.split("&"):
+        keyVal = keyValPair.split("=")
+        if len(keyVal) == 2:
+          (key, val) = keyVal
+          params[keyVal[0]] = keyVal[1]
     try:
       if line.startswith(b"Content-Length: "):
         lenStr = line[16:]
@@ -188,13 +209,7 @@ def readCommandRequest(cl):
       print("WARNING: max timeout reading from socket exceeded")
       break
 
-  cmdArr = data.split(b'=', 1)
-  cmd = cmdArr[0].decode("utf8")
-  val = None
-  if len(cmdArr) == 2:
-    val = cmdArr[1].decode("utf8")
-
-  return (cmd, val)
+  return (cmd, params, data)
 
 def readLastRotationDegrees():
   return readFileInt("last-rotation-degrees.txt")
