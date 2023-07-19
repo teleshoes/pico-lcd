@@ -71,7 +71,12 @@ my $USAGE = "Usage:
     --clear
       if TEXT is empty:
         -run: curl http://<IP_ADDRESS>/clear
-    --noclear
+      if multiple messages (e.g.: with --lines):
+        send clear=true for first message, clear=false for others
+      otherwise:
+        send clear=true with text
+    --no-clear | --noclear
+        always send clear=false with all messages
 
     --color=COLOR
       prefix all TEXT with '!color=COLOR!'
@@ -90,7 +95,7 @@ my $USAGE = "Usage:
 
     --buttons
       fetch button press counts and print them
-      (implies --noclear, give --clear again to clear)
+      (implies --no-clear, give --clear again to clear)
 
     --lcd-width=WIDTH_PX
       select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
@@ -145,7 +150,7 @@ sub main(@){
       $orient = $1;
     }elsif($arg =~ /^(--clear)$/){
       $isClear = 1;
-    }elsif($arg =~ /^(--no-clear)$/){
+    }elsif($arg =~ /^(--no-clear|--noclear)$/){
       $isClear = 0;
     }elsif($arg =~ /^--text=(.+)$/){
       $text = $1;
@@ -299,15 +304,15 @@ sub main(@){
 
     print "$msg\n" unless $quiet;
 
-    my $cmd = "text";
-    if($i < $#messages){
-      $cmd .= "buf"; #do not call show until last message
-    }
-    if($i == 0 and $isClear){
-      $cmd = "c$cmd"; #do ctext* to clear before adding text to buffer
-    }
+    #clear() on the first message unless --no-clear
+    my $clear = ($isClear and $i == 0) ? "true" : "false";
 
-    system "curl", "--no-progress-meter", "http://$ipAddr/$cmd", "--data", "$msg";
+    #do not show() until last message
+    my $show = $i < $#messages ? "false" : "true";
+
+    system "curl", "--no-progress-meter",
+      "http://$ipAddr/text?clear=$clear&show=$show",
+      "--data", "$msg";
   }
 }
 
