@@ -131,13 +131,21 @@ def main():
         if degrees != None:
           lcd.setRotationDegrees(degrees)
           writeLastRotationDegrees(lcd.getRotationDegrees())
-      elif cmd == "text" or cmd == "ctext" or cmd == "textbuf" or cmd == "ctextbuf":
+      elif cmd == "text":
         val = data.decode("utf8")
         print("text: " + val)
-        if cmd == "ctext" or cmd == "ctextbuf":
+
+        isClear = True
+        if "clear" in params and params["clear"].lower() == "false":
+          isClear = False
+
+        isShow = True
+        if "show" in params and params["show"].lower() == "false":
+          isShow = False
+        if isClear:
           lcd.fill(lcd.black)
         lcdFont.drawMarkup(val)
-        if cmd == "text" or cmd == "ctext":
+        if isShow:
           lcd.show()
       else:
         raise(Exception("ERROR: could not parse payload"))
