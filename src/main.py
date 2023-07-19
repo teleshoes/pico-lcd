@@ -105,18 +105,23 @@ def main():
       out = ""
 
       if cmd == "clear":
-        lcd.fillShow(lcd.black)
         print("clear")
+        lcd.fillShow(lcd.black)
       elif cmd == "show":
+        print("show")
         lcd.show()
       elif cmd == "buttons":
+        print("buttons")
         for btnName in sorted(controller['btnCount']):
           if len(out) > 0:
             out += ", "
           out += btnName + "=" + str(controller['btnCount'][btnName])
         out += "\n"
       elif cmd == "orient" or cmd == "rotation":
-        val = params['orient']
+        val = None
+        if 'orient' in params:
+          val = params['orient']
+        print("orient=" + str(val))
 
         degrees = None
         if val == "landscape" or val == "0" or val == "normal" or val == "default":
