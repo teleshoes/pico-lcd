@@ -37,10 +37,10 @@ class LcdFont:
       self.ready = False
 
   def getCharGridWidth(self, size):
-    return int( self.lcd.width / ((self.fontWidth+1)*size))
+    return int(self.lcd.get_width() / ((self.fontWidth+1)*size))
 
   def getCharGridHeight(self, size):
-    return int(self.lcd.height / ((self.fontHeight+1)*size))
+    return int(self.lcd.get_height() / ((self.fontHeight+1)*size))
 
   def getFontCharBytes(self, charStr):
     asciiIndex = ord(charStr)
