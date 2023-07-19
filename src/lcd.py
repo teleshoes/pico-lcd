@@ -61,22 +61,22 @@ class LCD():
 
     gc.collect()
     try:
-      (bufW, bufH) = self.getFramebufSize()
+      (bufW, bufH) = self.get_framebuf_size()
       self.buffer = bytearray(bufW * bufH * 2)
     except:
       print("WARNING: COULD NOT ALLOCATE BUFFER, DISABLING FRAMEBUF\n")
       self.buffer = None
 
-    self.initFramebuf()
+    self.init_framebuf()
 
-    self.initColors()
+    self.init_colors()
 
-  def getWidth(self):
+  def get_width(self):
     return self.rotCfg['W']
-  def getHeight(self):
+  def get_height(self):
     return self.rotCfg['H']
 
-  def getFramebufSize(self):
+  def get_framebuf_size(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
     if self.framebufMaxW != None and bufW > self.framebufMaxW:
@@ -85,9 +85,9 @@ class LCD():
       bufH = self.framebufMaxH
     return (bufW, bufH)
 
-  def initFramebuf(self):
+  def init_framebuf(self):
     if self.buffer != None:
-      (bufW, bufH) = self.getFramebufSize()
+      (bufW, bufH) = self.get_framebuf_size()
       self.framebuf = framebuf.FrameBuffer(
         self.buffer, bufW, bufH, framebuf.RGB565)
 
@@ -95,7 +95,7 @@ class LCD():
     else:
       self.framebuf = None
 
-  def initColors(self):
+  def init_colors(self):
     if self.framebuf == None:
       #RGB565
       self.red   = st7789.RED
@@ -105,37 +105,37 @@ class LCD():
       self.black = st7789.BLACK
     else:
       #byte order swapped in framebuf
-      self.red   = self.swapHiLoByteOrder(st7789.RED)
-      self.green = self.swapHiLoByteOrder(st7789.GREEN)
-      self.blue  = self.swapHiLoByteOrder(st7789.BLUE)
-      self.white = self.swapHiLoByteOrder(st7789.WHITE)
-      self.black = self.swapHiLoByteOrder(st7789.BLACK)
+      self.red   = self.swap_hi_lo_byte_order(st7789.RED)
+      self.green = self.swap_hi_lo_byte_order(st7789.GREEN)
+      self.blue  = self.swap_hi_lo_byte_order(st7789.BLUE)
+      self.white = self.swap_hi_lo_byte_order(st7789.WHITE)
+      self.black = self.swap_hi_lo_byte_order(st7789.BLACK)
 
-  def swapHiLoByteOrder(self, h):
+  def swap_hi_lo_byte_order(self, h):
     bHi = h >> 8
     bLo = h & 0xff
     return (bLo << 8) | (bHi & 0xff)
 
-  def getRotationDegrees(self):
+  def get_rotation_degrees(self):
     return self.rotCfg['DEG']
 
-  def setRotationDegrees(self, degrees):
+  def set_rotation_degrees(self, degrees):
     for rotationIdx in range(0, len(self.layouts)):
       if self.layouts[rotationIdx]['DEG'] == degrees:
-        self.setRotationIdx(rotationIdx)
+        self.set_rotation_index(rotationIdx)
         break
 
-  def setRotationNext(self):
-    self.setRotationIdx((self.rotationIdx + 1) % len(self.layouts))
+  def set_rotation_next(self):
+    self.set_rotation_index((self.rotationIdx + 1) % len(self.layouts))
 
-  def setRotationIdx(self, rotationIdx):
+  def set_rotation_index(self, rotationIdx):
     self.rotationIdx = rotationIdx
     self.rotCfg = self.layouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
 
     if self.framebufMaxW != None or self.framebufMaxH != None:
       self.fill_mem_blank()
-    self.initFramebuf()
+    self.init_framebuf()
     self.show()
 
   def fill(self, color):
@@ -275,7 +275,7 @@ class LCD():
         print("WARNING: 'rotateRad' is not implemented in poly() for framebuf")
       self.framebuf.poly(x, y, coords, color, fill)
 
-  def fillShow(self, color):
+  def fill_show(self, color):
     self.fill(color)
     self.show()
 
@@ -303,7 +303,7 @@ class LCD():
     buf = None
 
   def set_full_window(self):
-    (bufW, bufH) = self.getFramebufSize()
+    (bufW, bufH) = self.get_framebuf_size()
     xStart = self.rotCfg['X']
     xEnd = bufW + self.rotCfg['X'] - 1
     yStart = self.rotCfg['Y']

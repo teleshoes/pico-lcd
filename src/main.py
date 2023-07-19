@@ -49,8 +49,8 @@ def buttonPressed(pin, btnName, controller):
   controller['btnCount'][btnName] += 1
 
   if btnName == "B2" or btnName == "A":
-    controller['lcd'].setRotationNext()
-    writeLastRotationDegrees(controller['lcd'].getRotationDegrees())
+    controller['lcd'].set_rotation_next()
+    writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
 
 
 def main():
@@ -58,7 +58,7 @@ def main():
 
   degrees = readLastRotationDegrees()
   if degrees != None:
-    lcd.setRotationDegrees(degrees)
+    lcd.set_rotation_degrees(degrees)
 
   lcdFont = LcdFont('font5x8.bin', lcd)
   lcdFont.setup()
@@ -82,7 +82,7 @@ def main():
       lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
     ))
 
-  lcd.fillShow(lcd.black)
+  lcd.fill_show(lcd.black)
 
   lcdFont.markup(""
     + "!size=4!!color=green!"             + "CONNECTED\n"
@@ -106,7 +106,7 @@ def main():
 
       if cmd == "clear":
         print("clear")
-        lcd.fillShow(lcd.black)
+        lcd.fill_show(lcd.black)
       elif cmd == "show":
         print("show")
         lcd.show()
@@ -134,8 +134,8 @@ def main():
           degrees = 90
 
         if degrees != None:
-          lcd.setRotationDegrees(degrees)
-          writeLastRotationDegrees(lcd.getRotationDegrees())
+          lcd.set_rotation_degrees(degrees)
+          writeLastRotationDegrees(lcd.get_rotation_degrees())
       elif cmd == "text":
         val = data.decode("utf8")
         print("text: " + val)

@@ -70,7 +70,7 @@ class LcdFont:
     if color == None:
       color = self.defaultColor
     self.lcd.hline(self.cursor['startX'], self.cursor['y'],
-      self.lcd.getWidth(), color)
+      self.lcd.get_width(), color)
     self.cursor['x'] = self.cursor['startX']
     self.cursor['y'] += 1
   def cursorDrawText(self, text):
