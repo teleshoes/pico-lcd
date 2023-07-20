@@ -113,6 +113,17 @@ def main():
       elif cmd == "show":
         print("show")
         lcd.show()
+      elif cmd == "framebuf":
+        enabled = maybeGetParamBool(params, "enabled", True)
+        maxW = maybeGetParamInt(params, "maxwidth", None)
+        maxH = maybeGetParamInt(params, "maxheight", None)
+        if maxW == 0:
+          maxW = None
+        if maxH == 0:
+          maxH = None
+        lcd.set_framebuf_enabled(enabled, maxW, maxH)
+        out = "framebuf: enabled=%s maxW=%s maxH=%s\n" % (
+          lcd.framebufEnabled, lcd.framebufMaxWidth, lcd.framebufMaxHeight)
       elif cmd == "buttons":
         print("buttons")
         for btnName in sorted(controller['btnCount']):
@@ -170,6 +181,35 @@ def main():
           cl.close()
       except:
         pass
+
+def maybeGetParamStr(params, paramName, defaultValue=None):
+  if paramName in params:
+    return params[paramName]
+  else:
+    return defaultValue
+
+def maybeGetParamBool(params, paramName, defaultValue=None):
+  val = maybeGetParamStr(params, paramName, None)
+  if val == None:
+    return defaultValue
+  elif val.lower() == "true":
+    return True
+  elif val.lower() == "false":
+    return False
+  else:
+    print("WARNING: could not parse bool param " + paramName + "=" + val + "\n")
+    return defaultValue
+
+def maybeGetParamInt(params, paramName, defaultValue=None):
+  val = maybeGetParamStr(params, paramName, None)
+  if val == None:
+    return defaultValue
+  else:
+    try:
+      return int(val)
+    except:
+      print("WARNING: could not parse int param " + paramName + "=" + val + "\n")
+      return defaultValue
 
 def readCommandRequest(cl):
   cl.settimeout(0.25)
