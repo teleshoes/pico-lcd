@@ -56,7 +56,8 @@ def buttonPressed(pin, btnName, controller):
 
 
 def main():
-  lcd = LCD(LCD_CONF["layouts"], FRAMEBUF_MAX_W, FRAMEBUF_MAX_H)
+  lcd = LCD(LCD_CONF["layouts"])
+  lcd.set_framebuf_enabled(True, maxWidth=FRAMEBUF_MAX_W, maxHeight=FRAMEBUF_MAX_H)
 
   degrees = readLastRotationDegrees()
   if degrees != None:

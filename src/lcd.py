@@ -18,12 +18,16 @@ MADCTL_MH  = 0 #0:refresh-left-to-right  1:refresh-right-to-left
 MADCTL_RGB = 0 #0:RGB                    1:BGR
 
 class LCD():
-  def __init__(self, layouts, framebufMaxW=None, framebufMaxH=None):
+  def __init__(self, layouts):
     self.layouts = layouts
     self.rotationIdx = 0
-    self.framebufMaxW = framebufMaxW
-    self.framebufMaxH = framebufMaxH
     self.rotCfg = self.layouts[self.rotationIdx]
+
+    self.framebufEnabled = False
+    self.buffer = None
+    self.framebuf = None
+    self.framebufMaxWidth = None
+    self.framebufMaxHeight = None
 
     self.rotationsArr = []
     for i in range(0, len(self.layouts)):
@@ -56,34 +60,45 @@ class LCD():
     # blank entire memory, not just display size
     self.fill_mem_blank()
 
-    self.buffer = None
-    self.framebuf = None
-
-    gc.collect()
-    try:
-      (bufW, bufH) = self.get_framebuf_size()
-      self.buffer = bytearray(bufW * bufH * 2)
-    except:
-      print("WARNING: COULD NOT ALLOCATE BUFFER, DISABLING FRAMEBUF\n")
-      self.buffer = None
-
-    self.init_framebuf()
-
-    self.init_colors()
-
   def get_width(self):
     return self.rotCfg['W']
   def get_height(self):
     return self.rotCfg['H']
 
+  def set_framebuf_enabled(self, isEnabled, maxWidth=None, maxHeight=None):
+   self.framebufEnabled = isEnabled
+   self.framebufMaxWidth = maxWidth
+   self.framebufMaxHeight = maxHeight
+
+   if not self.framebufEnabled:
+     self.buffer = None
+     self.framebuf = None
+   else:
+     self.create_buffer()
+     self.init_framebuf()
+     self.init_colors()
+
   def get_framebuf_size(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
-    if self.framebufMaxW != None and bufW > self.framebufMaxW:
-      bufW = self.framebufMaxW
-    if self.framebufMaxH != None and bufH > self.framebufMaxH:
-      bufH = self.framebufMaxH
+    if self.framebufMaxWidth != None and bufW > self.framebufMaxWidth:
+      bufW = self.framebufMaxWidth
+    if self.framebufMaxHeight != None and bufH > self.framebufMaxHeight:
+      bufH = self.framebufMaxHeight
     return (bufW, bufH)
+
+  def create_buffer(self):
+    (bufW, bufH) = self.get_framebuf_size()
+    framebufSizeBytes = bufW * bufH * 2
+
+    if self.buffer == None or len(self.buffer) != framebufSizeBytes:
+      gc.collect()
+      try:
+        self.buffer = bytearray(framebufSizeBytes)
+      except Exception as e:
+        print(str(e))
+        print("WARNING: COULD NOT ALLOCATE BUFFER, DISABLING FRAMEBUF\n")
+        self.set_framebuf_enabled(False)
 
   def init_framebuf(self):
     if self.buffer != None:
@@ -133,8 +148,10 @@ class LCD():
     self.rotCfg = self.layouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
 
-    if self.framebufMaxW != None or self.framebufMaxH != None:
+    # if framebuf is not the entire screen, blank the entire screen
+    if self.framebufMaxWidth != None or self.framebufMaxHeight != None:
       self.fill_mem_blank()
+
     self.init_framebuf()
     self.show()
 
