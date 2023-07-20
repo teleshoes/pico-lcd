@@ -91,7 +91,7 @@ class LCD():
       self.framebuf = framebuf.FrameBuffer(
         self.buffer, bufW, bufH, framebuf.RGB565)
 
-      self.set_full_window()
+      self.set_window_to_framebuf()
     else:
       self.framebuf = None
 
@@ -302,12 +302,15 @@ class LCD():
       self.write_data(buf)
     buf = None
 
-  def set_full_window(self):
+  def set_window_to_framebuf(self):
     (bufW, bufH) = self.get_framebuf_size()
-    xStart = self.rotCfg['X']
-    xEnd = bufW + self.rotCfg['X'] - 1
-    yStart = self.rotCfg['Y']
-    yEnd = bufH + self.rotCfg['Y'] - 1
+    self.set_window_with_rotation_offset(0, 0, bufW, bufH)
+
+  def set_window_with_rotation_offset(self, x, y, w, h):
+    xStart = self.rotCfg['X'] + x
+    xEnd = w + self.rotCfg['X'] + x - 1
+    yStart = self.rotCfg['Y'] + y
+    yEnd = h + self.rotCfg['Y'] + y - 1
 
     self.set_window(xStart, xEnd, yStart, yEnd)
 
