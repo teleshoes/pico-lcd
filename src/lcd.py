@@ -294,11 +294,15 @@ class LCD():
     self.cs(1)
 
   def fill_mem_blank(self):
-    self.set_window(0, 320, 0, 240)
+    numberOfChunks = 32
+    memWidth = 320
+    memHeight = 240
+
+    self.set_window(0, memWidth, 0, memHeight)
     self.write_cmd(0x2C)
 
-    buf = bytearray(int(320*240*2 / 32))
-    for i in range(0, 32):
+    buf = bytearray(int(memWidth*memHeight*2 / numberOfChunks))
+    for i in range(0, numberOfChunks):
       self.write_data(buf)
     buf = None
 
