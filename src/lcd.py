@@ -294,7 +294,7 @@ class LCD():
     self.cs(1)
 
   def fill_mem_blank(self):
-    numberOfChunks = 32
+    numberOfChunks = 256
     memWidth = 320
     memHeight = 240
 
