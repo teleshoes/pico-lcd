@@ -92,7 +92,10 @@ class LCD():
     framebufSizeBytes = bufW * bufH * 2
 
     if self.buffer == None or len(self.buffer) != framebufSizeBytes:
+      self.framebuf = None
+      self.buffer = None
       gc.collect()
+
       try:
         self.buffer = bytearray(framebufSizeBytes)
       except Exception as e:
