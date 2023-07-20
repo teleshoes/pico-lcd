@@ -10,27 +10,29 @@ import machine
 from lcd import LCD
 from lcdFont import LcdFont
 
-LCD_CONF_1_3 = {
-  "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
-              'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
-  "layouts": [
-    {'DEG':  0, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
-    {'DEG': 90, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
-    {'DEG':180, 'W':240, 'H':240, 'X': 80, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
-    {'DEG':270, 'W':240, 'H':240, 'X':  0, 'Y': 80, 'MY':1, 'MX':1, 'MV':0},
-  ],
-}
-LCD_CONF_2_0 = {
-  "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
-  "layouts": [
-    {'DEG':  0, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
-    {'DEG': 90, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
-    {'DEG':180, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
-    {'DEG':270, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
-  ],
+LCD_CONFS = {
+  "1_3": {
+    "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
+                'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
+    "layouts": [
+      {'DEG':  0, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
+      {'DEG': 90, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
+      {'DEG':180, 'W':240, 'H':240, 'X': 80, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
+      {'DEG':270, 'W':240, 'H':240, 'X':  0, 'Y': 80, 'MY':1, 'MX':1, 'MV':0},
+    ],
+  },
+  "2_0": {
+    "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
+    "layouts": [
+      {'DEG':  0, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
+      {'DEG': 90, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
+      {'DEG':180, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
+      {'DEG':270, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
+    ],
+  },
 }
 
-LCD_CONF = LCD_CONF_1_3
+LCD_CONF = LCD_CONFS['1_3']
 
 #use only a portion of the screen for framebuf
 FRAMEBUF_MAX_W = None
