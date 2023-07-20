@@ -38,11 +38,13 @@ FRAMEBUF_MAX_H = None
 
 
 def buttonPressed(pin, btnName, controller):
-  #debounce 0.1s
+  #debounce 0.25s
   nowTicks = time.ticks_ms()
   lastPress = controller['btnLastPress'][btnName]
-  if lastPress != None and time.ticks_diff(nowTicks, lastPress) < 100:
-    return
+  if lastPress != None:
+    diff = time.ticks_diff(nowTicks, lastPress)
+    if diff < 250:
+      return
   controller['btnLastPress'][btnName] = nowTicks
 
   print("PRESSED: " + btnName + " " + str(pin))
