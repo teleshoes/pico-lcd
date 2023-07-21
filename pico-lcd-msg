@@ -23,6 +23,8 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
+  $EXEC [OPTS] text   TEXT
+  $EXEC [OPTS] --text TEXT
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -run: curl http://<IP_ADDRESS>/text --data 'TEXT'
@@ -167,6 +169,9 @@ sub main(@){
       $devName = $1;
     }elsif($arg =~ /^(--default-dev|--any-dev)$/){
       $devName = undef;
+    }elsif($arg =~ /^(--text|text)$/ and @_ > 0 and not defined $mode){
+      $text = shift @_;
+      $mode = $MODE_TEXT;
     }elsif($arg =~ /^--text=(.+)$/ and not defined $mode){
       $text = $1;
       $mode = $MODE_TEXT;
