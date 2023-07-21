@@ -66,6 +66,8 @@ def main():
 
   controller['lcdName'] = DEFAULT_LCD_NAME
   controller['lcd'] = createLCD(controller['lcdName'])
+  controller['buttons'] = createButtons(controller['lcdName'])
+  addButtonHandlers(controller['buttons'], controller)
 
   controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'])
   controller['lcdFont'].setup()
@@ -73,17 +75,6 @@ def main():
   controller['wlan'] = connectToWifi(controller['lcdFont'])
 
   controller['socket'] = getSocket()
-
-  lcdConf = LCD_CONFS[controller['lcdName']]
-  controller['buttons'] = {'lastPress': {}, 'count': {}}
-  for btnName in lcdConf['buttons']:
-    gpioPin = lcdConf['buttons'][btnName]
-    controller['buttons']['lastPress'][btnName] = None
-    controller['buttons']['count'][btnName] = 0
-    pin = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
-    pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
-      lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
-    ))
 
   controller['lcd'].fill_show(controller['lcd'].black)
 
@@ -195,6 +186,26 @@ def createLCD(lcdName):
   if degrees != None:
     lcd.set_rotation_degrees(degrees)
   return lcd
+
+def createButtons(lcdName):
+  buttons = {'pins': {}, 'lastPress': {}, 'count': {}}
+
+  lcdConf = LCD_CONFS[lcdName]
+  for btnName in lcdConf['buttons']:
+    gpioPin = lcdConf['buttons'][btnName]
+    buttons['lastPress'][btnName] = None
+    buttons['count'][btnName] = 0
+    buttons['pins'][btnName] = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
+
+  return buttons
+
+def addButtonHandlers(buttons, controller):
+  if buttons != None:
+    for btnName in buttons['pins']:
+      pin = buttons['pins'][btnName]
+      pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
+        lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
+      ))
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
   if paramName in params:
