@@ -23,6 +23,20 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
+  $EXEC [OPTS] --text=TEXT
+    -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
+    -run: curl http://<IP_ADDRESS>/text --data 'TEXT'
+
+  $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
+    -combine WORD_OR_FILE args into TEXT
+      -if WORD_OR_FILE is a file:
+        -append contents of WORD_OR_FILE to TEXT
+      -otherwise:
+        -replace '\\n' with literal newline in WORD_OR_FILE
+        -if TEXT is not empty, append a space character
+        -append ARG to TEXT
+    -same as: $EXEC --text=TEXT
+
   $EXEC [OPTS] cmd   CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
   $EXEC [OPTS] --cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
   $EXEC [OPTS] --cmd=CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
@@ -55,21 +69,10 @@ my $USAGE = "Usage:
           inverted-portrait | 90
             set rotateion to 90 degrees
 
-  $EXEC [OPTS] --text=TEXT
-    -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
-    -run: curl http://<IP_ADDRESS>/text --data 'TEXT'
-
-  $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
-    -combine WORD_OR_FILE args into TEXT
-      -if WORD_OR_FILE is a file:
-        -append contents of WORD_OR_FILE to TEXT
-      -otherwise:
-        -replace '\\n' with literal newline in WORD_OR_FILE
-        -if TEXT is not empty, append a space character
-        -append ARG to TEXT
-    -same as: $EXEC --text=TEXT
-
   OPTS
+    -q | --quiet
+      do not print messages sent with curl
+
     --ip=IP_ADDRESS
       use IP_ADDRESS in calls to curl
     --dev=DEV_NAME
@@ -81,9 +84,6 @@ my $USAGE = "Usage:
       -find first line that matches any device: DEV_NAME = IP_ADDRESS
       -same as: --ip=IP_ADDRESS
       (this is the default)
-
-    -q | --quiet
-      do not print messages sent with curl
 
     --clear-text
       when setting text, clear the screen first
