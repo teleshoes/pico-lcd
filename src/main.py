@@ -355,7 +355,7 @@ def readLastFramebufConf():
   enabled = True
   if val != None:
     arr = val.split(" ")
-    if len(arr) == 3:
+    if len(arr) == 5:
       enabledStr = arr[0]
       if enabledStr == "true":
         enabled = True
