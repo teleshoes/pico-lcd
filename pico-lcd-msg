@@ -27,7 +27,13 @@ my $USAGE = "Usage:
   $EXEC [OPTS] --text TEXT
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
-    -run: curl http://<IP_ADDRESS>/text --data 'TEXT'
+    -modify TEXT with markup
+      -see: --color/--size/--hspace/--vspace/--x/--y/--lcd-width/--lcd-height
+    -possibly split text into lines, add x/y markup, and run curl for each line
+      -see: --lines/--no-lines/--lines-big-only
+    -set CLEAR to 'true' or 'false' based on --clear-text/--no-clear-text
+    -otherwise:
+      -run: curl 'http://<IP_ADDRESS>/text?clear=<CLEAR>&show=true' --data '<TEXT>'
 
   $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
     -NOTE: the first WORD_OR_FILE cannot start with '-'
