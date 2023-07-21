@@ -125,7 +125,7 @@ my $USAGE = "Usage:
 my $MODE_TEXT = "text";
 
 sub main(@){
-  my $mode = $MODE_TEXT;
+  my $mode = undef;
   my $ipAddr = undef;
   my $quiet = 0;
   my $devName = undef;
@@ -144,7 +144,7 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(-q|--quiet)$/){
       $quiet = 1;
-    }elsif($arg =~ /^(clear)$/ and $text eq ""){
+    }elsif($arg =~ /^(clear)$/ and not defined $mode){
       $isClear = 1;
     }elsif($arg =~ /^(-b|--buttons)$/){
       $isButtons = 1;
@@ -155,7 +155,7 @@ sub main(@){
       $isClear = 1;
     }elsif($arg =~ /^(--no-clear|--noclear)$/){
       $isClear = 0;
-    }elsif($arg =~ /^--text=(.+)$/){
+    }elsif($arg =~ /^--text=(.+)$/ and not defined $mode){
       $text = $1;
       $mode = $MODE_TEXT;
     }elsif($arg =~ /^--ip=(.+)$/){
@@ -186,16 +186,18 @@ sub main(@){
       $x = $1;
     }elsif($arg =~ /^--y=(.+)$/){
       $y = $1;
-    }elsif(-f $arg){
+    }elsif(-f $arg and (not defined $mode or $mode eq $MODE_TEXT)){
       open FH, "< $arg" or die "ERROR: could not read $arg\n$!\n";
       my $contents = join '', <FH>;
       close FH;
       $text .= $contents;
       $mode = $MODE_TEXT;
-    }else{
+    }elsif(not defined $mode or $mode eq $MODE_TEXT){
       $text .= " " if $text ne "";
       $text .= $arg;
       $mode = $MODE_TEXT;
+    }else{
+      die "ERROR: unknown arg $arg\n";
     }
   }
 
@@ -215,6 +217,8 @@ sub main(@){
       die "ERROR: could not find IP address for $dev in $DEVICE_CONFIG_FILE\n";
     }
   }
+
+  $mode = $MODE_TEXT if not defined $mode;
 
   if($mode eq $MODE_TEXT){
     my $charsTotal = length $text;
