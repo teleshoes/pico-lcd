@@ -186,13 +186,19 @@ class LCD():
     self.set_rotation_index((self.rotationIdx + 1) % len(self.layouts))
 
   def set_rotation_index(self, rotationIdx):
+    wasLandscape = self.rotCfg['W'] >= self.rotCfg['H']
     self.rotationIdx = rotationIdx
     self.rotCfg = self.layouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
+    isLandscape = self.rotCfg['W'] >= self.rotCfg['H']
 
     # if framebuf is not the entire screen, blank the entire screen
     if self.framebufMaxWidth != None or self.framebufMaxHeight != None:
       self.fill_mem_blank()
+      if wasLandscape != isLandscape and self.buffer != None:
+        # if framebuf is not a square, clear buffer to prevent garbage (rows/cols transposed)
+        if self.framebufMaxWidth != self.framebufMaxHeight:
+          self.fill(0)
 
     self.init_framebuf()
     self.show()
