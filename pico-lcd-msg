@@ -59,6 +59,10 @@ my $USAGE = "Usage:
     clear the LCD
       -same as: $EXEC [OPTS] --cmd clear
 
+  $EXEC [OPTS] show | --show
+    show the framebuffer, if any
+      -same as: $EXEC [OPTS] --cmd show
+
   $EXEC [OPTS] buttons | --buttons
     fetch button press counts and print them
       -same as: $EXEC [OPTS] --cmd buttons
@@ -199,6 +203,9 @@ sub main(@){
       }
     }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
       $cmd = "clear";
+      $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--show|show)$/ and not defined $mode){
+      $cmd = "show";
       $mode = $MODE_CMD;
     }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
       $cmd = "buttons";
