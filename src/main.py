@@ -58,25 +58,25 @@ def buttonPressed(pin, btnName, controller):
 
 
 def main():
-  lcd = LCD(LCD_CONF["layouts"])
-  lcd.set_framebuf_enabled(True, maxWidth=FRAMEBUF_MAX_W, maxHeight=FRAMEBUF_MAX_H)
+  controller = {
+    'btnLastPress': {}, 'btnCount': {},
+    'lcd': None, 'lcdFont': None,
+    'wlan': None, 'socket': None
+  }
+
+  controller['lcd'] = LCD(LCD_CONF["layouts"])
+  controller['lcd'].set_framebuf_enabled(True, maxWidth=FRAMEBUF_MAX_W, maxHeight=FRAMEBUF_MAX_H)
 
   degrees = readLastRotationDegrees()
   if degrees != None:
-    lcd.set_rotation_degrees(degrees)
+    controller['lcd'].set_rotation_degrees(degrees)
 
-  lcdFont = LcdFont('font5x8.bin', lcd)
-  lcdFont.setup()
+  controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'])
+  controller['lcdFont'].setup()
 
-  wlan = connectToWifi(lcdFont)
+  controller['wlan'] = connectToWifi(controller['lcdFont'])
 
-  s = getSocket()
-
-  controller = {
-    'btnLastPress': {}, 'btnCount': {},
-    'lcd': lcd, 'lcdFont': lcdFont,
-    'wlan': wlan, 'socket': s
-  }
+  controller['socket'] = getSocket()
 
   for btnName in LCD_CONF['buttons']:
     gpioPin = LCD_CONF['buttons'][btnName]
@@ -87,14 +87,14 @@ def main():
       lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
     ))
 
-  lcd.fill_show(lcd.black)
+  controller['lcd'].fill_show(controller['lcd'].black)
 
-  lcdFont.markup(""
+  controller['lcdFont'].markup(""
     + "!size=4!!color=green!"             + "CONNECTED\n"
     + "!size=3!!color=blue!"              + "\nlistening on:\n"
-    + "!size=3!!color=green!!hspace=0.7!" + wlan.ifconfig()[0]
+    + "!size=3!!color=green!!hspace=0.7!" + controller['wlan'].ifconfig()[0]
   )
-  lcd.show()
+  controller['lcd'].show()
 
   while True:
     try:
@@ -102,7 +102,7 @@ def main():
       mem = gc.mem_free()
       gc.collect()
 
-      cl, addr = s.accept()
+      cl, addr = controller['socket'].accept()
       print('client connected from', addr)
 
       (cmd, params, data) = readCommandRequest(cl)
@@ -111,10 +111,10 @@ def main():
 
       if cmd == "clear":
         print("clear")
-        lcd.fill_show(lcd.black)
+        controller['lcd'].fill_show(controller['lcd'].black)
       elif cmd == "show":
         print("show")
-        lcd.show()
+        controller['lcd'].show()
       elif cmd == "framebuf":
         enabled = maybeGetParamBool(params, "enabled", True)
         maxW = maybeGetParamInt(params, "maxwidth", None)
@@ -123,9 +123,11 @@ def main():
           maxW = None
         if maxH == 0:
           maxH = None
-        lcd.set_framebuf_enabled(enabled, maxW, maxH)
+        controller['lcd'].set_framebuf_enabled(enabled, maxW, maxH)
         out = "framebuf: enabled=%s maxW=%s maxH=%s\n" % (
-          lcd.framebufEnabled, lcd.framebufMaxWidth, lcd.framebufMaxHeight)
+          controller['lcd'].framebufEnabled,
+          controller['lcd'].framebufMaxWidth,
+          controller['lcd'].framebufMaxHeight)
       elif cmd == "buttons":
         print("buttons")
         for btnName in sorted(controller['btnCount']):
@@ -150,8 +152,8 @@ def main():
           degrees = 90
 
         if degrees != None:
-          lcd.set_rotation_degrees(degrees)
-          writeLastRotationDegrees(lcd.get_rotation_degrees())
+          controller['lcd'].set_rotation_degrees(degrees)
+          writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
       elif cmd == "text":
         val = data.decode("utf8")
         print("text: " + val)
@@ -164,10 +166,10 @@ def main():
         if "show" in params and params["show"].lower() == "false":
           isShow = False
         if isClear:
-          lcd.fill(lcd.black)
-        lcdFont.drawMarkup(val)
+          controller['lcd'].fill(controller['lcd'].black)
+        controller['lcdFont'].drawMarkup(val)
         if isShow:
-          lcd.show()
+          controller['lcd'].show()
       else:
         raise(Exception("ERROR: could not parse payload"))
 
@@ -177,7 +179,7 @@ def main():
     except Exception as e:
       try:
         print(e)
-        lcdFont.text("MSG\nFAILED", size=5, color=lcd.red)
+        controller['lcdFont'].text("MSG\nFAILED", size=5, color=controller['lcd'].red)
         if cl != None:
           cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
           cl.close()
