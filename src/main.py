@@ -34,10 +34,6 @@ LCD_CONFS = {
 
 DEFAULT_LCD_NAME = "1_3"
 
-#use only a portion of the screen for framebuf
-DEFAULT_FRAMEBUF_MAX_W = None
-DEFAULT_FRAMEBUF_MAX_H = None
-
 def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
     controller['lcd'].set_rotation_next()
@@ -116,6 +112,10 @@ def main():
         if maxH == 0:
           maxH = None
         controller['lcd'].set_framebuf_enabled(enabled, maxW, maxH)
+        writeLastFramebufConf(
+          controller['lcd'].framebufEnabled,
+          controller['lcd'].framebufMaxWidth,
+          controller['lcd'].framebufMaxHeight)
         out = "framebuf: enabled=%s maxW=%s maxH=%s\n" % (
           controller['lcd'].framebufEnabled,
           controller['lcd'].framebufMaxWidth,
@@ -181,9 +181,8 @@ def main():
 def createLCD(lcdName):
   layouts = LCD_CONFS[lcdName]["layouts"]
   lcd = LCD(layouts)
-  lcd.set_framebuf_enabled(True,
-    maxWidth=DEFAULT_FRAMEBUF_MAX_W,
-    maxHeight=DEFAULT_FRAMEBUF_MAX_H)
+  (enabled, maxW, maxH) = readLastFramebufConf()
+  lcd.set_framebuf_enabled(enabled, maxW, maxH)
 
   degrees = readLastRotationDegrees()
   if degrees != None:
@@ -329,6 +328,38 @@ def readLastRotationDegrees():
   return readFileInt("last-rotation-degrees.txt")
 def writeLastRotationDegrees(degrees):
   writeFile("last-rotation-degrees.txt", str(degrees) + "\n")
+
+def readLastFramebufConf():
+  val = readFileLine("last-framebuf-conf.txt")
+  (maxW, maxH) = (0, 0)
+  enabled = True
+  if val != None:
+    arr = val.split(" ")
+    if len(arr) == 3:
+      enabledStr = arr[0]
+      if enabledStr == "true":
+        enabled = True
+      elif enabledStr == "false":
+        enabled = False
+      else:
+        enabled = True
+
+      try:
+        (maxW, maxH) = (int(arr[1]), int(arr[2]))
+      except:
+        (maxW, maxH) = (0, 0)
+  if maxW == 0:
+    maxW = None
+  if maxH == 0:
+    maxH = None
+  return (enabled, maxW, maxH)
+def writeLastFramebufConf(enabled, maxW, maxH):
+  if maxW == None:
+    maxW = 0
+  if maxH == None:
+    maxH = 0
+  writeFile("last-framebuf-conf.txt",
+    str(enabled).lower() + " " + str(maxW) + " " + str(maxH))
 
 def readFileInt(file):
   try:
