@@ -30,6 +30,7 @@ my $USAGE = "Usage:
     -run: curl http://<IP_ADDRESS>/text --data 'TEXT'
 
   $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
+    -NOTE: the first WORD_OR_FILE cannot start with '-'
     -combine WORD_OR_FILE args into TEXT
       -if WORD_OR_FILE is a file:
         -append contents of WORD_OR_FILE to TEXT
@@ -233,7 +234,7 @@ sub main(@){
       close FH;
       $text .= $contents;
       $mode = $MODE_TEXT;
-    }elsif(not defined $mode or $mode eq $MODE_TEXT){
+    }elsif($mode eq $MODE_TEXT or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
       $mode = $MODE_TEXT;
