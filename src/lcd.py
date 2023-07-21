@@ -28,6 +28,8 @@ class LCD():
     self.framebuf = None
     self.framebufMaxWidth = None
     self.framebufMaxHeight = None
+    self.framebufOffsetX = None
+    self.framebufOffsetY = None
 
     self.rotationsArr = []
     for i in range(0, len(self.layouts)):
@@ -65,10 +67,14 @@ class LCD():
   def get_height(self):
     return self.rotCfg['H']
 
-  def set_framebuf_enabled(self, isEnabled, maxWidth=None, maxHeight=None):
+  def set_framebuf_enabled(self, isEnabled,
+                           maxWidth=None, maxHeight=None,
+                           offsetX=None, offsetY=None):
    self.framebufEnabled = isEnabled
    self.framebufMaxWidth = maxWidth
    self.framebufMaxHeight = maxHeight
+   self.framebufOffsetX = offsetX
+   self.framebufOffsetY = offsetY
 
    if not self.framebufEnabled:
      self.buffer = None
@@ -342,7 +348,13 @@ class LCD():
 
   def set_window_to_framebuf(self):
     (bufW, bufH) = self.get_framebuf_size()
-    self.set_window_with_rotation_offset(0, 0, bufW, bufH)
+    offsetX = self.framebufOffsetX
+    offsetY = self.framebufOffsetY
+    if offsetX == None:
+      offsetX = 0
+    if offsetY == None:
+      offsetY = 0
+    self.set_window_with_rotation_offset(offsetX, offsetY, bufW, bufH)
 
   def set_window_with_rotation_offset(self, x, y, w, h):
     xStart = self.rotCfg['X'] + x

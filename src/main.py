@@ -123,19 +123,29 @@ def main():
         enabled = maybeGetParamBool(params, "enabled", True)
         maxW = maybeGetParamInt(params, "maxwidth", None)
         maxH = maybeGetParamInt(params, "maxheight", None)
+        offsetX = maybeGetParamInt(params, "x", None)
+        offsetY = maybeGetParamInt(params, "y", None)
         if maxW == 0:
           maxW = None
         if maxH == 0:
           maxH = None
-        controller['lcd'].set_framebuf_enabled(enabled, maxW, maxH)
+        if offsetX == 0:
+          offsetX = None
+        if offsetY == 0:
+          offsetY = None
+        controller['lcd'].set_framebuf_enabled(enabled, maxW, maxH, offsetX, offsetY)
         writeLastFramebufConf(
           controller['lcd'].framebufEnabled,
           controller['lcd'].framebufMaxWidth,
-          controller['lcd'].framebufMaxHeight)
-        out = "framebuf: enabled=%s maxW=%s maxH=%s\n" % (
+          controller['lcd'].framebufMaxHeight,
+          controller['lcd'].framebufOffsetX,
+          controller['lcd'].framebufOffsetY)
+        out = "framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
           controller['lcd'].framebufEnabled,
           controller['lcd'].framebufMaxWidth,
-          controller['lcd'].framebufMaxHeight)
+          controller['lcd'].framebufMaxHeight,
+          controller['lcd'].framebufOffsetX,
+          controller['lcd'].framebufOffsetY)
       elif cmd == "orient" or cmd == "rotation":
         val = maybeGetParamStr(params, "orient", None)
         print("orient=" + val)
@@ -191,8 +201,8 @@ def main():
 def createLCD(lcdName):
   layouts = LCD_CONFS[lcdName]["layouts"]
   lcd = LCD(layouts)
-  (enabled, maxW, maxH) = readLastFramebufConf()
-  lcd.set_framebuf_enabled(enabled, maxW, maxH)
+  (enabled, maxW, maxH, offsetX, offsetY) = readLastFramebufConf()
+  lcd.set_framebuf_enabled(enabled, maxW, maxH, offsetX, offsetY)
 
   degrees = readLastRotationDegrees()
   if degrees != None:
@@ -341,7 +351,7 @@ def writeLastRotationDegrees(degrees):
 
 def readLastFramebufConf():
   val = readFileLine("last-framebuf-conf.txt")
-  (maxW, maxH) = (0, 0)
+  (maxW, maxH, offsetX, offsetY) = (0, 0, 0, 0)
   enabled = True
   if val != None:
     arr = val.split(" ")
@@ -355,21 +365,33 @@ def readLastFramebufConf():
         enabled = True
 
       try:
-        (maxW, maxH) = (int(arr[1]), int(arr[2]))
+        (maxW, maxH, offsetX, offsetY) = (int(arr[1]), int(arr[2]), int(arr[3]), int(arr[4]))
       except:
-        (maxW, maxH) = (0, 0)
+        (maxW, maxH, offsetX, offsetY) = (0, 0, 0, 0)
   if maxW == 0:
     maxW = None
   if maxH == 0:
     maxH = None
-  return (enabled, maxW, maxH)
-def writeLastFramebufConf(enabled, maxW, maxH):
+  if offsetX == 0:
+    offsetX = None
+  if offsetY == 0:
+    offsetY = None
+  return (enabled, maxW, maxH, offsetX, offsetY)
+def writeLastFramebufConf(enabled, maxW, maxH, offsetX, offsetY):
   if maxW == None:
     maxW = 0
   if maxH == None:
     maxH = 0
-  writeFile("last-framebuf-conf.txt",
-    str(enabled).lower() + " " + str(maxW) + " " + str(maxH))
+  if offsetX == None:
+    offsetX = 0
+  if offsetY == None:
+    offsetY = 0
+  fbConfFmt = str(enabled).lower()
+  fbConfFmt += " " + str(maxW)
+  fbConfFmt += " " + str(maxH)
+  fbConfFmt += " " + str(offsetX)
+  fbConfFmt += " " + str(offsetY)
+  writeFile("last-framebuf-conf.txt", fbConfFmt + "\n")
 
 def readFileInt(file):
   try:
