@@ -82,7 +82,8 @@ class LCD():
    else:
      self.create_buffer()
      self.init_framebuf()
-     self.init_colors()
+
+   self.init_colors()
 
   def get_framebuf_size(self):
     bufW = self.rotCfg['W']
