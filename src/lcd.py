@@ -223,11 +223,13 @@ class LCD():
   #                      |   |
   #                      -----
   def transposeBufferRowColCount(self):
+    buf = self.buffer
     (bufW, bufH) = self.get_framebuf_size()
+
     diff = bufW - bufH
     if diff < 0:
       diff = 0 - diff
-    bufferSize = len(self.buffer)
+    bufferSize = bufW * bufH * 2
     if bufW >= bufH:
       #was portrait, now landscape, chop off pixels on the bottom
       for y in reversed(range(0, int(bufH))):
@@ -236,24 +238,24 @@ class LCD():
           idx2 = idx1 - (idx1 // bufW)*diff
 
           if x >= bufH:
-            self.buffer[idx1*2 + 0] = 0
-            self.buffer[idx1*2 + 1] = 0
+            buf[idx1*2 + 0] = 0
+            buf[idx1*2 + 1] = 0
           elif idx2*2 >= 0:
-            self.buffer[idx1*2 + 0] = self.buffer[idx2*2 + 0]
-            self.buffer[idx1*2 + 1] = self.buffer[idx2*2 + 1]
+            buf[idx1*2 + 0] = buf[idx2*2 + 0]
+            buf[idx1*2 + 1] = buf[idx2*2 + 1]
     else:
       #was landscape, now portrait, chop off pixels on the right
-      for y in range(0, int(bufH)):
-        for x in range(0, int(bufW)):
+      for y in range(0, bufH):
+        for x in range(0, bufW):
           idx1 = y*bufW + x
           idx2 = idx1 + (idx1 // bufW)*diff
 
           if idx2*2 + 1 < bufferSize:
-            self.buffer[idx1*2 + 0] = self.buffer[idx2*2 + 0]
-            self.buffer[idx1*2 + 1] = self.buffer[idx2*2 + 1]
+            buf[idx1*2 + 0] = buf[idx2*2 + 0]
+            buf[idx1*2 + 1] = buf[idx2*2 + 1]
           else:
-            self.buffer[idx1*2 + 0] = 0
-            self.buffer[idx1*2 + 1] = 0
+            buf[idx1*2 + 0] = 0
+            buf[idx1*2 + 1] = 0
 
   def fill(self, color):
     if self.framebuf == None:
