@@ -43,16 +43,17 @@ my $USAGE = "Usage:
   $EXEC [OPTS] orient   ORIENT
   $EXEC [OPTS] --orient ORIENT
   $EXEC [OPTS] --orient=ORIENT
-    -same as: $EXEC [OPTS] --cmd orient orient=<ORIENT>
-      ORIENT
-        landscape | 0 | normal | default
-          set rotation to 0 degrees
-        portrait | 270 | -90
-          set rotation to 270 degrees
-        inverted-landscape | 180
-          set rotation to 180 degrees
-        inverted-portrait | 90
-          set rotateion to 90 degrees
+    set the rotation
+      -same as: $EXEC [OPTS] --cmd orient orient=<ORIENT>
+        ORIENT
+          landscape | 0 | normal | default
+            set rotation to 0 degrees
+          portrait | 270 | -90
+            set rotation to 270 degrees
+          inverted-landscape | 180
+            set rotation to 180 degrees
+          inverted-portrait | 90
+            set rotateion to 90 degrees
 
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
