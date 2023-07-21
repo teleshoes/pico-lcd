@@ -203,6 +203,13 @@ def createLCD(lcdName):
   lcd = LCD(layouts)
   (enabled, maxW, maxH, offsetX, offsetY) = readLastFramebufConf()
   lcd.set_framebuf_enabled(enabled, maxW, maxH, offsetX, offsetY)
+  print("LCD init")
+  print("framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
+    lcd.framebufEnabled,
+    lcd.framebufMaxWidth,
+    lcd.framebufMaxHeight,
+    lcd.framebufOffsetX,
+    lcd.framebufOffsetY))
 
   degrees = readLastRotationDegrees()
   if degrees != None:
