@@ -161,15 +161,15 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(-q|--quiet)$/){
       $quiet = 1;
-    }elsif($arg =~ /^--text=(.+)$/ and not defined $mode){
-      $text = $1;
-      $mode = $MODE_TEXT;
     }elsif($arg =~ /^--ip=(.+)$/){
       $ipAddr = $1
     }elsif($arg =~ /^--dev=(\w+)$/){
       $devName = $1;
     }elsif($arg =~ /^(--default-dev|--any-dev)$/){
       $devName = undef;
+    }elsif($arg =~ /^--text=(.+)$/ and not defined $mode){
+      $text = $1;
+      $mode = $MODE_TEXT;
     }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $mode){
       $cmd = shift @_;
       $mode = $MODE_CMD;
