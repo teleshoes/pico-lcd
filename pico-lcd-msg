@@ -26,6 +26,15 @@ my $USAGE = "Usage:
   $EXEC [OPTS] clear
     -same as: $EXEC [OPTS] --clear --text=\"\"
 
+  $EXEC [OPTS] cmd   CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
+  $EXEC [OPTS] --cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
+  $EXEC [OPTS] --cmd=CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
+    -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
+    -run: curl 'http://<IP_ADDRESS>/<CMD>?<PARAM_NAME>=<PARAM_VAL>&<PARAM_NAME>=<PARAM_VAL>'
+        PARAM_NAME=PARAM_VAL
+          pass in as URL param in curl
+          PARAM_NAME and PARAM_VAL can contain only letters, numbers, and underscores
+
   $EXEC [OPTS] --orient=ORIENT
     -run: curl http://<IP_ADDRESS>/orient?orient=ORIENT'
       ORIENT
@@ -123,6 +132,7 @@ my $USAGE = "Usage:
 ";
 
 my $MODE_TEXT = "text";
+my $MODE_CMD = "cmd";
 
 sub main(@){
   my $mode = undef;
@@ -137,6 +147,10 @@ sub main(@){
   my $lcdWidthPx = $DEFAULT_LCD_WIDTH;
   my $lcdHeightPx = $DEFAULT_LCD_HEIGHT;
   my ($color, $size, $hspace, $vspace, $x, $y);
+
+  my $cmd = undef;
+  my @params;
+
   while(@_ > 0){
     my $arg = shift @_;
     if($arg =~ /^(-h|--help)$/){
@@ -164,6 +178,18 @@ sub main(@){
       $devName = $1;
     }elsif($arg =~ /^--(default-dev)$/){
       $devName = undef;
+    }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $mode){
+      $cmd = shift @_;
+      $mode = $MODE_CMD;
+      while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
+        push @params, shift @_;
+      }
+    }elsif($arg =~ /^--cmd=(\w+)$/ and not defined $mode){
+      $cmd = $1;
+      $mode = $MODE_CMD;
+      while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
+        push @params, shift @_;
+      }
     }elsif($arg =~ /^--lcd-width=(\d+)$/){
       $lcdWidthPx = $1;
     }elsif($arg =~ /^--lcd-height=(\d+)$/){
@@ -220,7 +246,14 @@ sub main(@){
 
   $mode = $MODE_TEXT if not defined $mode;
 
-  if($mode eq $MODE_TEXT){
+  if($mode eq $MODE_CMD){
+    my $paramsFmt = "";
+    if(@params > 0){
+      $paramsFmt = "?" . join "&", @params;
+    }
+
+    system "curl", "--no-progress-meter", "http://$ipAddr/$cmd$paramsFmt";
+  }elsif($mode eq $MODE_TEXT){
     my $charsTotal = length $text;
 
     my $isLines;
