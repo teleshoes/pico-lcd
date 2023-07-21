@@ -277,7 +277,7 @@ sub main(@){
       close FH;
       $text .= $contents;
       $mode = $MODE_TEXT;
-    }elsif($mode eq $MODE_TEXT or ($arg !~ /^-/ and not defined $mode)){
+    }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
       $mode = $MODE_TEXT;
