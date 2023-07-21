@@ -122,7 +122,10 @@ my $USAGE = "Usage:
       (this is the default)
 ";
 
+my $MODE_TEXT = "text";
+
 sub main(@){
+  my $mode = $MODE_TEXT;
   my $ipAddr = undef;
   my $quiet = 0;
   my $devName = undef;
@@ -154,6 +157,7 @@ sub main(@){
       $isClear = 0;
     }elsif($arg =~ /^--text=(.+)$/){
       $text = $1;
+      $mode = $MODE_TEXT;
     }elsif($arg =~ /^--ip=(.+)$/){
       $ipAddr = $1
     }elsif($arg =~ /^--dev=(\w+)$/){
@@ -187,9 +191,11 @@ sub main(@){
       my $contents = join '', <FH>;
       close FH;
       $text .= $contents;
+      $mode = $MODE_TEXT;
     }else{
       $text .= " " if $text ne "";
       $text .= $arg;
+      $mode = $MODE_TEXT;
     }
   }
 
@@ -210,109 +216,113 @@ sub main(@){
     }
   }
 
-  my $charsTotal = length $text;
+  if($mode eq $MODE_TEXT){
+    my $charsTotal = length $text;
 
-  my $isLines;
-  if($splitLines eq $SPLIT_LINES_ALWAYS){
-    $isLines = 1;
-  }elsif($splitLines eq $SPLIT_LINES_BIG_ONLY){
-    $isLines = $charsTotal > $SPLIT_LINES_BIG_CHAR_LIMIT ? 1 : 0;
-  }else{
-    $isLines = 0;
-  }
-
-  #remove '\r' chars
-  $text =~ s/\r\n/\n/g;
-  $text =~ s/\r/\n/g;
-
-  #replace '!n!' markup with newlines
-  $text =~ s/&/&amp;/g;
-  while($text =~ /!([^!]*)!/){
-    my $cmd = $1;
-    if($cmd eq "n"){
-      $text =~ s/!$cmd!/\n/;
+    my $isLines;
+    if($splitLines eq $SPLIT_LINES_ALWAYS){
+      $isLines = 1;
+    }elsif($splitLines eq $SPLIT_LINES_BIG_ONLY){
+      $isLines = $charsTotal > $SPLIT_LINES_BIG_CHAR_LIMIT ? 1 : 0;
     }else{
-      $text =~ s/!$cmd!/&exc;$cmd&exc;/;
+      $isLines = 0;
     }
-  }
-  $text =~ s/&exc;/!/g;
-  $text =~ s/&amp;/&/g;
 
-  my @lines = split /\n/, $text;
+    #remove '\r' chars
+    $text =~ s/\r\n/\n/g;
+    $text =~ s/\r/\n/g;
 
-  my $charsH = @lines;
-  my $charsW = 0;
-  for my $line(@lines){
-    $charsW = length $line if length $line > $charsW;
-  }
-  $charsW = 1 if $charsW <= 1;
-  $charsH = 1 if $charsH <= 1;
+    #replace '!n!' markup with newlines
+    $text =~ s/&/&amp;/g;
+    while($text =~ /!([^!]*)!/){
+      my $cmd = $1;
+      if($cmd eq "n"){
+        $text =~ s/!$cmd!/\n/;
+      }else{
+        $text =~ s/!$cmd!/&exc;$cmd&exc;/;
+      }
+    }
+    $text =~ s/&exc;/!/g;
+    $text =~ s/&amp;/&/g;
 
-  $vspace = 1 if not defined $vspace;
-  $hspace = 1 if not defined $hspace;
+    my @lines = split /\n/, $text;
 
-  #select the largest size that will fit all characters,
-  #  vertically and horizontally,
-  #  or 1 if they cannot fit
-  if(not defined $size){
-    my $hSize = int($lcdWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
-    my $vSize = int($lcdHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
-    $size = $hSize < $vSize ? $hSize : $vSize;
-    $size = 1 if $size < 1;
-  }
-
-  my @messages;
-  if($isLines){
-    my $height = ($FONT_BASE_HEIGHT+$vspace)*$size;
-    my $offset = 0;
+    my $charsH = @lines;
+    my $charsW = 0;
     for my $line(@lines){
-      push @messages, "!x=0!!y=$offset!$line";
-      $offset += $height;
+      $charsW = length $line if length $line > $charsW;
+    }
+    $charsW = 1 if $charsW <= 1;
+    $charsH = 1 if $charsH <= 1;
+
+    $vspace = 1 if not defined $vspace;
+    $hspace = 1 if not defined $hspace;
+
+    #select the largest size that will fit all characters,
+    #  vertically and horizontally,
+    #  or 1 if they cannot fit
+    if(not defined $size){
+      my $hSize = int($lcdWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
+      my $vSize = int($lcdHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
+      $size = $hSize < $vSize ? $hSize : $vSize;
+      $size = 1 if $size < 1;
+    }
+
+    my @messages;
+    if($isLines){
+      my $height = ($FONT_BASE_HEIGHT+$vspace)*$size;
+      my $offset = 0;
+      for my $line(@lines){
+        push @messages, "!x=0!!y=$offset!$line";
+        $offset += $height;
+      }
+    }else{
+      if(length $text > 0){
+        @messages = ($text);
+      }
+    }
+
+    @messages = grep {length $_ > 0} @messages;
+
+    if(defined $orient){
+      system "curl", "--no-progress-meter", "http://$ipAddr/orient?orient=$orient";
+
+      if(@messages == 0){
+        exit 0;
+      }
+    }
+
+    if($isButtons){
+      system "curl", "--no-progress-meter", "http://$ipAddr/buttons";
+    }
+
+    if($isClear and @messages == 0){
+      system "curl", "--no-progress-meter", "http://$ipAddr/clear";
+    }
+
+    for(my $i=0; $i<@messages; $i++){
+      my $msg = $messages[$i];
+      $msg = "!size=$size!$msg" if defined $size;
+      $msg = "!color=$color!$msg" if defined $color;
+      $msg = "!hspace=$hspace!$msg" if defined $hspace and $hspace != 1.0;
+      $msg = "!vspace=$vspace!$msg" if defined $vspace and $vspace != 1.0;
+      $msg = "!x=$x!$msg" if defined $x;
+      $msg = "!y=$y!$msg" if defined $y;
+
+      print "$msg\n" unless $quiet;
+
+      #clear() on the first message unless --no-clear
+      my $clear = ($isClear and $i == 0) ? "true" : "false";
+
+      #do not show() until last message
+      my $show = $i < $#messages ? "false" : "true";
+
+      system "curl", "--no-progress-meter",
+        "http://$ipAddr/text?clear=$clear&show=$show",
+        "--data", "$msg";
     }
   }else{
-    if(length $text > 0){
-      @messages = ($text);
-    }
-  }
-
-  @messages = grep {length $_ > 0} @messages;
-
-  if(defined $orient){
-    system "curl", "--no-progress-meter", "http://$ipAddr/orient?orient=$orient";
-
-    if(@messages == 0){
-      exit 0;
-    }
-  }
-
-  if($isButtons){
-    system "curl", "--no-progress-meter", "http://$ipAddr/buttons";
-  }
-
-  if($isClear and @messages == 0){
-    system "curl", "--no-progress-meter", "http://$ipAddr/clear";
-  }
-
-  for(my $i=0; $i<@messages; $i++){
-    my $msg = $messages[$i];
-    $msg = "!size=$size!$msg" if defined $size;
-    $msg = "!color=$color!$msg" if defined $color;
-    $msg = "!hspace=$hspace!$msg" if defined $hspace and $hspace != 1.0;
-    $msg = "!vspace=$vspace!$msg" if defined $vspace and $vspace != 1.0;
-    $msg = "!x=$x!$msg" if defined $x;
-    $msg = "!y=$y!$msg" if defined $y;
-
-    print "$msg\n" unless $quiet;
-
-    #clear() on the first message unless --no-clear
-    my $clear = ($isClear and $i == 0) ? "true" : "false";
-
-    #do not show() until last message
-    my $show = $i < $#messages ? "false" : "true";
-
-    system "curl", "--no-progress-meter",
-      "http://$ipAddr/text?clear=$clear&show=$show",
-      "--data", "$msg";
+    die "ERROR: unknown mode $mode\n";
   }
 }
 
