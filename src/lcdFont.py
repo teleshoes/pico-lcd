@@ -124,18 +124,10 @@ class LcdFont:
     else:
       return defaultVal
   def maybeReadColor(self, valStr, defaultVal):
-    if valStr == "red":
-       return self.lcd.red
-    elif valStr == "green":
-       return self.lcd.green
-    elif valStr == "blue":
-       return self.lcd.blue
-    elif valStr == "white":
-       return self.lcd.white
-    elif valStr == "black":
-       return self.lcd.black
-    else:
-       return defaultVal
+    color = self.lcd.get_color_by_name(valStr)
+    if color == None:
+      color = defaultVal
+    return color
   def maybeReadInt(self, valStr, defaultVal):
     try:
       return int(valStr)

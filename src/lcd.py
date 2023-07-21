@@ -129,6 +129,20 @@ class LCD():
       self.white = self.swap_hi_lo_byte_order(st7789.WHITE)
       self.black = self.swap_hi_lo_byte_order(st7789.BLACK)
 
+  def get_color_by_name(self, colorName):
+    if colorName == "red":
+      return self.red
+    elif colorName == "green":
+      return self.green
+    elif colorName == "blue":
+      return self.blue
+    elif colorName == "white":
+      return self.white
+    elif colorName == "black":
+      return self.black
+    else:
+      return None
+
   def swap_hi_lo_byte_order(self, h):
     bHi = h >> 8
     bLo = h & 0xff
