@@ -318,8 +318,14 @@ def writeLastRotationDegrees(degrees):
 
 def readFileInt(file):
   try:
+    return int(readFileLine(file))
+  except:
+    return None
+
+def readFileLine(file):
+  try:
     with open(file, "r") as fh:
-      return int(fh.readline())
+      return fh.readline()
   except:
     return None
 
