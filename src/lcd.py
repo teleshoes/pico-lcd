@@ -196,12 +196,64 @@ class LCD():
     if self.framebufMaxWidth != None or self.framebufMaxHeight != None:
       self.fill_mem_blank()
       if wasLandscape != isLandscape and self.buffer != None:
-        # if framebuf is not a square, clear buffer to prevent garbage (rows/cols transposed)
+        # if framebuf is not a square, transpose row/col count (cut off right or bottom)
         if self.framebufMaxWidth != self.framebufMaxHeight:
-          self.fill(0)
+          self.transposeBufferRowColCount()
 
     self.init_framebuf()
     self.show()
+
+  # transpose row count and column count, blanking the cut-off region
+  #   e.g.:
+  #     2x4 to 4x2 (chop off bottom px 5,6,7,8)
+  #     [1, 2, 3, 4, 5, 6, 7, 8] => [1, 2, 0, 0, 3, 4, 0, 0]
+  #        _____    _________
+  #        |1 2|    |1 2    |
+  #        |3 4| => |3 4    |
+  #        |5 6|    ---------
+  #        |7 8|
+  #        -----
+  #
+  #     4x2 to 2x4 (chop off right px 3,4,7,8)
+  #     [1, 2, 3, 4, 5, 6, 7, 8] => [1, 2, 5, 6, 0, 0, 0, 0]
+  #        _________     _____
+  #        |1 2 3 4|     |1 2|
+  #        |5 6 7 8|  => |5 6|
+  #        ---------     |   |
+  #                      |   |
+  #                      -----
+  def transposeBufferRowColCount(self):
+    (bufW, bufH) = self.get_framebuf_size()
+    diff = bufW - bufH
+    if diff < 0:
+      diff = 0 - diff
+    bufferSize = len(self.buffer)
+    if bufW >= bufH:
+      #was portrait, now landscape, chop off pixels on the bottom
+      for y in reversed(range(0, int(bufH))):
+        for x in reversed(range(0, int(bufW))):
+          idx1 = y*bufW + x
+          idx2 = idx1 - (idx1 // bufW)*diff
+
+          if x >= bufH:
+            self.buffer[idx1*2 + 0] = 0
+            self.buffer[idx1*2 + 1] = 0
+          elif idx2*2 >= 0:
+            self.buffer[idx1*2 + 0] = self.buffer[idx2*2 + 0]
+            self.buffer[idx1*2 + 1] = self.buffer[idx2*2 + 1]
+    else:
+      #was landscape, now portrait, chop off pixels on the right
+      for y in range(0, int(bufH)):
+        for x in range(0, int(bufW)):
+          idx1 = y*bufW + x
+          idx2 = idx1 + (idx1 // bufW)*diff
+
+          if idx2*2 + 1 < bufferSize:
+            self.buffer[idx1*2 + 0] = self.buffer[idx2*2 + 0]
+            self.buffer[idx1*2 + 1] = self.buffer[idx2*2 + 1]
+          else:
+            self.buffer[idx1*2 + 0] = 0
+            self.buffer[idx1*2 + 1] = 0
 
   def fill(self, color):
     if self.framebuf == None:
