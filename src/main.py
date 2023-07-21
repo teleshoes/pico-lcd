@@ -51,7 +51,11 @@ def main():
     'buttons': None,
   }
 
-  controller['lcdName'] = DEFAULT_LCD_NAME
+  lcdName = readLastLCDName()
+  if lcdName == None:
+    lcdName = DEFAULT_LCD_NAME
+
+  controller['lcdName'] = lcdName
   controller['lcd'] = createLCD(controller['lcdName'])
   controller['buttons'] = createButtons(controller['lcdName'])
   addButtonHandlers(controller['buttons'], controller)
@@ -102,6 +106,7 @@ def main():
           addButtonHandlers(controller['buttons'], controller)
 
           controller['lcdFont'].setLCD(controller['lcd'])
+          writeLastLCDName(name)
       elif cmd == "framebuf":
         enabled = maybeGetParamBool(params, "enabled", True)
         maxW = maybeGetParamInt(params, "maxwidth", None)
@@ -310,6 +315,15 @@ def readCommandRequest(cl):
       break
 
   return (cmd, params, data)
+
+def readLastLCDName():
+  val = readFileLine("last-lcd-name.txt")
+  if val != None:
+    val = val.strip()
+  if val in LCD_CONFS:
+    return val
+def writeLastLCDName(lcdName):
+  writeFile("last-lcd-name.txt", lcdName + "\n")
 
 def readLastRotationDegrees():
   return readFileInt("last-rotation-degrees.txt")
