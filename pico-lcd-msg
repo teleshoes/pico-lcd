@@ -76,7 +76,7 @@ my $USAGE = "Usage:
       -parse contents of $DEVICE_CONFIG_FILE
       -find line that matches this device: DEV_NAME = IP_ADDRESS
       -same as: --ip=IP_ADDRESS
-    --default-dev
+    --default-dev | --any-dev
       -parse contents of $DEVICE_CONFIG_FILE
       -find first line that matches any device: DEV_NAME = IP_ADDRESS
       -same as: --ip=IP_ADDRESS
@@ -141,8 +141,9 @@ my $MODE_CMD = "cmd";
 sub main(@){
   my $mode = undef;
   my $ipAddr = undef;
-  my $quiet = 0;
   my $devName = undef;
+  my $quiet = 0;
+
   my $text = "";
   my $isClearText = 1;
   my $splitLines = $SPLIT_LINES_BIG_ONLY;
@@ -167,7 +168,7 @@ sub main(@){
       $ipAddr = $1
     }elsif($arg =~ /^--dev=(\w+)$/){
       $devName = $1;
-    }elsif($arg =~ /^--(default-dev)$/){
+    }elsif($arg =~ /^(--default-dev|--any-dev)$/){
       $devName = undef;
     }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $mode){
       $cmd = shift @_;
