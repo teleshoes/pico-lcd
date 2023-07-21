@@ -65,16 +65,7 @@ def main():
   }
 
   controller['lcdName'] = DEFAULT_LCD_NAME
-  lcdConf = LCD_CONFS[controller['lcdName']]
-  controller['lcd'] = LCD(lcdConf["layouts"])
-  controller['lcd'].set_framebuf_enabled(
-    True,
-    maxWidth=DEFAULT_FRAMEBUF_MAX_W,
-    maxHeight=DEFAULT_FRAMEBUF_MAX_H)
-
-  degrees = readLastRotationDegrees()
-  if degrees != None:
-    controller['lcd'].set_rotation_degrees(degrees)
+  controller['lcd'] = createLCD(controller['lcdName'])
 
   controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'])
   controller['lcdFont'].setup()
@@ -83,6 +74,7 @@ def main():
 
   controller['socket'] = getSocket()
 
+  lcdConf = LCD_CONFS[controller['lcdName']]
   controller['buttons'] = {'lastPress': {}, 'count': {}}
   for btnName in lcdConf['buttons']:
     gpioPin = lcdConf['buttons'][btnName]
@@ -191,6 +183,18 @@ def main():
           cl.close()
       except:
         pass
+
+def createLCD(lcdName):
+  layouts = LCD_CONFS[lcdName]["layouts"]
+  lcd = LCD(layouts)
+  lcd.set_framebuf_enabled(True,
+    maxWidth=DEFAULT_FRAMEBUF_MAX_W,
+    maxHeight=DEFAULT_FRAMEBUF_MAX_H)
+
+  degrees = readLastRotationDegrees()
+  if degrees != None:
+    lcd.set_rotation_degrees(degrees)
+  return lcd
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
   if paramName in params:
