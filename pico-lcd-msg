@@ -127,7 +127,10 @@ my $USAGE = "Usage:
           -assume SIZE=5 if not given
         -prefix each TEXT_LINE with '!y=OFFSET!'
         -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
-        -run: curl http://<IP_ADDRESS>/text 'TEXT_LINE'
+        -calculate SHOW as 'true' for the last TEXT_LINE, and 'false' otherwise
+        -calculate CLEAR as 'true' for the first TEXT_LINE, and 'false' otherwise
+          -unless --no-clear-text is given, then false always
+        -run: curl 'http://<IP_ADDRESS>/text?clear=CLEAR&show=SHOW' 'TEXT_LINE'
     --no-lines
       never split lines as in --lines
     --lines-big-only
