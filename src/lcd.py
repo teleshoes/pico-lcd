@@ -87,10 +87,12 @@ class LCD():
   def get_framebuf_size(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
-    if self.framebufMaxWidth != None and bufW > self.framebufMaxWidth:
-      bufW = self.framebufMaxWidth
-    if self.framebufMaxHeight != None and bufH > self.framebufMaxHeight:
-      bufH = self.framebufMaxHeight
+    (maxW, maxH) = (self.framebufMaxWidth, self.framebufMaxHeight)
+
+    if maxW != None and bufW > maxW:
+      bufW = maxW
+    if maxH != None and bufH > maxH:
+      bufH = maxH
     return (bufW, bufH)
 
   def get_framebuf_offset(self):
