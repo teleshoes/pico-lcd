@@ -36,6 +36,10 @@ my $USAGE = "Usage:
     clear the LCD
       -same as: $EXEC [OPTS] --cmd clear
 
+  $EXEC [OPTS] buttons | --buttons
+    fetch button press counts and print them
+      -same as: $EXEC [OPTS] --cmd buttons
+
   $EXEC [OPTS] --orient=ORIENT
     -run: curl http://<IP_ADDRESS>/orient?orient=ORIENT'
       ORIENT
@@ -103,10 +107,6 @@ my $USAGE = "Usage:
     --y=Y
       prefix all TEXT with '!y=Y!'
 
-    --buttons
-      fetch button press counts and print them
-      (implies --no-clear, give --clear again to clear)
-
     --lcd-width=WIDTH_PX
       select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
     --lcd-height=HEIGHT_PX
@@ -141,7 +141,6 @@ sub main(@){
   my $quiet = 0;
   my $devName = undef;
   my $text = "";
-  my $isButtons = 0;
   my $isClearText = 1;
   my $orient = undef;
   my $splitLines = $SPLIT_LINES_BIG_ONLY;
@@ -159,9 +158,6 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(-q|--quiet)$/){
       $quiet = 1;
-    }elsif($arg =~ /^(-b|--buttons)$/){
-      $isButtons = 1;
-      $isClearText = 0;
     }elsif($arg =~ /^--orient=(.+)$/){
       $orient = $1;
     }elsif($arg =~ /^--text=(.+)$/ and not defined $mode){
@@ -192,6 +188,9 @@ sub main(@){
       $isClearText = 1;
     }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
       $isClearText = 0;
+    }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
+      $cmd = "buttons";
+      $mode = $MODE_CMD;
     }elsif($arg =~ /^--lcd-width=(\d+)$/){
       $lcdWidthPx = $1;
     }elsif($arg =~ /^--lcd-height=(\d+)$/){
@@ -329,10 +328,6 @@ sub main(@){
       if(@messages == 0){
         exit 0;
       }
-    }
-
-    if($isButtons){
-      system "curl", "--no-progress-meter", "http://$ipAddr/buttons";
     }
 
     for(my $i=0; $i<@messages; $i++){
