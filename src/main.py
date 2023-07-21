@@ -42,15 +42,15 @@ FRAMEBUF_MAX_H = None
 def buttonPressed(pin, btnName, controller):
   #debounce 0.25s
   nowTicks = time.ticks_ms()
-  lastPress = controller['btnLastPress'][btnName]
+  lastPress = controller['buttons']['lastPress'][btnName]
   if lastPress != None:
     diff = time.ticks_diff(nowTicks, lastPress)
     if diff < 250:
       return
-  controller['btnLastPress'][btnName] = nowTicks
+  controller['buttons']['lastPress'][btnName] = nowTicks
 
   print("PRESSED: " + btnName + " " + str(pin))
-  controller['btnCount'][btnName] += 1
+  controller['buttons']['count'][btnName] += 1
 
   if btnName == "B2" or btnName == "A":
     controller['lcd'].set_rotation_next()
@@ -59,9 +59,9 @@ def buttonPressed(pin, btnName, controller):
 
 def main():
   controller = {
-    'btnLastPress': {}, 'btnCount': {},
     'lcd': None, 'lcdFont': None,
-    'wlan': None, 'socket': None
+    'wlan': None, 'socket': None,
+    'buttons': None,
   }
 
   controller['lcd'] = LCD(LCD_CONF["layouts"])
@@ -78,10 +78,11 @@ def main():
 
   controller['socket'] = getSocket()
 
+  controller['buttons'] = {'lastPress': {}, 'count': {}}
   for btnName in LCD_CONF['buttons']:
     gpioPin = LCD_CONF['buttons'][btnName]
-    controller['btnLastPress'][btnName] = None
-    controller['btnCount'][btnName] = 0
+    controller['buttons']['lastPress'][btnName] = None
+    controller['buttons']['count'][btnName] = 0
     pin = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
     pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
       lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
@@ -130,10 +131,10 @@ def main():
           controller['lcd'].framebufMaxHeight)
       elif cmd == "buttons":
         print("buttons")
-        for btnName in sorted(controller['btnCount']):
+        for btnName in sorted(controller['buttons']['count']):
           if len(out) > 0:
             out += ", "
-          out += btnName + "=" + str(controller['btnCount'][btnName])
+          out += btnName + "=" + str(controller['buttons']['count'][btnName])
         out += "\n"
       elif cmd == "orient" or cmd == "rotation":
         val = None
