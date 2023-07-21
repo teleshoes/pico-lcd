@@ -91,6 +91,13 @@ def main():
       elif cmd == "show":
         print("show")
         controller['lcd'].show()
+      elif cmd == "buttons":
+        print("buttons")
+        for btnName in sorted(controller['buttons']['count']):
+          if len(out) > 0:
+            out += ", "
+          out += btnName + "=" + str(controller['buttons']['count'][btnName])
+        out += "\n"
       elif cmd == "lcd":
         name = maybeGetParamStr(params, "name", None)
         if name in LCD_CONFS:
@@ -120,13 +127,6 @@ def main():
           controller['lcd'].framebufEnabled,
           controller['lcd'].framebufMaxWidth,
           controller['lcd'].framebufMaxHeight)
-      elif cmd == "buttons":
-        print("buttons")
-        for btnName in sorted(controller['buttons']['count']):
-          if len(out) > 0:
-            out += ", "
-          out += btnName + "=" + str(controller['buttons']['count'][btnName])
-        out += "\n"
       elif cmd == "orient" or cmd == "rotation":
         val = None
         if 'orient' in params:
