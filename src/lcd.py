@@ -346,6 +346,9 @@ class LCD():
       self.write_data(buf)
     buf = None
 
+    if self.framebuf != None:
+      self.set_window_to_framebuf()
+
   def set_window_to_framebuf(self):
     (bufW, bufH) = self.get_framebuf_size()
     offsetX = self.framebufOffsetX
