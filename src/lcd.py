@@ -93,6 +93,15 @@ class LCD():
       bufH = self.framebufMaxHeight
     return (bufW, bufH)
 
+  def get_framebuf_offset(self):
+    (offsetX, offsetY) = (self.framebufOffsetX, self.framebufOffsetY)
+
+    if offsetX == None:
+      offsetX = 0
+    if offsetY == None:
+      offsetY = 0
+    return (offsetX, offsetY)
+
   def create_buffer(self):
     (bufW, bufH) = self.get_framebuf_size()
     framebufSizeBytes = bufW * bufH * 2
@@ -351,12 +360,7 @@ class LCD():
 
   def set_window_to_framebuf(self):
     (bufW, bufH) = self.get_framebuf_size()
-    offsetX = self.framebufOffsetX
-    offsetY = self.framebufOffsetY
-    if offsetX == None:
-      offsetX = 0
-    if offsetY == None:
-      offsetY = 0
+    (offsetX, offsetY) = self.get_framebuf_offset()
     self.set_window_with_rotation_offset(offsetX, offsetY, bufW, bufH)
 
   def set_window_with_rotation_offset(self, x, y, w, h):
