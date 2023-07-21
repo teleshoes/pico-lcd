@@ -56,7 +56,7 @@ my $USAGE = "Usage:
           PARAM_NAME and PARAM_VAL can contain only letters, numbers, and underscores
 
   $EXEC [OPTS] clear | --clear
-    clear the LCD
+    clear the entire LCD memory
       -same as: $EXEC [OPTS] --cmd clear
 
   $EXEC [OPTS] show | --show
