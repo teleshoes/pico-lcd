@@ -82,6 +82,21 @@ my $USAGE = "Usage:
           inverted-portrait | 90
             set rotateion to 90 degrees
 
+  $EXEC [OPTS] framebuf   ENABLED [MAX_WIDTH MAX_HEIGHT [OFFSET_X OFFSET_Y]
+  $EXEC [OPTS] --framebuf ENABLED [MAX_WIDTH MAX_HEIGHT [OFFSET_X OFFSET_Y]
+    -same as: $EXEC [OPTS] --cmd framebuf enabled=ENABLED \\
+                maxwidth=MAX_WIDTH maxheight=MAX_HEIGHT x=OFFSET_X y=OFFSET_Y
+      ENABLED
+        'true' or 'false' to enable/disable the framebuf
+      MAX_WIDTH
+        limit the framebuf width, 0 means no maximum
+      MAX_HEIGHT
+        limit the framebuf height, 0 means no maximum
+      OFFSET_X
+        shift the framebuf window to the right, 0 means no offset
+      OFFSET_Y
+        shift the framebuf window down, 0 means no offset
+
   OPTS
     -q | --quiet
       do not print messages sent with curl
@@ -218,6 +233,18 @@ sub main(@){
       $cmd = "orient";
       $mode = $MODE_CMD;
       push @params, "orient=$1";
+    }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $mode){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @params, "enabled=" . shift @_;
+      if(@_ >= 2 and $_[0] =~ /^\d+$/ and $_[0] =~ /^\d+$/){
+        push @params, "maxwidth=" . shift @_;
+        push @params, "maxheight=" . shift @_;
+      }
+      if(@_ >= 2 and $_[0] =~ /^\d+$/ and $_[0] =~ /^\d+$/){
+        push @params, "x=" . shift @_;
+        push @params, "y=" . shift @_;
+      }
     }elsif($arg =~ /^(--clear-text)$/){
       $isClearText = 1;
     }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
