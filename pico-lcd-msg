@@ -185,10 +185,6 @@ sub main(@){
     }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
       $cmd = "clear";
       $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--clear-text)$/){
-      $isClearText = 1;
-    }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
-      $isClearText = 0;
     }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
       $cmd = "buttons";
       $mode = $MODE_CMD;
@@ -200,6 +196,10 @@ sub main(@){
       $cmd = "orient";
       $mode = $MODE_CMD;
       push @params, "orient=$1";
+    }elsif($arg =~ /^(--clear-text)$/){
+      $isClearText = 1;
+    }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
+      $isClearText = 0;
     }elsif($arg =~ /^--lcd-width=(\d+)$/){
       $lcdWidthPx = $1;
     }elsif($arg =~ /^--lcd-height=(\d+)$/){
