@@ -98,6 +98,15 @@ def main():
             out += ", "
           out += btnName + "=" + str(controller['buttons']['count'][btnName])
         out += "\n"
+      elif cmd == "fill":
+        print("fill")
+        colorName = maybeGetParamStr(params, "color", None)
+        color = controller['lcd'].get_color_by_name(colorName)
+        if color == None:
+          out = "ERROR: could not parse color " + colorName + "\n"
+        else:
+          controller['lcd'].fill(color)
+          controller['lcd'].show()
       elif cmd == "lcd":
         name = maybeGetParamStr(params, "name", None)
         if name in LCD_CONFS:
