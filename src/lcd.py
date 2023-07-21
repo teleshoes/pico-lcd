@@ -222,9 +222,13 @@ class LCD():
   #        ---------     |   |
   #                      |   |
   #                      -----
+  #  (python => viper yields 26x faster performance, 1624ms => 62ms)
+  @micropython.viper
   def transposeBufferRowColCount(self):
-    buf = self.buffer
-    (bufW, bufH) = self.get_framebuf_size()
+    buf = ptr8(self.buffer)
+    (bufWObj, bufHObj) = self.get_framebuf_size()
+    bufW = int(bufWObj)
+    bufH = int(bufHObj)
 
     diff = bufW - bufH
     if diff < 0:
@@ -232,8 +236,10 @@ class LCD():
     bufferSize = bufW * bufH * 2
     if bufW >= bufH:
       #was portrait, now landscape, chop off pixels on the bottom
-      for y in reversed(range(0, int(bufH))):
-        for x in reversed(range(0, int(bufW))):
+      for y in range(0, bufH):
+        y = bufH - y - 1 #reversed(range())
+        for x in range(0, bufW):
+          x = bufW - x - 1 #reversed(range())
           idx1 = y*bufW + x
           idx2 = idx1 - (idx1 // bufW)*diff
 
