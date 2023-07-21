@@ -120,6 +120,10 @@ def main():
           controller['lcdFont'].setLCD(controller['lcd'])
           writeLastLCDName(name)
       elif cmd == "framebuf":
+        #NOTE: regardless of current orientation:
+        #  'maxwidth' and 'x' refers to the largest physical dimension
+        #  'maxheight' and 'y' refers to the smallest physical dimension
+
         enabled = maybeGetParamBool(params, "enabled", True)
         maxW = maybeGetParamInt(params, "maxwidth", None)
         maxH = maybeGetParamInt(params, "maxheight", None)
