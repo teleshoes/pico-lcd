@@ -157,8 +157,8 @@ def main():
         else:
           out = "unknown orient " + val + "\n"
       elif cmd == "text":
-        val = data.decode("utf8")
-        print("text: " + val)
+        markup = data.decode("utf8")
+        print("text: " + markup)
 
         isClear = True
         if "clear" in params and params["clear"].lower() == "false":
@@ -169,7 +169,7 @@ def main():
           isShow = False
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
-        controller['lcdFont'].drawMarkup(val)
+        controller['lcdFont'].drawMarkup(markup)
         if isShow:
           controller['lcd'].show()
       else:
