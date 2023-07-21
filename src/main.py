@@ -32,11 +32,11 @@ LCD_CONFS = {
   },
 }
 
-LCD_CONF = LCD_CONFS['1_3']
+DEFAULT_LCD_NAME = "1_3"
 
 #use only a portion of the screen for framebuf
-FRAMEBUF_MAX_W = None
-FRAMEBUF_MAX_H = None
+DEFAULT_FRAMEBUF_MAX_W = None
+DEFAULT_FRAMEBUF_MAX_H = None
 
 
 def buttonPressed(pin, btnName, controller):
@@ -59,13 +59,18 @@ def buttonPressed(pin, btnName, controller):
 
 def main():
   controller = {
-    'lcd': None, 'lcdFont': None,
+    'lcdName': None, 'lcd': None, 'lcdFont': None,
     'wlan': None, 'socket': None,
     'buttons': None,
   }
 
-  controller['lcd'] = LCD(LCD_CONF["layouts"])
-  controller['lcd'].set_framebuf_enabled(True, maxWidth=FRAMEBUF_MAX_W, maxHeight=FRAMEBUF_MAX_H)
+  controller['lcdName'] = DEFAULT_LCD_NAME
+  lcdConf = LCD_CONFS[controller['lcdName']]
+  controller['lcd'] = LCD(lcdConf["layouts"])
+  controller['lcd'].set_framebuf_enabled(
+    True,
+    maxWidth=DEFAULT_FRAMEBUF_MAX_W,
+    maxHeight=DEFAULT_FRAMEBUF_MAX_H)
 
   degrees = readLastRotationDegrees()
   if degrees != None:
@@ -79,8 +84,8 @@ def main():
   controller['socket'] = getSocket()
 
   controller['buttons'] = {'lastPress': {}, 'count': {}}
-  for btnName in LCD_CONF['buttons']:
-    gpioPin = LCD_CONF['buttons'][btnName]
+  for btnName in lcdConf['buttons']:
+    gpioPin = lcdConf['buttons'][btnName]
     controller['buttons']['lastPress'][btnName] = None
     controller['buttons']['count'][btnName] = 0
     pin = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
