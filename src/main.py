@@ -38,20 +38,7 @@ DEFAULT_LCD_NAME = "1_3"
 DEFAULT_FRAMEBUF_MAX_W = None
 DEFAULT_FRAMEBUF_MAX_H = None
 
-
-def buttonPressed(pin, btnName, controller):
-  #debounce 0.25s
-  nowTicks = time.ticks_ms()
-  lastPress = controller['buttons']['lastPress'][btnName]
-  if lastPress != None:
-    diff = time.ticks_diff(nowTicks, lastPress)
-    if diff < 250:
-      return
-  controller['buttons']['lastPress'][btnName] = nowTicks
-
-  print("PRESSED: " + btnName + " " + str(pin))
-  controller['buttons']['count'][btnName] += 1
-
+def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
     controller['lcd'].set_rotation_next()
     writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
@@ -204,8 +191,23 @@ def addButtonHandlers(buttons, controller):
     for btnName in buttons['pins']:
       pin = buttons['pins'][btnName]
       pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
-        lambda pin, btn=btnName, c=controller: buttonPressed(pin, btn, c)
+        lambda pin, btn=btnName, c=controller: buttonPressedHandler(pin, btn, c)
       ))
+
+def buttonPressedHandler(pin, btnName, controller):
+  #debounce 0.25s
+  nowTicks = time.ticks_ms()
+  lastPress = controller['buttons']['lastPress'][btnName]
+  if lastPress != None:
+    diff = time.ticks_diff(nowTicks, lastPress)
+    if diff < 250:
+      return
+  controller['buttons']['lastPress'][btnName] = nowTicks
+
+  print("PRESSED: " + btnName + " " + str(pin))
+  controller['buttons']['count'][btnName] += 1
+
+  buttonPressedActions(btnName, controller)
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
   if paramName in params:
