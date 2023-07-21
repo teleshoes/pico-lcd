@@ -87,7 +87,7 @@ def main():
 
       if cmd == "clear":
         print("clear")
-        controller['lcd'].fill_show(controller['lcd'].black)
+        controller['lcd'].fill_mem_blank()
       elif cmd == "show":
         print("show")
         controller['lcd'].show()
