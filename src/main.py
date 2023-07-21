@@ -137,10 +137,8 @@ def main():
           controller['lcd'].framebufMaxWidth,
           controller['lcd'].framebufMaxHeight)
       elif cmd == "orient" or cmd == "rotation":
-        val = None
-        if 'orient' in params:
-          val = params['orient']
-        print("orient=" + str(val))
+        val = maybeGetParamStr(params, "orient", None)
+        print("orient=" + val)
 
         degrees = None
         if val == "landscape" or val == "0" or val == "normal" or val == "default":
@@ -155,6 +153,9 @@ def main():
         if degrees != None:
           controller['lcd'].set_rotation_degrees(degrees)
           writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
+          out = "orient=" + str(degrees) + "\n"
+        else:
+          out = "unknown orient " + val + "\n"
       elif cmd == "text":
         val = data.decode("utf8")
         print("text: " + val)
