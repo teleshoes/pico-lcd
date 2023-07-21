@@ -36,6 +36,9 @@ class LcdFont:
       self.bytesPerChar = None
       self.ready = False
 
+  def setLCD(self, lcd):
+    self.lcd = lcd
+
   def getCharGridWidth(self, size):
     return int(self.lcd.get_width() / ((self.fontWidth+1)*size))
 

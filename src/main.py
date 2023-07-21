@@ -91,6 +91,17 @@ def main():
       elif cmd == "show":
         print("show")
         controller['lcd'].show()
+      elif cmd == "lcd":
+        name = maybeGetParamStr(params, "name", None)
+        if name in LCD_CONFS:
+          removeButtonHandlers(controller['buttons'])
+
+          controller['lcdName'] = name
+          controller['lcd'] = createLCD(controller['lcdName'])
+          controller['buttons'] = createButtons(controller['lcdName'])
+          addButtonHandlers(controller['buttons'], controller)
+
+          controller['lcdFont'].setLCD(controller['lcd'])
       elif cmd == "framebuf":
         enabled = maybeGetParamBool(params, "enabled", True)
         maxW = maybeGetParamInt(params, "maxwidth", None)
@@ -208,6 +219,12 @@ def buttonPressedHandler(pin, btnName, controller):
   controller['buttons']['count'][btnName] += 1
 
   buttonPressedActions(btnName, controller)
+
+def removeButtonHandlers(buttons):
+  if buttons != None:
+    for btnName in buttons['pins']:
+      pin = buttons['pins'][btnName]
+      pin.irq(handler=None)
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
   if paramName in params:
