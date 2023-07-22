@@ -39,11 +39,11 @@ class LcdFont:
   def setLCD(self, lcd):
     self.lcd = lcd
 
-  def getCharGridWidth(self, size):
-    return int(self.lcd.get_width() / ((self.fontWidth+1)*size))
-
-  def getCharGridHeight(self, size):
-    return int(self.lcd.get_height() / ((self.fontHeight+1)*size))
+  def getCharGridSize(self, size):
+    (winX, winY) = self.lcd.get_target_window_size()
+    charX = int(winX / ((self.fontWidth+1)*size))
+    charY = int(winY / ((self.fontHeight+1)*size))
+    return (charX, charY)
 
   def getFontCharBytes(self, charStr):
     asciiIndex = ord(charStr)
