@@ -165,18 +165,31 @@ class LCD():
       self.blue  = self.swap_hi_lo_byte_order(st7789.BLUE)
       self.white = self.swap_hi_lo_byte_order(st7789.WHITE)
       self.black = self.swap_hi_lo_byte_order(st7789.BLACK)
+    elif self.framebufColorProfile == framebuf.RGB444:
+      #RGB444
+      self.set_lcd_RGB444()
+      self.red   = 0b111100000000
+      self.green = 0b000011110000
+      self.blue  = 0b000000001111
+      self.white = 0b111111111111
+      self.black = 0b000000000000
 
   def bits_per_px(self):
     if not self.framebufEnabled:
       return 16 #RGB565
     elif self.framebufColorProfile == framebuf.RGB565:
       return 16 #RGB565
+    elif self.framebufColorProfile == framebuf.RGB444:
+      return 12 #RGB444
     else:
       return None
 
   def set_lcd_RGB565(self):
       self.write_cmd(0x3a)
       self.write_data(bytearray([0x05]))
+  def set_lcd_RGB444(self):
+      self.write_cmd(0x3a)
+      self.write_data(bytearray([0x03]))
 
 
   def get_color_by_name(self, colorName):
@@ -260,7 +273,7 @@ class LCD():
     bufH = int(bufHObj)
     bitsPerPx = int(self.bits_per_px())
 
-    bytesPer2Px = 2*bitsPerPx // 8 # 2px = 4 bytes for RGB565
+    bytesPer2Px = 2*bitsPerPx // 8 # 2px = 4 bytes for RGB565, 3 bytes for RGB444
 
     diff = bufW - bufH
     if diff < 0:
