@@ -55,6 +55,10 @@ my $USAGE = "Usage:
           pass in as URL param in curl
           PARAM_NAME and PARAM_VAL can contain only letters, numbers, and underscores
 
+  $EXEC [OPTS] info | --info
+    fetch+show current state
+      -same as: $EXEC [OPTS] --cmd info
+
   $EXEC [OPTS] clear | --clear
     clear the entire LCD memory
       -same as: $EXEC [OPTS] --cmd clear
@@ -238,6 +242,9 @@ sub main(@){
       while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
         push @params, shift @_;
       }
+    }elsif($arg =~ /^(--info|info)$/ and not defined $mode){
+      $cmd = "info";
+      $mode = $MODE_CMD;
     }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
       $cmd = "clear";
       $mode = $MODE_CMD;
