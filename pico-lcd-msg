@@ -3,9 +3,15 @@ use strict;
 use warnings;
 use File::Basename qw(basename);
 
+sub parseConfig($);
+
 my $EXEC = basename $0;
 
 my $DEVICE_CONFIG_FILE = "$ENV{HOME}/.config/pico-lcd.conf";
+my @DEVICES = parseConfig($DEVICE_CONFIG_FILE);
+my @DEVICE_NAMES = map {$$_{devName}} @DEVICES;
+my %DEVICE_IPS_BY_NAME = map {$$_{devName} => $$_{devIP}} @DEVICES;
+my $DEVICE_NAME_REGEX = join "|", @DEVICE_NAMES;
 
 my $SPLIT_LINES_BIG_CHAR_LIMIT = 3000;
 
@@ -133,6 +139,8 @@ my $USAGE = "Usage:
       -parse contents of $DEVICE_CONFIG_FILE
       -find line that matches this device: DEV_NAME = IP_ADDRESS
       -same as: --ip=IP_ADDRESS
+        DEV_NAME
+          any of: @DEVICE_NAMES
     --default-dev | --any-dev
       -parse contents of $DEVICE_CONFIG_FILE
       -find first line that matches any device: DEV_NAME = IP_ADDRESS
@@ -484,6 +492,18 @@ sub main(@){
   }else{
     die "ERROR: unknown mode $mode\n";
   }
+}
+
+sub parseConfig($){
+  my @devices;
+  my @lines = `cat $DEVICE_CONFIG_FILE 2>/dev/null`;
+  for my $line(@lines){
+    if($line =~ /^\s*(\w+)\s*=\s*(\d+\.\d+\.\d+\.\d+)$/){
+      my ($devName, $devIP) = ($1, $2);
+      push @devices, {devName => $devName, devIP => $devIP};
+    }
+  }
+  return @devices;
 }
 
 &main(@ARGV);
