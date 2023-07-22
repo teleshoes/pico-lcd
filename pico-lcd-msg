@@ -113,6 +113,12 @@ my $USAGE = "Usage:
       OFFSET_Y
         shift the framebuf window down, 0 means no offset
 
+  $EXEC [OPTS] left | --left | top | --top
+    -same as: $EXEC [OPTS] framebuf 160 240 0 0
+
+  $EXEC [OPTS] right | --right | bot | --bot | bottom | --bottom
+    -same as: $EXEC [OPTS] framebuf 160 240 160 0
+
   OPTS
     -q | --quiet
       do not print messages sent with curl
@@ -277,6 +283,22 @@ sub main(@){
         push @params, "x=" . shift @_;
         push @params, "y=" . shift @_;
       }
+    }elsif($arg =~ /^(left|--left|top|--top)$/ and not defined $mode){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @params, "enabled=true";
+      push @params, "maxwidth=160";
+      push @params, "maxheight=240";
+      push @params, "x=0";
+      push @params, "y=0";
+    }elsif($arg =~ /^(right|--right|bot|--bot|bottom|--bottom)$/ and not defined $mode){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @params, "enabled=true";
+      push @params, "maxwidth=160";
+      push @params, "maxheight=240";
+      push @params, "x=160";
+      push @params, "y=0";
     }elsif($arg =~ /^(--clear-text)$/){
       $isClearText = 1;
     }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
