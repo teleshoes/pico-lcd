@@ -167,36 +167,38 @@ def main():
         else:
           out = "unknown orient " + val + "\n"
       elif cmd == "framebuf":
+        #  'framebuf' param is one of:
+        #     on | enabled | true
+        #       enable framebuf, with no max WxH or X/Y offsets
+        #     off | disabled | false
+        #       disable framebuf
+        #     WxH
+        #       enable framebuf, and set max WxH with no X/Y offsets
+        #     WxH+X+Y
+        #       enable framebuf, and set max WxH and X/Y offsets
+        #
         #NOTE: regardless of current orientation:
-        #  'maxwidth' and 'x' refers to the largest physical dimension
-        #  'maxheight' and 'y' refers to the smallest physical dimension
+        #  W and X always refers to the larger physical dimension of the LCD
+        #  H and Y always refers to the smaller physical dimension of the LCD
 
-        enabled = maybeGetParamBool(params, "enabled", True)
-        maxW = maybeGetParamInt(params, "maxwidth", None)
-        maxH = maybeGetParamInt(params, "maxheight", None)
-        offsetX = maybeGetParamInt(params, "x", None)
-        offsetY = maybeGetParamInt(params, "y", None)
-        if maxW == 0:
-          maxW = None
-        if maxH == 0:
-          maxH = None
-        if offsetX == 0:
-          offsetX = None
-        if offsetY == 0:
-          offsetY = None
-        controller['lcd'].set_framebuf_enabled(enabled, maxW, maxH, offsetX, offsetY)
-        writeLastFramebufConf(
-          controller['lcd'].framebufEnabled,
-          controller['lcd'].framebufMaxWidth,
-          controller['lcd'].framebufMaxHeight,
-          controller['lcd'].framebufOffsetX,
-          controller['lcd'].framebufOffsetY)
-        out = "framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
-          controller['lcd'].framebufEnabled,
-          controller['lcd'].framebufMaxWidth,
-          controller['lcd'].framebufMaxHeight,
-          controller['lcd'].framebufOffsetX,
-          controller['lcd'].framebufOffsetY)
+        fb = maybeGetParamFramebuf(params, "framebuf", None)
+        if fb == None:
+          out = "ERROR: could not parse framebuf\n"
+        else:
+          controller['lcd'].set_framebuf_enabled(
+            fb['enabled'], fb['maxW'], fb['maxH'], fb['x'], fb['y'])
+          writeLastFramebufConf(
+            controller['lcd'].framebufEnabled,
+            controller['lcd'].framebufMaxWidth,
+            controller['lcd'].framebufMaxHeight,
+            controller['lcd'].framebufOffsetX,
+            controller['lcd'].framebufOffsetY)
+          out = "framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
+            controller['lcd'].framebufEnabled,
+            controller['lcd'].framebufMaxWidth,
+            controller['lcd'].framebufMaxHeight,
+            controller['lcd'].framebufOffsetX,
+            controller['lcd'].framebufOffsetY)
       elif cmd == "text":
         isClear = maybeGetParamBool(params, "clear", True)
         isShow = maybeGetParamBool(params, "show", True)
@@ -320,6 +322,55 @@ def maybeGetParamInt(params, paramName, defaultValue=None):
     except:
       print("WARNING: could not parse int param " + paramName + "=" + val + "\n")
       return defaultValue
+
+def maybeGetParamFramebuf(params, paramName, defaultValue=None):
+  val = maybeGetParamStr(params, paramName, None)
+  if val == None:
+    return defaultValue
+  else:
+    val = val.lower()
+    fb = {'enabled': False, 'maxW': None, 'maxH': None, 'x': None, 'y': None}
+    if val == "on" or val == "enabled" or val == "true":
+      fb['enabled'] = True
+    elif val == "off" or val == "disabled" or val == "false":
+      fb['enabled'] = False
+    else:
+      nums = []
+      curNum = ""
+      for c in val:
+        if c.isdigit():
+          curNum += c
+        elif (len(nums) == 0 and c == "x") or (len(nums) > 0 and c == "+"):
+          if len(curNum) == 0:
+            return None
+          nums.append(int(curNum))
+          curNum = ""
+      if len(curNum) > 0:
+        nums.append(int(curNum))
+
+      if len(nums) == 2:
+        fb['enabled'] = True
+        fb['maxW'] = nums[0]
+        fb['maxH'] = nums[1]
+      elif len(nums) == 4:
+        fb['enabled'] = True
+        fb['maxW'] = nums[0]
+        fb['maxH'] = nums[1]
+        fb['x'] = nums[2]
+        fb['y'] = nums[3]
+        print(str(fb))
+      else:
+        return None
+
+    if fb['maxW'] == 0:
+      fb['maxW'] = None
+    if fb['maxH'] == 0:
+      fb['maxH'] = None
+    if fb['x'] == 0:
+      fb['x'] = None
+    if fb['y'] == 0:
+      fb['y'] = None
+    return fb
 
 def readCommandRequest(cl):
   cl.settimeout(0.25)
