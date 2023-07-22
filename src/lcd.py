@@ -248,28 +248,34 @@ class LCD():
         y = bufH - y - 1 #reversed(range())
         for x in range(0, bufW):
           x = bufW - x - 1 #reversed(range())
-          idx1 = y*bufW + x
-          idx2 = idx1 - (idx1 // bufW)*diff
+          pxIdx1 = y*bufW + x
+          pxIdx2 = pxIdx1 - (pxIdx1 // bufW)*diff
+
+          bIdx1 = pxIdx1 * 2
+          bIdx2 = pxIdx2 * 2
 
           if x >= bufH:
-            buf[idx1*2 + 0] = 0
-            buf[idx1*2 + 1] = 0
-          elif idx2*2 >= 0:
-            buf[idx1*2 + 0] = buf[idx2*2 + 0]
-            buf[idx1*2 + 1] = buf[idx2*2 + 1]
+            buf[bIdx1 + 0] = 0
+            buf[bIdx1 + 1] = 0
+          elif bIdx2 >= 0:
+            buf[bIdx1 + 0] = buf[bIdx2 + 0]
+            buf[bIdx1 + 1] = buf[bIdx2 + 1]
     else:
       #was landscape, now portrait, chop off pixels on the right
       for y in range(0, bufH):
         for x in range(0, bufW):
-          idx1 = y*bufW + x
-          idx2 = idx1 + (idx1 // bufW)*diff
+          pxIdx1 = y*bufW + x
+          pxIdx2 = pxIdx1 + (pxIdx1 // bufW)*diff
 
-          if idx2*2 + 1 < bufferSize:
-            buf[idx1*2 + 0] = buf[idx2*2 + 0]
-            buf[idx1*2 + 1] = buf[idx2*2 + 1]
+          bIdx1 = pxIdx1 * 2
+          bIdx2 = pxIdx2 * 2
+
+          if bIdx2 + 1 < bufferSize:
+            buf[bIdx1 + 0] = buf[bIdx2 + 0]
+            buf[bIdx1 + 1] = buf[bIdx2 + 1]
           else:
-            buf[idx1*2 + 0] = 0
-            buf[idx1*2 + 1] = 0
+            buf[bIdx1 + 0] = 0
+            buf[bIdx1 + 1] = 0
 
   def fill(self, color):
     if not self.framebufEnabled:
