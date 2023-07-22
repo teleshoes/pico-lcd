@@ -59,7 +59,7 @@ my $USAGE = "Usage:
     -run: curl 'http://<IP_ADDRESS>/<CMD>?<PARAM_NAME>=<PARAM_VAL>&<PARAM_NAME>=<PARAM_VAL>'
         PARAM_NAME=PARAM_VAL
           pass in as URL param in curl
-          PARAM_NAME and PARAM_VAL can contain only letters, numbers, and underscores
+          PARAM_NAME and can contain only letters, numbers, and underscores
 
   $EXEC [OPTS] info | --info
     fetch+show current state
@@ -267,7 +267,7 @@ sub main(@){
     }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $mode){
       $cmd = shift @_;
       $mode = $MODE_CMD;
-      while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
+      while(@_ > 0 and $_[0] =~ /^\w+=.+$/){
         push @cmdParams, shift @_;
       }
     }elsif($arg =~ /^--cmd=(\w+)$/ and not defined $mode){
