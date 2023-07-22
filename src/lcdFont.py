@@ -9,7 +9,7 @@ class LcdFont:
   def __init__(self, fontFileName, lcd):
     self.fontFileName = fontFileName
     self.lcd = lcd
-    self.defaultColor = self.lcd.white
+    self.defaultColorName = 'white'
     self.fontHandle = None
     self.fontWidth = None
     self.fontHeight = None
@@ -71,7 +71,7 @@ class LcdFont:
   def cursorHline(self):
     color = self.cursor['color']
     if color == None:
-      color = self.defaultColor
+      color = self.lcd.get_color_by_name(self.defaultColorName)
     self.lcd.hline(self.cursor['startX'], self.cursor['y'],
       self.lcd.get_width(), color)
     self.cursor['x'] = self.cursor['startX']
@@ -93,7 +93,7 @@ class LcdFont:
     bitIndex = 0
     byte = fontCharBytes[byteIndex]
     if color == None:
-      color = self.defaultColor
+      color = self.lcd.get_color_by_name(self.defaultColorName)
     for chX in range(self.fontWidth):
       for chY in range(self.fontHeight):
         if bitIndex >= 8:
