@@ -259,9 +259,10 @@ class LCD():
           bIdx2 = pxIdx2*bitsPerPx//8
 
           if x >= bufH:
+            #old y (aka x) is outside of new height
             buf[bIdx1 + 0] = 0
             buf[bIdx1 + 1] = 0
-          elif bIdx2 >= 0:
+          else:
             buf[bIdx1 + 0] = buf[bIdx2 + 0]
             buf[bIdx1 + 1] = buf[bIdx2 + 1]
     else:
@@ -274,12 +275,13 @@ class LCD():
           bIdx1 = pxIdx1*bitsPerPx//8
           bIdx2 = pxIdx2*bitsPerPx//8
 
-          if bIdx2 + 1 < bufferSize:
-            buf[bIdx1 + 0] = buf[bIdx2 + 0]
-            buf[bIdx1 + 1] = buf[bIdx2 + 1]
-          else:
+          if y >= bufW:
+            #old x (aka y) is outside of new width
             buf[bIdx1 + 0] = 0
             buf[bIdx1 + 1] = 0
+          else:
+            buf[bIdx1 + 0] = buf[bIdx2 + 0]
+            buf[bIdx1 + 1] = buf[bIdx2 + 1]
 
   def fill(self, color):
     if not self.framebufEnabled:
