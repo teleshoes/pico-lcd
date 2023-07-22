@@ -244,6 +244,7 @@ sub main(@){
   my $quiet = 0;
 
   my $text = "";
+  my @textParams;
   my $isClearText = 1;
   my $splitLines = $SPLIT_LINES_BIG_ONLY;
   my $lcdWidthPx = undef;
@@ -525,14 +526,24 @@ sub main(@){
 
       print "$msg\n" unless $quiet;
 
+      my @params = (@textParams);
       #clear() on the first message unless --no-clear
-      my $clear = ($isClearText and $i == 0) ? "true" : "false";
+      if($isClearText and $i == 0){
+        @params = (@params, "clear=true");
+      }else{
+        @params = (@params, "clear=false");
+      }
 
       #do not show() until last message
-      my $show = $i < $#messages ? "false" : "true";
+      if($i < $#messages){
+        @params = (@params, "show=false");
+      }else{
+        @params = (@params, "show=true");
+      }
 
+      my $paramsFmt = "?" . join "&", @params;
       system "curl", "--no-progress-meter",
-        "http://$ipAddr/text?clear=$clear&show=$show",
+        "http://$ipAddr/text$paramsFmt",
         "--data", "$msg";
     }
   }else{
