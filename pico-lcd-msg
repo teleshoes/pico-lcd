@@ -435,17 +435,32 @@ sub main(@){
     $text =~ s/\r/\n/g;
 
     #replace '!n!' markup with newlines
-    $text =~ s/&/&amp;/g;
-    while($text =~ /!([^!]*)!/){
-      my $cmd = $1;
-      if($cmd eq "n"){
-        $text =~ s/!$cmd!/\n/;
+    my $newText;
+    for(my $i=0; $i<length $text; $i++){
+      my $ch = substr($text, $i, 1);
+      if($ch eq "!"){
+        my $cmd = "!";
+        $i++;
+        while($i < length $text and substr($text, $i, 1) ne "!"){
+          $cmd .= substr($text, $i, 1);
+          $i++;
+        }
+        if($i < length $text){
+          $cmd .= substr($text, $i, 1);
+          die "ERROR: failed to parse $text\n" if $cmd !~ /^![^!]*!$/;
+        }else{
+          die "ERROR: failed to parse $text\n" if $cmd !~ /^![^!]*$/;
+        }
+        if($cmd eq "!n!"){
+          $newText .= "\n";
+        }else{
+          $newText .= $cmd;
+        }
       }else{
-        $text =~ s/!\Q$cmd\E!/&exc;\Q$cmd\E&exc;/;
+        $newText .= $ch;
       }
     }
-    $text =~ s/&exc;/!/g;
-    $text =~ s/&amp;/&/g;
+    $text = $newText;
 
     my @lines = split /\n/, $text;
 
