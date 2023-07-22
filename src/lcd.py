@@ -147,7 +147,7 @@ class LCD():
     self.init_colors()
 
   def init_colors(self):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       #RGB565
       self.red   = st7789.RED
       self.green = st7789.GREEN
@@ -272,13 +272,13 @@ class LCD():
             buf[idx1*2 + 1] = 0
 
   def fill(self, color):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       self.tft.fill(color)
     else:
       self.framebuf.fill(color)
 
   def rect(self, x, y, w, h, color, fill=True):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       if fill:
         self.tft.fill_rect(x, y, w, h, color)
       else:
@@ -290,25 +290,25 @@ class LCD():
     self.rect(x, y, w, h, color, True)
 
   def pixel(self, x, y, color):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       self.tft.pixel(x, y, color)
     else:
       self.framebuf.pixel(x, y, color)
 
   def hline(self, x, y, w, c):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       self.tft.hline(x, y, w, c)
     else:
       self.framebuf.hline(x, y, w, c)
 
   def vline(self, x, y, w, c):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       self.tft.vline(x, y, w, c)
     else:
       self.framebuf.vline(x, y, w, c)
 
   def line(self, x1, y1, x2, y2, c):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       self.tft.line(x1, y1, x2, y2, c)
     else:
       self.framebuf.line(x1, y1, x2, y2, c)
@@ -317,7 +317,7 @@ class LCD():
     self.ellipse(centerX, centerY, radius, radius, color, fill, quadrantMask)
 
   def ellipse(self, centerX, centerY, radiusX, radiusY, color, fill=True, quadrantMask=0b1111):
-    if self.framebuf != None:
+    if self.framebufEnabled:
       self.framebuf.ellipse(centerX, centerY, radiusX, radiusY, color, fill, quadrantMask)
       return
 
@@ -395,7 +395,7 @@ class LCD():
   #   fill=True is implemented only WITH framebuf
   #   rotateRad/rotateCX/rotateCY is implemented only WITHOUT framebuf
   def poly(self, coords, x, y, color, fill=False, rotateRad=0, rotateCX=0, rotateCY=0):
-    if self.framebuf == None:
+    if not self.framebufEnabled:
       if fill:
         print("WARNING: 'fill' is not implemented in poly() for st7789_mpy")
       polygonXYPairs = []
@@ -439,7 +439,7 @@ class LCD():
       self.write_data(buf)
     buf = None
 
-    if self.framebuf != None:
+    if self.framebufEnabled:
       self.set_window_to_framebuf()
 
   def set_window_to_framebuf(self):
@@ -463,6 +463,6 @@ class LCD():
     self.write_data(bytearray([yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]))
 
   def show(self):
-    if self.framebuf != None:
+    if self.framebufEnabled:
       self.write_cmd(0x2C)
       self.write_data(self.buffer)
