@@ -93,11 +93,7 @@ def main():
         controller['lcd'].show()
       elif cmd == "buttons":
         print("buttons")
-        for btnName in sorted(controller['buttons']['count']):
-          if len(out) > 0:
-            out += ", "
-          out += btnName + "=" + str(controller['buttons']['count'][btnName])
-        out += "\n"
+        out = formatButtonCount(controller['buttons']) + "\n"
       elif cmd == "fill":
         print("fill")
         colorName = maybeGetParamStr(params, "color", None)
@@ -260,6 +256,14 @@ def removeButtonHandlers(buttons):
     for btnName in buttons['pins']:
       pin = buttons['pins'][btnName]
       pin.irq(handler=None)
+
+def formatButtonCount(buttons):
+  fmt = ""
+  for btnName in sorted(buttons['count']):
+    if len(fmt) > 0:
+      fmt += ", "
+    fmt += btnName + "=" + str(buttons['count'][btnName])
+  return fmt
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
   if paramName in params:
