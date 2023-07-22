@@ -148,6 +148,9 @@ my $USAGE = "Usage:
     -q | --quiet
       do not print messages sent with curl
 
+    --data=DATA
+      for --cmd, pass in DATA as POST payload with curl (using '--data DATA')
+
     --ip=IP_ADDRESS
       use IP_ADDRESS in calls to curl
     --ap
@@ -236,6 +239,7 @@ sub main(@){
 
   my $cmd = undef;
   my @cmdParams;
+  my $cmdData = undef;
 
   while(@_ > 0){
     my $arg = shift @_;
@@ -272,6 +276,9 @@ sub main(@){
       while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
         push @cmdParams, shift @_;
       }
+    }elsif($arg =~ /^--data=(.+)$/){
+      $cmdData = $1;
+      die "ERROR: --data must follow --cmd\n" if $mode ne $MODE_CMD;
     }elsif($arg =~ /^(--info|info)$/ and not defined $mode){
       $cmd = "info";
       $mode = $MODE_CMD;
@@ -417,7 +424,9 @@ sub main(@){
       $paramsFmt = "?" . join "&", @cmdParams;
     }
 
-    system "curl", "--no-progress-meter", "http://$ipAddr/$cmd$paramsFmt";
+    my @curlCmd = ("curl", "--no-progress-meter", "http://$ipAddr/$cmd$paramsFmt");
+    @curlCmd = (@curlCmd, "--data", $cmdData) if defined $cmdData;
+    system @curlCmd;
   }elsif($mode eq $MODE_TEXT){
     my $charsTotal = length $text;
 
