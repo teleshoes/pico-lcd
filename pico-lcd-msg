@@ -141,6 +141,9 @@ my $USAGE = "Usage:
   $EXEC [OPTS] right | --right | bot | --bot | bottom | --bottom
     -same as: $EXEC [OPTS] framebuf 160 240 160 0
 
+  $EXEC [OPTS] square | --square
+    -same as: $EXEC [OPTS] framebuf 240 240 0 0
+
   OPTS
     -q | --quiet
       do not print messages sent with curl
