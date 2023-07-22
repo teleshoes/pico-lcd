@@ -109,6 +109,8 @@ def main():
       elif cmd == "show":
         print("show")
         controller['lcd'].show()
+      elif cmd == "connect":
+        controller['wifi'] = setupWifi(controller['lcdFont'])
       elif cmd == "ssid":
         ssid = maybeGetParamStr(params, "ssid", None)
         password = maybeGetParamStr(params, "password", None)
