@@ -31,7 +31,8 @@ class LCD():
     self.framebufOffsetX = None
     self.framebufOffsetY = None
 
-    self.framebufColorProfile = framebuf.RGB565
+    #used only in framebuf, st7789 is RGB565 only
+    self.framebufColorProfile = framebuf.RGB444
 
     self.rotationsArr = []
     for i in range(0, len(self.layouts)):
