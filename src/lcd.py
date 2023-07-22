@@ -209,7 +209,11 @@ class LCD():
       if wasLandscape != isLandscape and self.buffer != None:
         # if framebuf is not a square, transpose row/col count (cut off right or bottom)
         if self.framebufMaxWidth != self.framebufMaxHeight:
-          self.transposeBufferRowColCount()
+          if self.framebufMaxWidth % 2 == 1 or self.framebufMaxHeight % 2 == 1:
+            # skip transpose of odd-width or odd-height framebuffers
+            self.fill(0)
+          else:
+            self.transposeBufferRowColCount()
 
     self.init_framebuf()
     self.show()
@@ -242,7 +246,7 @@ class LCD():
     bufH = int(bufHObj)
     bitsPerPx = int(self.bits_per_px())
 
-    bytesPerPx = bitsPerPx // 8
+    bytesPer2Px = 2*bitsPerPx // 8 # 2px = 4 bytes for RGB565
 
     diff = bufW - bufH
     if diff < 0:
@@ -252,15 +256,16 @@ class LCD():
       #was portrait, now landscape, chop off pixels on the bottom
       for y in range(0, bufH):
         y = bufH - y - 1 #reversed(range())
-        for x in range(0, bufW):
-          x = bufW - x - 1 #reversed(range())
+        for x in range(0, bufW, 2): #even X only, 2px at a time
+          x = bufW - x - 2 #reversed(range())
           pxIdx1 = y*bufW + x
           pxIdx2 = pxIdx1 - (pxIdx1 // bufW)*diff
 
           bIdx1 = pxIdx1*bitsPerPx//8
           bIdx2 = pxIdx2*bitsPerPx//8
 
-          for i in range(0, bytesPerPx):
+          #copy 2 pixels, x and x+1
+          for i in range(0, bytesPer2Px):
             if x >= bufH:
               #old y (aka x) is outside of new height
               buf[bIdx1 + i] = 0
@@ -269,14 +274,15 @@ class LCD():
     else:
       #was landscape, now portrait, chop off pixels on the right
       for y in range(0, bufH):
-        for x in range(0, bufW):
+        for x in range(0, bufW, 2): #even X only, 2px at a time
           pxIdx1 = y*bufW + x
           pxIdx2 = pxIdx1 + (pxIdx1 // bufW)*diff
 
           bIdx1 = pxIdx1*bitsPerPx//8
           bIdx2 = pxIdx2*bitsPerPx//8
 
-          for i in range(0, bytesPerPx):
+          #copy 2 pixels, x and x+1
+          for i in range(0, bytesPer2Px):
             if y >= bufW:
               #old x (aka y) is outside of new width
               buf[bIdx1 + i] = 0
