@@ -242,6 +242,8 @@ class LCD():
     bufH = int(bufHObj)
     bitsPerPx = int(self.bits_per_px())
 
+    bytesPerPx = bitsPerPx // 8
+
     diff = bufW - bufH
     if diff < 0:
       diff = 0 - diff
@@ -258,13 +260,12 @@ class LCD():
           bIdx1 = pxIdx1*bitsPerPx//8
           bIdx2 = pxIdx2*bitsPerPx//8
 
-          if x >= bufH:
-            #old y (aka x) is outside of new height
-            buf[bIdx1 + 0] = 0
-            buf[bIdx1 + 1] = 0
-          else:
-            buf[bIdx1 + 0] = buf[bIdx2 + 0]
-            buf[bIdx1 + 1] = buf[bIdx2 + 1]
+          for i in range(0, bytesPerPx):
+            if x >= bufH:
+              #old y (aka x) is outside of new height
+              buf[bIdx1 + i] = 0
+            else:
+              buf[bIdx1 + i] = buf[bIdx2 + i]
     else:
       #was landscape, now portrait, chop off pixels on the right
       for y in range(0, bufH):
@@ -275,13 +276,12 @@ class LCD():
           bIdx1 = pxIdx1*bitsPerPx//8
           bIdx2 = pxIdx2*bitsPerPx//8
 
-          if y >= bufW:
-            #old x (aka y) is outside of new width
-            buf[bIdx1 + 0] = 0
-            buf[bIdx1 + 1] = 0
-          else:
-            buf[bIdx1 + 0] = buf[bIdx2 + 0]
-            buf[bIdx1 + 1] = buf[bIdx2 + 1]
+          for i in range(0, bytesPerPx):
+            if y >= bufW:
+              #old x (aka y) is outside of new width
+              buf[bIdx1 + i] = 0
+            else:
+              buf[bIdx1 + i] = buf[bIdx2 + i]
 
   def fill(self, color):
     if not self.framebufEnabled:
