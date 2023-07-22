@@ -120,29 +120,42 @@ my $USAGE = "Usage:
           inverted-portrait | 90
             set rotateion to 90 degrees
 
-  $EXEC [OPTS] framebuf   ENABLED [MAX_WIDTH MAX_HEIGHT [OFFSET_X OFFSET_Y]
-  $EXEC [OPTS] --framebuf ENABLED [MAX_WIDTH MAX_HEIGHT [OFFSET_X OFFSET_Y]
+  $EXEC [OPTS] framebuf   FRAMEBUF
+  $EXEC [OPTS] --framebuf FRAMEBUF
     -same as: $EXEC [OPTS] --cmd framebuf enabled=ENABLED \\
                 maxwidth=MAX_WIDTH maxheight=MAX_HEIGHT x=OFFSET_X y=OFFSET_Y
-      ENABLED
-        'true' or 'false' to enable/disable the framebuf
-      MAX_WIDTH
-        limit the framebuf width, 0 means no maximum
-      MAX_HEIGHT
-        limit the framebuf height, 0 means no maximum
-      OFFSET_X
+      FRAMEBUF
+        one of:
+          on | enabled | true
+            enable framebuf, with no max WxH or X/Y offsets
+          off | disabled | false
+            disable framebuf
+          WxH
+            enable framebuf, and set max WxH with no X/Y offsets
+          WxH+X+Y
+            enable framebuf, and set max WxH and X/Y offsets
+      W
+        limit the framebuf max width, 0 means no maximum
+      H
+        limit the framebuf max height, 0 means no maximum
+      X
         shift the framebuf window to the right, 0 means no offset
-      OFFSET_Y
+      Y
         shift the framebuf window down, 0 means no offset
 
+      NOTE: regardless of current orientation:
+        W and X always refers to the larger physical dimension of the LCD
+        H and Y always refers to the smaller physical dimension of the LCD
+
+
   $EXEC [OPTS] left | --left | top | --top
-    -same as: $EXEC [OPTS] framebuf 160 240 0 0
+    -same as: $EXEC [OPTS] framebuf 160x240+0+0
 
   $EXEC [OPTS] right | --right | bot | --bot | bottom | --bottom
-    -same as: $EXEC [OPTS] framebuf 160 240 160 0
+    -same as: $EXEC [OPTS] framebuf 160x240+160+0
 
   $EXEC [OPTS] square | --square
-    -same as: $EXEC [OPTS] framebuf 240 240 0 0
+    -same as: $EXEC [OPTS] framebuf 240x240
 
   OPTS
     -q | --quiet
@@ -329,39 +342,19 @@ sub main(@){
     }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @cmdParams, "enabled=" . shift @_;
-      if(@_ >= 2 and $_[0] =~ /^\d+$/ and $_[0] =~ /^\d+$/){
-        push @cmdParams, "maxwidth=" . shift @_;
-        push @cmdParams, "maxheight=" . shift @_;
-      }
-      if(@_ >= 2 and $_[0] =~ /^\d+$/ and $_[0] =~ /^\d+$/){
-        push @cmdParams, "x=" . shift @_;
-        push @cmdParams, "y=" . shift @_;
-      }
+      push @cmdParams, "framebuf=" . shift @_;
     }elsif($arg =~ /^(left|--left|top|--top)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @cmdParams, "enabled=true";
-      push @cmdParams, "maxwidth=160";
-      push @cmdParams, "maxheight=240";
-      push @cmdParams, "x=0";
-      push @cmdParams, "y=0";
+      push @cmdParams, "framebuf=160x240+0+0";
     }elsif($arg =~ /^(right|--right|bot|--bot|bottom|--bottom)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @cmdParams, "enabled=true";
-      push @cmdParams, "maxwidth=160";
-      push @cmdParams, "maxheight=240";
-      push @cmdParams, "x=160";
-      push @cmdParams, "y=0";
+      push @cmdParams, "framebuf=160x240+160+0";
     }elsif($arg =~ /^(square|--square)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @cmdParams, "enabled=true";
-      push @cmdParams, "maxwidth=240";
-      push @cmdParams, "maxheight=240";
-      push @cmdParams, "x=0";
-      push @cmdParams, "y=0";
+      push @cmdParams, "framebuf=240x240";
     }elsif($arg =~ /^(--clear-text)$/){
       $isClearText = 1;
     }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
