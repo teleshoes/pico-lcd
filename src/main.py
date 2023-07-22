@@ -85,7 +85,34 @@ def main():
 
       out = ""
 
-      if cmd == "clear":
+      if cmd == "info":
+        if controller['lcd'].framebufEnabled:
+          (winX, winY) = controller['lcd'].get_framebuf_size()
+        else:
+          (winX, winY) = (controller['lcd'].get_width(), controller['lcd'].get_height())
+        (charX, charY) = controller['lcdFont'].getCharGridSize(1)
+
+        out += "window: %sx%s\n" % (
+          winX,
+          winY)
+        out += "  (lcd: %sx%s, framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s)\n" % (
+          controller['lcd'].get_width(),
+          controller['lcd'].get_height(),
+          controller['lcd'].framebufEnabled,
+          controller['lcd'].framebufMaxWidth,
+          controller['lcd'].framebufMaxHeight,
+          controller['lcd'].framebufOffsetX,
+          controller['lcd'].framebufOffsetY)
+        out += "orientation: %s degrees\n" % (
+          controller['lcd'].get_rotation_degrees())
+        out += "RAM free: %s bytes\n" % (
+          gc.mem_free())
+        out += "buttons: %s\n" % (
+          formatButtonCount(controller['buttons']))
+        out += "char8px: %sx%s\n" % (
+          charX,
+          charY)
+      elif cmd == "clear":
         print("clear")
         controller['lcd'].fill_mem_blank()
       elif cmd == "show":
