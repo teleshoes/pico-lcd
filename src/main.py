@@ -103,12 +103,6 @@ def main():
         out += "char8px: %sx%s\n" % (
           charX,
           charY)
-      elif cmd == "clear":
-        print("clear")
-        controller['lcd'].fill_mem_blank()
-      elif cmd == "show":
-        print("show")
-        controller['lcd'].show()
       elif cmd == "connect":
         controller['wifi'] = setupWifi(controller['lcdFont'])
       elif cmd == "ssid":
@@ -123,6 +117,12 @@ def main():
         writeFile("wifi-conf.txt", "")
         out = "WARNING: all wifi networks removed for next boot\n"
         print(out)
+      elif cmd == "clear":
+        print("clear")
+        controller['lcd'].fill_mem_blank()
+      elif cmd == "show":
+        print("show")
+        controller['lcd'].show()
       elif cmd == "buttons":
         print("buttons")
         out = formatButtonCount(controller['buttons']) + "\n"
