@@ -67,6 +67,13 @@ class LCD():
   def get_height(self):
     return self.rotCfg['H']
 
+  def get_target_window_size(self):
+    if self.framebufEnabled:
+      (winX, winY) = self.get_framebuf_size()
+    else:
+      (winX, winY) = (self.get_width(), self.get_height())
+    return (winX, winY)
+
   def set_framebuf_enabled(self, isEnabled,
                            maxWidth=None, maxHeight=None,
                            offsetX=None, offsetY=None):
