@@ -43,7 +43,7 @@ def buttonPressedActions(btnName, controller):
 def main():
   controller = {
     'lcdName': None, 'lcd': None, 'lcdFont': None,
-    'wifi': None, 'socket': None,
+    'socket': None,
     'buttons': None,
   }
 
@@ -61,7 +61,7 @@ def main():
 
   controller['socket'] = getSocket()
 
-  controller['wifi'] = setupWifi(controller['lcdFont'])
+  setupWifi(controller['lcdFont'])
 
   while True:
     try:
@@ -104,7 +104,7 @@ def main():
           charX,
           charY)
       elif cmd == "connect":
-        controller['wifi'] = setupWifi(controller['lcdFont'])
+        setupWifi(controller['lcdFont'])
       elif cmd == "ssid":
         ssid = maybeGetParamStr(params, "ssid", None)
         password = maybeGetParamStr(params, "password", None)
@@ -520,7 +520,6 @@ def setupWifi(lcdFont):
       + "!size=3!!color=blue!"              + "\nlistening on:\n"
       + "!size=3!!color=green!!hspace=0.7!" + ip + "\n"
     )
-    return {'isAP': False, 'ssid': ssid, 'password': password, 'ip': ip, 'wlan': wlan}
 
 def setupAccessPoint(lcdFont):
   ssid = "pico-lcd"
@@ -563,7 +562,6 @@ def setupAccessPoint(lcdFont):
     + "!size=1!!color=white!"             + "e.g.:\n"
     + "!size=1!!color=white!"             + "curl 'http://" + ip + "/ssid?\nssid=MY_NETWORK&password=P4SSW0RD'\n"
   )
-  return {'isAP': True, 'ssid': ssid, 'password': password, 'ip': ip, 'wlan': wlan}
 
 
 def getSocket():
