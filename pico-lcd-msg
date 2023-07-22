@@ -75,6 +75,14 @@ my $USAGE = "Usage:
         COLOR
           one of: white black red green blue
 
+  $EXEC [OPTS] lcd   NAME
+  $EXEC [OPTS] --lcd NAME
+  $EXEC [OPTS] --lcd=NAME
+    set the lcd model to NAME
+      -same as: $EXEC [OPTS] --cmd lcd name=<LCD_NAME>
+        LCD_NAME
+          one of: 1_3 2_0
+
   $EXEC [OPTS] orient   ORIENT
   $EXEC [OPTS] --orient ORIENT
   $EXEC [OPTS] --orient=ORIENT
@@ -241,6 +249,14 @@ sub main(@){
       $cmd = "fill";
       $mode = $MODE_CMD;
       push @params, "color=$1";
+    }elsif($arg =~ /^(--lcd|lcd)$/ and @_ > 0 and not defined $mode){
+      $cmd = "lcd";
+      $mode = $MODE_CMD;
+      push @params, "name=" . shift @_;
+    }elsif($arg =~ /^--lcd=(\w+)$/ and not defined $mode){
+      $cmd = "lcd";
+      $mode = $MODE_CMD;
+      push @params, "name=$1";
     }elsif($arg =~ /^(--orient|orient)$/ and @_ > 0 and not defined $mode){
       $cmd = "orient";
       $mode = $MODE_CMD;
