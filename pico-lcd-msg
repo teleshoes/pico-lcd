@@ -364,14 +364,10 @@ sub main(@){
   }
 
   if(not defined $ipAddr){
-    my @lines = `cat $DEVICE_CONFIG_FILE 2>/dev/null`;
-    for my $line(@lines){
-      if($line =~ /^\s*(\w+)\s*=\s*(\d+\.\d+\.\d+\.\d+)$/){
-        my ($cfgDevName, $cfgDevIP) = ($1, $2);
-        if(not defined $devName or (lc $devName eq lc $cfgDevName)){
-          $ipAddr = $cfgDevIP;
-          last;
-        }
+    for my $cfgDevName(@DEVICE_NAMES){
+      if(not defined $devName or (lc $devName eq lc $cfgDevName)){
+        $ipAddr = $DEVICE_IPS_BY_NAME{$cfgDevName};
+        last;
       }
     }
     if(not defined $ipAddr){
