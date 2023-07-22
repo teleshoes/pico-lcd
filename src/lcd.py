@@ -120,7 +120,7 @@ class LCD():
 
   def create_buffer(self):
     (bufW, bufH) = self.get_framebuf_size()
-    framebufSizeBytes = bufW * bufH * 2
+    framebufSizeBytes = bufW * bufH * self.bits_per_px() // 8
 
     if self.buffer == None or len(self.buffer) != framebufSizeBytes:
       self.framebuf = None
@@ -161,6 +161,9 @@ class LCD():
       self.blue  = self.swap_hi_lo_byte_order(st7789.BLUE)
       self.white = self.swap_hi_lo_byte_order(st7789.WHITE)
       self.black = self.swap_hi_lo_byte_order(st7789.BLACK)
+
+  def bits_per_px(self):
+    return 16
 
   def get_color_by_name(self, colorName):
     if colorName == "red":
@@ -237,11 +240,12 @@ class LCD():
     (bufWObj, bufHObj) = self.get_framebuf_size()
     bufW = int(bufWObj)
     bufH = int(bufHObj)
+    bitsPerPx = int(self.bits_per_px())
 
     diff = bufW - bufH
     if diff < 0:
       diff = 0 - diff
-    bufferSize = bufW * bufH * 2
+    bufferSize = bufW * bufH * bitsPerPx // 8
     if bufW >= bufH:
       #was portrait, now landscape, chop off pixels on the bottom
       for y in range(0, bufH):
@@ -251,8 +255,8 @@ class LCD():
           pxIdx1 = y*bufW + x
           pxIdx2 = pxIdx1 - (pxIdx1 // bufW)*diff
 
-          bIdx1 = pxIdx1 * 2
-          bIdx2 = pxIdx2 * 2
+          bIdx1 = pxIdx1*bitsPerPx//8
+          bIdx2 = pxIdx2*bitsPerPx//8
 
           if x >= bufH:
             buf[bIdx1 + 0] = 0
@@ -267,8 +271,8 @@ class LCD():
           pxIdx1 = y*bufW + x
           pxIdx2 = pxIdx1 + (pxIdx1 // bufW)*diff
 
-          bIdx1 = pxIdx1 * 2
-          bIdx2 = pxIdx2 * 2
+          bIdx1 = pxIdx1*bitsPerPx//8
+          bIdx2 = pxIdx2*bitsPerPx//8
 
           if bIdx2 + 1 < bufferSize:
             buf[bIdx1 + 0] = buf[bIdx2 + 0]
@@ -440,7 +444,7 @@ class LCD():
     self.set_window(0, memWidth, 0, memHeight)
     self.write_cmd(0x2C)
 
-    buf = bytearray(int(memWidth*memHeight*2 / numberOfChunks))
+    buf = bytearray(memWidth*memHeight*self.bits_per_px()//8 // numberOfChunks)
     for i in range(0, numberOfChunks):
       self.write_data(buf)
     buf = None
