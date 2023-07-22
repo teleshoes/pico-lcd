@@ -147,6 +147,26 @@ def main():
 
           controller['lcdFont'].setLCD(controller['lcd'])
           writeLastLCDName(name)
+      elif cmd == "orient" or cmd == "rotation":
+        val = maybeGetParamStr(params, "orient", None)
+        print("orient=" + val)
+
+        degrees = None
+        if val == "landscape" or val == "0" or val == "normal" or val == "default":
+          degrees = 0
+        elif val == "portrait" or val == "270" or val == "-90":
+          degrees = 270
+        elif val == "inverted-landscape" or val == "180":
+          degrees = 180
+        elif val == "inverted-portrait" or val == "90":
+          degrees = 90
+
+        if degrees != None:
+          controller['lcd'].set_rotation_degrees(degrees)
+          writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
+          out = "orient=" + str(degrees) + "\n"
+        else:
+          out = "unknown orient " + val + "\n"
       elif cmd == "framebuf":
         #NOTE: regardless of current orientation:
         #  'maxwidth' and 'x' refers to the largest physical dimension
@@ -178,26 +198,6 @@ def main():
           controller['lcd'].framebufMaxHeight,
           controller['lcd'].framebufOffsetX,
           controller['lcd'].framebufOffsetY)
-      elif cmd == "orient" or cmd == "rotation":
-        val = maybeGetParamStr(params, "orient", None)
-        print("orient=" + val)
-
-        degrees = None
-        if val == "landscape" or val == "0" or val == "normal" or val == "default":
-          degrees = 0
-        elif val == "portrait" or val == "270" or val == "-90":
-          degrees = 270
-        elif val == "inverted-landscape" or val == "180":
-          degrees = 180
-        elif val == "inverted-portrait" or val == "90":
-          degrees = 90
-
-        if degrees != None:
-          controller['lcd'].set_rotation_degrees(degrees)
-          writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
-          out = "orient=" + str(degrees) + "\n"
-        else:
-          out = "unknown orient " + val + "\n"
       elif cmd == "text":
         markup = data.decode("utf8")
         print("text: " + markup)
