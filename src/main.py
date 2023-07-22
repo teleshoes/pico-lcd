@@ -66,7 +66,6 @@ def main():
   while True:
     try:
       #something allocates memory that GC is not aware of
-      mem = gc.mem_free()
       gc.collect()
 
       cl, addr = controller['socket'].accept()
