@@ -306,6 +306,14 @@ sub main(@){
       push @params, "maxheight=240";
       push @params, "x=160";
       push @params, "y=0";
+    }elsif($arg =~ /^(square|--square)$/ and not defined $mode){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @params, "enabled=true";
+      push @params, "maxwidth=240";
+      push @params, "maxheight=240";
+      push @params, "x=0";
+      push @params, "y=0";
     }elsif($arg =~ /^(--clear-text)$/){
       $isClearText = 1;
     }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
