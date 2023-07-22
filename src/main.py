@@ -118,6 +118,14 @@ def main():
       elif cmd == "show":
         print("show")
         controller['lcd'].show()
+      elif cmd == "ssid":
+        ssid = maybeGetParamStr(params, "ssid", None)
+        password = maybeGetParamStr(params, "password", None)
+        if ssid != None and password != None:
+          appendSSID(ssid, password)
+          out = "added wifi network:\n ssid=" + ssid +"\n password=" + password + "\n"
+        else:
+          out = "ERROR: missing ssid or password\n"
       elif cmd == "buttons":
         print("buttons")
         out = formatButtonCount(controller['buttons']) + "\n"
@@ -376,6 +384,13 @@ def readCommandRequest(cl):
       break
 
   return (cmd, params, data)
+
+def appendSSID(ssid, password):
+  try:
+    with open("wifi-conf.txt", "a") as fh:
+      fh.write(ssid + " = " + password + "\n")
+  except:
+    pass
 
 def readLastLCDName():
   val = readFileLine("last-lcd-name.txt")
