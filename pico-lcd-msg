@@ -235,7 +235,7 @@ sub main(@){
   my ($color, $size, $hspace, $vspace, $x, $y);
 
   my $cmd = undef;
-  my @params;
+  my @cmdParams;
 
   while(@_ > 0){
     my $arg = shift @_;
@@ -264,13 +264,13 @@ sub main(@){
       $cmd = shift @_;
       $mode = $MODE_CMD;
       while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
-        push @params, shift @_;
+        push @cmdParams, shift @_;
       }
     }elsif($arg =~ /^--cmd=(\w+)$/ and not defined $mode){
       $cmd = $1;
       $mode = $MODE_CMD;
       while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
-        push @params, shift @_;
+        push @cmdParams, shift @_;
       }
     }elsif($arg =~ /^(--info|info)$/ and not defined $mode){
       $cmd = "info";
@@ -281,8 +281,8 @@ sub main(@){
     }elsif($arg =~ /^(--ssid|ssid)$/ and @_ >= 2 and not defined $mode){
       $cmd = "ssid";
       $mode = $MODE_CMD;
-      push @params, "ssid=" . shift @_;
-      push @params, "password=" . shift @_;
+      push @cmdParams, "ssid=" . shift @_;
+      push @cmdParams, "password=" . shift @_;
     }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $mode){
       $cmd = "resetwifi";
       $mode = $MODE_CMD;
@@ -298,63 +298,63 @@ sub main(@){
     }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $mode){
       $cmd = "fill";
       $mode = $MODE_CMD;
-      push @params, "color=" . shift @_;
+      push @cmdParams, "color=" . shift @_;
     }elsif($arg =~ /^--fill=(\w+)$/ and not defined $mode){
       $cmd = "fill";
       $mode = $MODE_CMD;
-      push @params, "color=$1";
+      push @cmdParams, "color=$1";
     }elsif($arg =~ /^(--lcd|lcd)$/ and @_ > 0 and not defined $mode){
       $cmd = "lcd";
       $mode = $MODE_CMD;
-      push @params, "name=" . shift @_;
+      push @cmdParams, "name=" . shift @_;
     }elsif($arg =~ /^--lcd=(\w+)$/ and not defined $mode){
       $cmd = "lcd";
       $mode = $MODE_CMD;
-      push @params, "name=$1";
+      push @cmdParams, "name=$1";
     }elsif($arg =~ /^(--orient|orient)$/ and @_ > 0 and not defined $mode){
       $cmd = "orient";
       $mode = $MODE_CMD;
-      push @params, "orient=" . shift @_;
+      push @cmdParams, "orient=" . shift @_;
     }elsif($arg =~ /^--orient=(\w+)$/ and not defined $mode){
       $cmd = "orient";
       $mode = $MODE_CMD;
-      push @params, "orient=$1";
+      push @cmdParams, "orient=$1";
     }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @params, "enabled=" . shift @_;
+      push @cmdParams, "enabled=" . shift @_;
       if(@_ >= 2 and $_[0] =~ /^\d+$/ and $_[0] =~ /^\d+$/){
-        push @params, "maxwidth=" . shift @_;
-        push @params, "maxheight=" . shift @_;
+        push @cmdParams, "maxwidth=" . shift @_;
+        push @cmdParams, "maxheight=" . shift @_;
       }
       if(@_ >= 2 and $_[0] =~ /^\d+$/ and $_[0] =~ /^\d+$/){
-        push @params, "x=" . shift @_;
-        push @params, "y=" . shift @_;
+        push @cmdParams, "x=" . shift @_;
+        push @cmdParams, "y=" . shift @_;
       }
     }elsif($arg =~ /^(left|--left|top|--top)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @params, "enabled=true";
-      push @params, "maxwidth=160";
-      push @params, "maxheight=240";
-      push @params, "x=0";
-      push @params, "y=0";
+      push @cmdParams, "enabled=true";
+      push @cmdParams, "maxwidth=160";
+      push @cmdParams, "maxheight=240";
+      push @cmdParams, "x=0";
+      push @cmdParams, "y=0";
     }elsif($arg =~ /^(right|--right|bot|--bot|bottom|--bottom)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @params, "enabled=true";
-      push @params, "maxwidth=160";
-      push @params, "maxheight=240";
-      push @params, "x=160";
-      push @params, "y=0";
+      push @cmdParams, "enabled=true";
+      push @cmdParams, "maxwidth=160";
+      push @cmdParams, "maxheight=240";
+      push @cmdParams, "x=160";
+      push @cmdParams, "y=0";
     }elsif($arg =~ /^(square|--square)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
-      push @params, "enabled=true";
-      push @params, "maxwidth=240";
-      push @params, "maxheight=240";
-      push @params, "x=0";
-      push @params, "y=0";
+      push @cmdParams, "enabled=true";
+      push @cmdParams, "maxwidth=240";
+      push @cmdParams, "maxheight=240";
+      push @cmdParams, "x=0";
+      push @cmdParams, "y=0";
     }elsif($arg =~ /^(--clear-text)$/){
       $isClearText = 1;
     }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
@@ -413,8 +413,8 @@ sub main(@){
 
   if($mode eq $MODE_CMD){
     my $paramsFmt = "";
-    if(@params > 0){
-      $paramsFmt = "?" . join "&", @params;
+    if(@cmdParams > 0){
+      $paramsFmt = "?" . join "&", @cmdParams;
     }
 
     system "curl", "--no-progress-meter", "http://$ipAddr/$cmd$paramsFmt";
