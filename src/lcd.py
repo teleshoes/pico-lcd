@@ -31,6 +31,8 @@ class LCD():
     self.framebufOffsetX = None
     self.framebufOffsetY = None
 
+    self.framebufColorProfile = framebuf.RGB565
+
     self.rotationsArr = []
     for i in range(0, len(self.layouts)):
       rot = self.layouts[i]
@@ -138,7 +140,7 @@ class LCD():
     if self.buffer != None:
       (bufW, bufH) = self.get_framebuf_size()
       self.framebuf = framebuf.FrameBuffer(
-        self.buffer, bufW, bufH, framebuf.RGB565)
+        self.buffer, bufW, bufH, self.framebufColorProfile)
 
       self.set_window_to_framebuf()
     else:
@@ -149,13 +151,15 @@ class LCD():
   def init_colors(self):
     if not self.framebufEnabled:
       #RGB565
+      self.set_lcd_RGB565()
       self.red   = st7789.RED
       self.green = st7789.GREEN
       self.blue  = st7789.BLUE
       self.white = st7789.WHITE
       self.black = st7789.BLACK
-    else:
-      #byte order swapped in framebuf
+    elif self.framebufColorProfile == framebuf.RGB565:
+      #RGB565 (byte order swapped st7789 vs framebuf)
+      self.set_lcd_RGB565()
       self.red   = self.swap_hi_lo_byte_order(st7789.RED)
       self.green = self.swap_hi_lo_byte_order(st7789.GREEN)
       self.blue  = self.swap_hi_lo_byte_order(st7789.BLUE)
@@ -163,7 +167,17 @@ class LCD():
       self.black = self.swap_hi_lo_byte_order(st7789.BLACK)
 
   def bits_per_px(self):
-    return 16
+    if not self.framebufEnabled:
+      return 16 #RGB565
+    elif self.framebufColorProfile == framebuf.RGB565:
+      return 16 #RGB565
+    else:
+      return None
+
+  def set_lcd_RGB565(self):
+      self.write_cmd(0x3a)
+      self.write_data(bytearray([0x05]))
+
 
   def get_color_by_name(self, colorName):
     if colorName == "red":
