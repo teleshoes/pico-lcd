@@ -199,16 +199,12 @@ def main():
           controller['lcd'].framebufOffsetX,
           controller['lcd'].framebufOffsetY)
       elif cmd == "text":
+        isClear = maybeGetParamBool(params, "clear", True)
+        isShow = maybeGetParamBool(params, "show", True)
         markup = data.decode("utf8")
+
         print("text: " + markup)
 
-        isClear = True
-        if "clear" in params and params["clear"].lower() == "false":
-          isClear = False
-
-        isShow = True
-        if "show" in params and params["show"].lower() == "false":
-          isShow = False
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
         controller['lcdFont'].drawMarkup(markup)
