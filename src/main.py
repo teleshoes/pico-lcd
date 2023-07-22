@@ -59,30 +59,9 @@ def main():
   controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'])
   controller['lcdFont'].setup()
 
-  controller['wifi'] = setupWifi(controller['lcdFont'])
-
   controller['socket'] = getSocket()
 
-  controller['lcd'].fill_show(controller['lcd'].black)
-
-  if controller['wifi']['isAP']:
-    controller['lcdFont'].markup(""
-      + "!size=2!!color=green!"             + "SSID:\n"
-      + "!size=2!!color=white!"             + controller['wifi']['ssid'] + "\n"
-      + "!size=2!!color=green!"             + "PASSWORD:\n"
-      + "!size=2!!color=white!"             + controller['wifi']['password'] + "\n"
-      + "!size=2!!color=blue!"              + "IP:\n"
-      + "!size=2!!color=green!!hspace=0.7!" + controller['wifi']['ip'] + "\n"
-      + "!size=1!!color=white!"             + "e.g.:\n"
-      + "!size=1!!color=white!"             + "curl 'http://" + controller['wifi']['ip'] + "/ssid?ssid=MY_NETWORK&password=P4SSW0RD'\n"
-    )
-  else:
-    controller['lcdFont'].markup(""
-      + "!size=4!!color=green!"             + "CONNECTED\n"
-      + "!size=3!!color=blue!"              + "\nlistening on:\n"
-      + "!size=3!!color=green!!hspace=0.7!" + controller['wifi']['ip']
-    )
-  controller['lcd'].show()
+  controller['wifi'] = setupWifi(controller['lcdFont'])
 
   while True:
     try:
@@ -536,10 +515,14 @@ def setupWifi(lcdFont):
     return setupAccessPoint(lcdFont)
   else:
     print('connected')
-    status = wlan.ifconfig()
-    print( 'ip = ' + status[0] )
-    ipAddr = status[0]
-    return {'isAP': False, 'ssid': ssid, 'password': password, 'ip': wlan.ifconfig()[0]}
+    ip = wlan.ifconfig()[0]
+    print('ip=' + ip)
+    lcdFont.markup(""
+      + "!size=4!!color=green!"             + "CONNECTED\n"
+      + "!size=3!!color=blue!"              + "\nlistening on:\n"
+      + "!size=3!!color=green!!hspace=0.7!" + ip + "\n"
+    )
+    return {'isAP': False, 'ssid': ssid, 'password': password, 'ip': ip, 'wlan': wlan}
 
 def setupAccessPoint(lcdFont):
   ssid = "pico-lcd"
@@ -569,7 +552,20 @@ def setupAccessPoint(lcdFont):
 
   print("AP active: ssid=" + ssid + " password=" + password)
   print(wlan.ifconfig())
-  return {'isAP': True, 'ssid': ssid, 'password': password, 'ip': wlan.ifconfig()[0]}
+
+  ip = wlan.ifconfig()[0]
+
+  lcdFont.markup(""
+    + "!size=2!!color=green!"             + "SSID:\n"
+    + "!size=2!!color=white!"             + ssid + "\n"
+    + "!size=2!!color=green!"             + "PASSWORD:\n"
+    + "!size=2!!color=white!"             + password + "\n"
+    + "!size=2!!color=blue!"              + "IP:\n"
+    + "!size=2!!color=green!!hspace=0.7!" + ip + "\n"
+    + "!size=1!!color=white!"             + "e.g.:\n"
+    + "!size=1!!color=white!"             + "curl 'http://" + ip + "/ssid?\nssid=MY_NETWORK&password=P4SSW0RD'\n"
+  )
+  return {'isAP': True, 'ssid': ssid, 'password': password, 'ip': ip, 'wlan': wlan}
 
 
 def getSocket():
