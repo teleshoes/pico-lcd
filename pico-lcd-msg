@@ -441,7 +441,7 @@ sub main(@){
       if($cmd eq "n"){
         $text =~ s/!$cmd!/\n/;
       }else{
-        $text =~ s/!$cmd!/&exc;$cmd&exc;/;
+        $text =~ s/!\Q$cmd\E!/&exc;\Q$cmd\E&exc;/;
       }
     }
     $text =~ s/&exc;/!/g;
