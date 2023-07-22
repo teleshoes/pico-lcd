@@ -238,14 +238,16 @@ class LCD():
     # if framebuf is not the entire screen, blank the entire screen
     if self.framebufMaxWidth != None or self.framebufMaxHeight != None:
       self.fill_mem_blank()
-      if wasLandscape != isLandscape and self.buffer != None:
-        # if framebuf is not a square, transpose row/col count (cut off right or bottom)
-        if self.framebufMaxWidth != self.framebufMaxHeight:
-          if self.framebufMaxWidth % 2 == 1 or self.framebufMaxHeight % 2 == 1:
-            # skip transpose of odd-width or odd-height framebuffers
-            self.fill(0)
-          else:
-            self.transposeBufferRowColCount()
+
+    if wasLandscape != isLandscape and self.buffer != None:
+      # if framebuf is not a square, transpose row/col count (cut off right or bottom)
+      (bufW, bufH) = self.get_framebuf_size()
+      if bufW != bufH:
+        if bufW % 2 == 1 or bufH % 2 == 1:
+          # skip transpose of odd-width or odd-height framebuffers
+          self.fill(0)
+        else:
+          self.transposeBufferRowColCount()
 
     self.init_framebuf()
     self.show()
