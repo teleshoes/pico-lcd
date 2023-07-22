@@ -67,6 +67,14 @@ my $USAGE = "Usage:
     fetch button press counts and print them
       -same as: $EXEC [OPTS] --cmd buttons
 
+  $EXEC [OPTS] fill   COLOR
+  $EXEC [OPTS] --fill COLOR
+  $EXEC [OPTS] --fill=COLOR
+    fill the window with COLOR
+      -same as: $EXEC [OPTS] --cmd fill color=<COLOR>
+        COLOR
+          one of: white black red green blue
+
   $EXEC [OPTS] orient   ORIENT
   $EXEC [OPTS] --orient ORIENT
   $EXEC [OPTS] --orient=ORIENT
@@ -225,6 +233,14 @@ sub main(@){
     }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
       $cmd = "buttons";
       $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $mode){
+      $cmd = "fill";
+      $mode = $MODE_CMD;
+      push @params, "color=" . shift @_;
+    }elsif($arg =~ /^--fill=(\w+)$/ and not defined $mode){
+      $cmd = "fill";
+      $mode = $MODE_CMD;
+      push @params, "color=$1";
     }elsif($arg =~ /^(--orient|orient)$/ and @_ > 0 and not defined $mode){
       $cmd = "orient";
       $mode = $MODE_CMD;
