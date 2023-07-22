@@ -73,6 +73,10 @@ my $USAGE = "Usage:
     append a network 'SSID = PASSWORD' for next boot/connect
       -same as: $EXEC [OPTS] --ssid ssid=SSID password=PASSWORD
 
+  $EXEC [OPTS] resetwifi | --resetwifi
+    REMOVE all configured wifi network SSIDs for next boot/connect
+      -same as: $EXEC [OPTS] --cmd resetwifi
+
   $EXEC [OPTS] clear | --clear
     clear the entire LCD memory
       -same as: $EXEC [OPTS] --cmd clear
@@ -271,6 +275,9 @@ sub main(@){
       $mode = $MODE_CMD;
       push @params, "ssid=" . shift @_;
       push @params, "password=" . shift @_;
+    }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $mode){
+      $cmd = "resetwifi";
+      $mode = $MODE_CMD;
     }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
       $cmd = "clear";
       $mode = $MODE_CMD;
