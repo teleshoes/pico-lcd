@@ -65,6 +65,10 @@ my $USAGE = "Usage:
     fetch+show current state
       -same as: $EXEC [OPTS] --cmd info
 
+  $EXEC [OPTS] connect | --connect
+    re-connect to wifi or setup access point
+      -same as: $EXEC [OPTS] --cmd connect
+
   $EXEC [OPTS] clear | --clear
     clear the entire LCD memory
       -same as: $EXEC [OPTS] --cmd clear
@@ -254,6 +258,9 @@ sub main(@){
       }
     }elsif($arg =~ /^(--info|info)$/ and not defined $mode){
       $cmd = "info";
+      $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--connect|connect)$/ and not defined $mode){
+      $cmd = "connect";
       $mode = $MODE_CMD;
     }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
       $cmd = "clear";
