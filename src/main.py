@@ -148,11 +148,12 @@ def main():
           writeLastLCDName(name)
       elif cmd == "orient" or cmd == "rotation":
         orient = maybeGetParamStr(params, "orient", None)
-        print("orient=" + val)
+        print("orient=" + orient)
 
         out = setOrientation(controller, orient)
       elif cmd == "framebuf":
         fb = maybeGetParamFramebuf(params, "framebuf", None)
+        print("framebuf=" + str(fb))
         out = setFramebuf(controller, fb)
       elif cmd == "text":
         isClear = maybeGetParamBool(params, "clear", True)
