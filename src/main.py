@@ -43,7 +43,7 @@ def buttonPressedActions(btnName, controller):
 def main():
   controller = {
     'lcdName': None, 'lcd': None, 'lcdFont': None,
-    'wlan': None, 'socket': None,
+    'wifi': None, 'socket': None,
     'buttons': None,
   }
 
@@ -59,17 +59,29 @@ def main():
   controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'])
   controller['lcdFont'].setup()
 
-  controller['wlan'] = connectToWifi(controller['lcdFont'])
+  controller['wifi'] = setupWifi(controller['lcdFont'])
 
   controller['socket'] = getSocket()
 
   controller['lcd'].fill_show(controller['lcd'].black)
 
-  controller['lcdFont'].markup(""
-    + "!size=4!!color=green!"             + "CONNECTED\n"
-    + "!size=3!!color=blue!"              + "\nlistening on:\n"
-    + "!size=3!!color=green!!hspace=0.7!" + controller['wlan'].ifconfig()[0]
-  )
+  if controller['wifi']['isAP']:
+    controller['lcdFont'].markup(""
+      + "!size=2!!color=green!"             + "SSID:\n"
+      + "!size=2!!color=white!"             + controller['wifi']['ssid'] + "\n"
+      + "!size=2!!color=green!"             + "PASSWORD:\n"
+      + "!size=2!!color=white!"             + controller['wifi']['password'] + "\n"
+      + "!size=2!!color=blue!"              + "IP:\n"
+      + "!size=2!!color=green!!hspace=0.7!" + controller['wifi']['ip'] + "\n"
+      + "!size=1!!color=white!"             + "e.g.:\n"
+      + "!size=1!!color=white!"             + "curl 'http://" + controller['wifi']['ip'] + "/ssid?ssid=MY_NETWORK&password=P4SSW0RD'\n"
+    )
+  else:
+    controller['lcdFont'].markup(""
+      + "!size=4!!color=green!"             + "CONNECTED\n"
+      + "!size=3!!color=blue!"              + "\nlistening on:\n"
+      + "!size=3!!color=green!!hspace=0.7!" + controller['wifi']['ip']
+    )
   controller['lcd'].show()
 
   while True:
@@ -470,7 +482,7 @@ def writeFile(file, contents):
   except:
     pass
 
-def connectToWifi(lcdFont):
+def setupWifi(lcdFont):
   networks = []
   with open("wifi-conf.txt", "r") as fh:
     for line in fh:
@@ -486,47 +498,75 @@ def connectToWifi(lcdFont):
   wlan = network.WLAN(network.STA_IF)
   wlan.active(True)
 
-  while not connected:
-    for ssidPassword in networks:
-      ssid = ssidPassword[0]
-      password = ssidPassword[1]
+  for ssidPassword in networks:
+    ssid = ssidPassword[0]
+    password = ssidPassword[1]
 
-      try:
-        wlan.connect(ssid, password)
-      except Exception as e:
-        print(str(e))
+    try:
+      wlan.connect(ssid, password)
+    except Exception as e:
+      print(str(e))
 
-      lcdFont.markup(""
-        + "!size=4!!color=green!" + "WAITING\n"
-        + "!size=4!!color=green!" + "FOR WIFI\n"
-        + "!size=4!!color=white!" + "--------\n"
-        + "!size=2!!color=blue!"  + ssid
-      )
+    lcdFont.markup(""
+      + "!size=4!!color=green!" + "WAITING\n"
+      + "!size=4!!color=green!" + "FOR WIFI\n"
+      + "!size=4!!color=white!" + "--------\n"
+      + "!size=2!!color=blue!"  + ssid
+    )
 
-      max_wait = 10
-      while max_wait > 0:
-          if wlan.status() < 0 or wlan.status() >= 3:
-              break
-          max_wait -= 1
-          print('waiting for connection...')
-          time.sleep(1)
-
-      if wlan.status() == 3:
-        connected = True
-        connectedSSID = ssid
+    max_wait = 10
+    while max_wait > 0:
+      if wlan.status() < 0 or wlan.status() >= 3:
         break
+      max_wait -= 1
+      print('waiting for connection...')
+      time.sleep(1)
+
+    if wlan.status() == 3:
+      connected = True
+      connectedSSID = ssid
+      break
 
   ipAddr = None
   if not connected:
-      lcdFont.markup("!size=7!!color=red!" + "FAILED\nWIFI")
-      raise RuntimeError('network connection failed')
-
+    return setupAccessPoint(lcdFont)
   else:
-      print('connected')
-      status = wlan.ifconfig()
-      print( 'ip = ' + status[0] )
-      ipAddr = status[0]
-  return wlan
+    print('connected')
+    status = wlan.ifconfig()
+    print( 'ip = ' + status[0] )
+    ipAddr = status[0]
+    return {'isAP': False, 'ssid': ssid, 'password': password, 'ip': wlan.ifconfig()[0]}
+
+def setupAccessPoint(lcdFont):
+  ssid = "pico-lcd"
+  password = "123456789"
+
+  lcdFont.markup(""
+    + "!size=4!!color=green!" + "TURNING ON\n"
+    + "!size=4!!color=green!" + "WIFI AP\n"
+    + "!size=4!!color=white!" + "--------\n"
+    + "!size=2!!color=blue!"  + ssid
+  )
+  wlan = network.WLAN(network.AP_IF)
+  wlan.config(essid=ssid, password=password)
+  wlan.active(True)
+
+  max_wait = 30
+  while max_wait > 0:
+    if wlan.active:
+      break
+    max_wait -= 1
+    print('waiting for connection...')
+    time.sleep(1)
+
+  if not wlan.active:
+    lcdFont.markup("!size=7!!color=red!" + "FAILED\nWIFI")
+    raise RuntimeError('network connection failed')
+
+  print("AP active: ssid=" + ssid + " password=" + password)
+  print(wlan.ifconfig())
+  return {'isAP': True, 'ssid': ssid, 'password': password, 'ip': wlan.ifconfig()[0]}
+
 
 def getSocket():
   addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
