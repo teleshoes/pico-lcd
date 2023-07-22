@@ -147,58 +147,13 @@ def main():
           controller['lcdFont'].setLCD(controller['lcd'])
           writeLastLCDName(name)
       elif cmd == "orient" or cmd == "rotation":
-        val = maybeGetParamStr(params, "orient", None)
+        orient = maybeGetParamStr(params, "orient", None)
         print("orient=" + val)
 
-        degrees = None
-        if val == "landscape" or val == "0" or val == "normal" or val == "default":
-          degrees = 0
-        elif val == "portrait" or val == "270" or val == "-90":
-          degrees = 270
-        elif val == "inverted-landscape" or val == "180":
-          degrees = 180
-        elif val == "inverted-portrait" or val == "90":
-          degrees = 90
-
-        if degrees != None:
-          controller['lcd'].set_rotation_degrees(degrees)
-          writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
-          out = "orient=" + str(degrees) + "\n"
-        else:
-          out = "unknown orient " + val + "\n"
+        out = setOrientation(controller, orient)
       elif cmd == "framebuf":
-        #  'framebuf' param is one of:
-        #     on | enabled | true
-        #       enable framebuf, with no max WxH or X/Y offsets
-        #     off | disabled | false
-        #       disable framebuf
-        #     WxH
-        #       enable framebuf, and set max WxH with no X/Y offsets
-        #     WxH+X+Y
-        #       enable framebuf, and set max WxH and X/Y offsets
-        #
-        #NOTE: regardless of current orientation:
-        #  W and X always refers to the larger physical dimension of the LCD
-        #  H and Y always refers to the smaller physical dimension of the LCD
-
         fb = maybeGetParamFramebuf(params, "framebuf", None)
-        if fb == None:
-          out = "ERROR: could not parse framebuf\n"
-        else:
-          controller['lcd'].set_framebuf_enabled(
-            fb['enabled'], fb['maxW'], fb['maxH'], fb['x'], fb['y'])
-          writeLastFramebufConf(
-            controller['lcd'].framebufEnabled,
-            controller['lcd'].framebufMaxWidth,
-            controller['lcd'].framebufMaxHeight,
-            controller['lcd'].framebufOffsetX,
-            controller['lcd'].framebufOffsetY)
-          out = "framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
-            controller['lcd'].framebufEnabled,
-            controller['lcd'].framebufMaxWidth,
-            controller['lcd'].framebufMaxHeight,
-            controller['lcd'].framebufOffsetX,
-            controller['lcd'].framebufOffsetY)
+        out = setFramebuf(controller, fb)
       elif cmd == "text":
         isClear = maybeGetParamBool(params, "clear", True)
         isShow = maybeGetParamBool(params, "show", True)
@@ -293,6 +248,59 @@ def formatButtonCount(buttons):
       fmt += ", "
     fmt += btnName + "=" + str(buttons['count'][btnName])
   return fmt
+
+
+def setOrientation(controller, orient):
+  degrees = None
+  if orient == "landscape" or orient == "0" or orient == "normal" or orient == "default":
+    degrees = 0
+  elif orient == "portrait" or orient == "270" or orient == "-90":
+    degrees = 270
+  elif orient == "inverted-landscape" or orient == "180":
+    degrees = 180
+  elif orient == "inverted-portrait" or orient == "90":
+    degrees = 90
+
+  if degrees != None:
+    controller['lcd'].set_rotation_degrees(degrees)
+    writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
+    return "orient=" + str(degrees) + "\n"
+  else:
+    return "unknown orient " + orient + "\n"
+
+def setFramebuf(controller, fb):
+  #  'framebuf' param is one of:
+  #     on | enabled | true
+  #       enable framebuf, with no max WxH or X/Y offsets
+  #     off | disabled | false
+  #       disable framebuf
+  #     WxH
+  #       enable framebuf, and set max WxH with no X/Y offsets
+  #     WxH+X+Y
+  #       enable framebuf, and set max WxH and X/Y offsets
+  #
+  #NOTE: regardless of current orientation:
+  #  W and X always refers to the larger physical dimension of the LCD
+  #  H and Y always refers to the smaller physical dimension of the LCD
+
+  if fb == None:
+    out = "ERROR: could not parse framebuf\n"
+  else:
+    controller['lcd'].set_framebuf_enabled(
+      fb['enabled'], fb['maxW'], fb['maxH'], fb['x'], fb['y'])
+    writeLastFramebufConf(
+      controller['lcd'].framebufEnabled,
+      controller['lcd'].framebufMaxWidth,
+      controller['lcd'].framebufMaxHeight,
+      controller['lcd'].framebufOffsetX,
+      controller['lcd'].framebufOffsetY)
+    return "framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
+      controller['lcd'].framebufEnabled,
+      controller['lcd'].framebufMaxWidth,
+      controller['lcd'].framebufMaxHeight,
+      controller['lcd'].framebufOffsetX,
+      controller['lcd'].framebufOffsetY)
+
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
   if paramName in params:
