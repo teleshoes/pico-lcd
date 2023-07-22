@@ -138,6 +138,10 @@ def main():
           out = "added wifi network:\n ssid=" + ssid +"\n password=" + password + "\n"
         else:
           out = "ERROR: missing ssid or password\n"
+      elif cmd == "resetwifi":
+        writeFile("wifi-conf.txt", "")
+        out = "WARNING: all wifi networks removed for next boot\n"
+        print(out)
       elif cmd == "buttons":
         print("buttons")
         out = formatButtonCount(controller['buttons']) + "\n"
