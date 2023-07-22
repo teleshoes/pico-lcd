@@ -135,7 +135,7 @@ my $USAGE = "Usage:
 
     --ip=IP_ADDRESS
       use IP_ADDRESS in calls to curl
-    --dev=DEV_NAME
+    DEV_NAME | --dev=DEV_NAME
       -parse contents of $DEVICE_CONFIG_FILE
       -find line that matches this device: DEV_NAME = IP_ADDRESS
       -same as: --ip=IP_ADDRESS
@@ -229,6 +229,8 @@ sub main(@){
     }elsif($arg =~ /^--ip=(.+)$/){
       $ipAddr = $1
     }elsif($arg =~ /^--dev=(\w+)$/){
+      $devName = $1;
+    }elsif($arg =~ /^($DEVICE_NAME_REGEX)$/){
       $devName = $1;
     }elsif($arg =~ /^(--default-dev|--any-dev)$/){
       $devName = undef;
