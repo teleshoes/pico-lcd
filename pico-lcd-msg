@@ -122,6 +122,7 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] framebuf   FRAMEBUF
   $EXEC [OPTS] --framebuf FRAMEBUF
+  $EXEC [OPTS] --framebuf=FRAMEBUF
     -same as: $EXEC [OPTS] --cmd framebuf enabled=ENABLED \\
                 maxwidth=MAX_WIDTH maxheight=MAX_HEIGHT x=OFFSET_X y=OFFSET_Y
       FRAMEBUF
@@ -180,6 +181,16 @@ my $USAGE = "Usage:
       -find first line that matches any device: DEV_NAME = IP_ADDRESS
       -same as: --ip=IP_ADDRESS
       (this is the default)
+
+    --framebuf=FRAMEBUF
+    --orient=ORIENT
+    --left
+    --top
+    --right
+    --bot
+    --bottom
+    --square
+      if specified after TEXT, send orient/framebuf params as part of the /text cmd
 
     --clear-text
       when setting text, clear the screen first
@@ -336,26 +347,62 @@ sub main(@){
       $cmd = "orient";
       $mode = $MODE_CMD;
       push @cmdParams, "orient=" . shift @_;
-    }elsif($arg =~ /^--orient=(\w+)$/ and not defined $mode){
-      $cmd = "orient";
-      $mode = $MODE_CMD;
-      push @cmdParams, "orient=$1";
+    }elsif($arg =~ /^--orient=(\w+)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "orient";
+        $mode = $MODE_CMD;
+        push @cmdParams, "orient=$1";
+      }elsif($mode eq $MODE_TEXT){
+        push @textParams, "orient=$1";
+      }
     }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=" . shift @_;
-    }elsif($arg =~ /^(left|--left|top|--top)$/ and not defined $mode){
+    }elsif($arg =~ /^--framebuf=(.+)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "framebuf";
+        $mode = $MODE_CMD;
+        push @cmdParams, "framebuf=$1";
+      }elsif($mode eq $MODE_TEXT){
+        push @textParams, "framebuf=$1";
+      }
+    }elsif($arg =~ /^(left|top)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=160x240+0+0";
-    }elsif($arg =~ /^(right|--right|bot|--bot|bottom|--bottom)$/ and not defined $mode){
+    }elsif($arg =~ /^(--left|--top)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "framebuf";
+        $mode = $MODE_CMD;
+        push @cmdParams, "framebuf=160x240+0+0";
+      }elsif($mode eq $MODE_TEXT){
+        push @textParams, "framebuf=160x240+0+0";
+      }
+    }elsif($arg =~ /^(right|bot|bottom)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=160x240+160+0";
-    }elsif($arg =~ /^(square|--square)$/ and not defined $mode){
+    }elsif($arg =~ /^(--right|--bot|--bottom)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "framebuf";
+        $mode = $MODE_CMD;
+        push @cmdParams, "framebuf=160x240+160+0";
+      }elsif($mode eq $MODE_TEXT){
+        push @textParams, "framebuf=160x240+160+0";
+      }
+    }elsif($arg =~ /^(square)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=240x240";
+    }elsif($arg =~ /^(--square)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "framebuf";
+        $mode = $MODE_CMD;
+        push @cmdParams, "framebuf=240x240";
+      }else{
+        push @textParams, "framebuf=240x240";
+      }
     }elsif($arg =~ /^(--clear-text)$/){
       $isClearText = 1;
     }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
