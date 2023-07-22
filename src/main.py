@@ -157,9 +157,16 @@ def main():
       elif cmd == "text":
         isClear = maybeGetParamBool(params, "clear", True)
         isShow = maybeGetParamBool(params, "show", True)
+        fb = maybeGetParamFramebuf(params, "framebuf", None)
+        orient = maybeGetParamStr(params, "orient", None)
         markup = data.decode("utf8")
 
         print("text: " + markup)
+
+        if orient != None:
+          out += setOrientation(controller, orient)
+        if fb != None:
+          out += setFramebuf(controller, fb)
 
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
