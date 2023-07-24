@@ -149,11 +149,18 @@ my $USAGE = "Usage:
         H and Y always refers to the smaller physical dimension of the LCD
 
 
-  $EXEC [OPTS] left | --left | top | --top
+  $EXEC [OPTS] left | --left
     -same as: $EXEC [OPTS] framebuf 160x240+0+0
 
-  $EXEC [OPTS] right | --right | bot | --bot | bottom | --bottom
+  $EXEC [OPTS] right | --right
     -same as: $EXEC [OPTS] framebuf 160x240+160+0
+
+  $EXEC [OPTS] top | --top
+    -same as: $EXEC [OPTS] framebuf 320x120+0+0
+
+  $EXEC [OPTS] bot | --bot | bottom | --bottom
+    -same as: $EXEC [OPTS] framebuf 320x120+0+120
+
 
   $EXEC [OPTS] square | --square
     -same as: $EXEC [OPTS] framebuf 240x240
@@ -367,11 +374,11 @@ sub main(@){
       }elsif($mode eq $MODE_TEXT){
         push @textParams, "framebuf=$1";
       }
-    }elsif($arg =~ /^(left|top)$/ and not defined $mode){
+    }elsif($arg =~ /^(left)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=160x240+0+0";
-    }elsif($arg =~ /^(--left|--top)$/){
+    }elsif($arg =~ /^(--left)$/){
       if(not defined $mode or $mode eq $MODE_CMD){
         $cmd = "framebuf";
         $mode = $MODE_CMD;
@@ -379,17 +386,41 @@ sub main(@){
       }elsif($mode eq $MODE_TEXT){
         push @textParams, "framebuf=160x240+0+0";
       }
-    }elsif($arg =~ /^(right|bot|bottom)$/ and not defined $mode){
+    }elsif($arg =~ /^(top)$/ and not defined $mode){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @cmdParams, "framebuf=320x120+0+0";
+    }elsif($arg =~ /^(--top)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "framebuf";
+        $mode = $MODE_CMD;
+        push @cmdParams, "framebuf=320x120+0+0";
+      }elsif($mode eq $MODE_TEXT){
+        push @textParams, "framebuf=320x120+0+0";
+      }
+    }elsif($arg =~ /^(right)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=160x240+160+0";
-    }elsif($arg =~ /^(--right|--bot|--bottom)$/){
+    }elsif($arg =~ /^(--right)$/){
       if(not defined $mode or $mode eq $MODE_CMD){
         $cmd = "framebuf";
         $mode = $MODE_CMD;
         push @cmdParams, "framebuf=160x240+160+0";
       }elsif($mode eq $MODE_TEXT){
         push @textParams, "framebuf=160x240+160+0";
+      }
+    }elsif($arg =~ /^(bot|bottom)$/ and not defined $mode){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @cmdParams, "framebuf=320x120+0+120";
+    }elsif($arg =~ /^(--bot|--bottom)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "framebuf";
+        $mode = $MODE_CMD;
+        push @cmdParams, "framebuf=320x120+0+120";
+      }elsif($mode eq $MODE_TEXT){
+        push @textParams, "framebuf=320x120+0+120";
       }
     }elsif($arg =~ /^(square)$/ and not defined $mode){
       $cmd = "framebuf";
