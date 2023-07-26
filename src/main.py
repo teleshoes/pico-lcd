@@ -6,6 +6,7 @@ import time
 import socket
 import gc
 import machine
+import sys
 
 from lcd import LCD
 from lcdFont import LcdFont
@@ -182,7 +183,7 @@ def main():
 
     except Exception as e:
       try:
-        print(e)
+        sys.print_exception(e)
         controller['lcdFont'].text("MSG\nFAILED", size=5, color=controller['lcd'].red)
         if cl != None:
           cl.send('HTTP/1.1 400 Bad request\r\nContent-Type: text/html\r\n\r\n')
