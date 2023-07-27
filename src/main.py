@@ -293,7 +293,7 @@ def setFramebuf(controller, fb):
   #  H and Y always refers to the smaller physical dimension of the LCD
 
   if fb == None:
-    out = "ERROR: could not parse framebuf\n"
+    return "ERROR: could not parse framebuf\n"
   else:
     controller['lcd'].set_framebuf_enabled(
       fb['enabled'], fb['maxW'], fb['maxH'], fb['x'], fb['y'])
