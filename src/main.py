@@ -77,7 +77,7 @@ def main():
       out = ""
 
       if cmd == "info":
-        if controller['lcd'].framebufEnabled:
+        if controller['lcd'].is_framebuf_enabled():
           (winX, winY) = controller['lcd'].get_framebuf_size()
         else:
           (winX, winY) = (controller['lcd'].get_width(), controller['lcd'].get_height())
@@ -285,7 +285,7 @@ def setFramebuf(lcd, fbConf):
   #  H and Y always refers to the smaller physical dimension of the LCD
 
   if fbConf == None:
-    fbConf = FramebufConf()
+    fbConf = FramebufConf(enabled=False)
 
   lcd.set_framebuf_conf(fbConf)
   # get the actual framebuf conf of the LCD (might have failed due to OOM)

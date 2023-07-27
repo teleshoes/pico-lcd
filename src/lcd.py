@@ -23,13 +23,9 @@ class LCD():
     self.rotationIdx = 0
     self.rotCfg = self.layouts[self.rotationIdx]
 
-    self.framebufEnabled = False
     self.buffer = None
     self.framebuf = None
-    self.framebufMaxWidth = 0
-    self.framebufMaxHeight = 0
-    self.framebufOffsetX = 0
-    self.framebufOffsetY = 0
+    self.fbConf = FramebufConf(enabled=False)
 
     try:
       #used only in framebuf, st7789 is RGB565 only
@@ -75,43 +71,24 @@ class LCD():
     return self.rotCfg['H']
 
   def get_target_window_size(self):
-    if self.framebufEnabled:
+    if self.is_framebuf_enabled():
       (winX, winY) = self.get_framebuf_size()
     else:
       (winX, winY) = (self.get_width(), self.get_height())
     return (winX, winY)
 
+  def is_framebuf_enabled(self):
+    return self.fbConf.enabled
+
   def get_framebuf_conf(self):
-    return FramebufConf(
-           enabled=self.framebufEnabled,
-           maxW = self.framebufMaxWidth,
-           maxH = self.framebufMaxHeight,
-           x = self.framebufOffsetX,
-           y = self.framebufOffsetY)
+    return self.fbConf
   def set_framebuf_conf(self, fbConf):
     if fbConf == None:
-      self.framebufEnabled = False
-      self.framebufMaxWidth = 0
-      self.framebufMaxHeight = 0
-      self.framebufOffsetX = 0
-      self.framebufOffsetY = 0
+      self.fbConf = FramebufConf(enabled=False)
     else:
-      self.framebufEnabled = fbConf.enabled
-      self.framebufMaxWidth = fbConf.maxW
-      self.framebufMaxHeight = fbConf.maxH
-      self.framebufOffsetX = fbConf.x
-      self.framebufOffsetY = fbConf.y
+      self.fbConf = fbConf
 
-      if self.framebufMaxWidth == None:
-        self.framebufMaxWidth = 0
-      if self.framebufMaxHeight == None:
-        self.framebufMaxHeight = 0
-      if self.framebufOffsetX == None:
-        self.framebufOffsetX = 0
-      if self.framebufOffsetY == None:
-        self.framebufOffsetY = 0
-
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       self.buffer = None
     else:
       self.create_buffer()
@@ -121,7 +98,7 @@ class LCD():
   def get_framebuf_size(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
-    (maxW, maxH) = (self.framebufMaxWidth, self.framebufMaxHeight)
+    (maxW, maxH) = (self.fbConf.maxW, self.fbConf.maxH)
 
     if bufW < bufH:
       (maxW, maxH) = (maxH, maxW)
@@ -135,7 +112,7 @@ class LCD():
   def get_framebuf_offset(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
-    (offsetX, offsetY) = (self.framebufOffsetX, self.framebufOffsetY)
+    (offsetX, offsetY) = (self.fbConf.x, self.fbConf.y)
 
     if bufW < bufH:
       (offsetX, offsetY) = (offsetY, offsetX)
@@ -171,7 +148,7 @@ class LCD():
     self.init_colors()
 
   def init_colors(self):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       #RGB565
       self.set_lcd_RGB565()
       self.red   = st7789.RED
@@ -197,7 +174,7 @@ class LCD():
       self.black = 0b000000000000
 
   def bits_per_px(self):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       return 16 #RGB565
     elif self.framebufColorProfile == framebuf.RGB565:
       return 16 #RGB565
@@ -253,7 +230,7 @@ class LCD():
     isLandscape = self.rotCfg['W'] >= self.rotCfg['H']
 
     # if framebuf is not the entire screen, blank the entire screen
-    if self.framebufMaxWidth != 0 or self.framebufMaxHeight != 0:
+    if self.fbConf.maxW != 0 or self.fbConf.maxH != 0:
       self.fill_mem_blank()
 
     if wasLandscape != isLandscape and self.buffer != None:
@@ -341,13 +318,13 @@ class LCD():
               buf[bIdx1 + i] = buf[bIdx2 + i]
 
   def fill(self, color):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       self.tft.fill(color)
     else:
       self.framebuf.fill(color)
 
   def rect(self, x, y, w, h, color, fill=True):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       if fill:
         self.tft.fill_rect(x, y, w, h, color)
       else:
@@ -359,25 +336,25 @@ class LCD():
     self.rect(x, y, w, h, color, True)
 
   def pixel(self, x, y, color):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       self.tft.pixel(x, y, color)
     else:
       self.framebuf.pixel(x, y, color)
 
   def hline(self, x, y, w, c):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       self.tft.hline(x, y, w, c)
     else:
       self.framebuf.hline(x, y, w, c)
 
   def vline(self, x, y, w, c):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       self.tft.vline(x, y, w, c)
     else:
       self.framebuf.vline(x, y, w, c)
 
   def line(self, x1, y1, x2, y2, c):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       self.tft.line(x1, y1, x2, y2, c)
     else:
       self.framebuf.line(x1, y1, x2, y2, c)
@@ -386,7 +363,7 @@ class LCD():
     self.ellipse(centerX, centerY, radius, radius, color, fill, quadrantMask)
 
   def ellipse(self, centerX, centerY, radiusX, radiusY, color, fill=True, quadrantMask=0b1111):
-    if self.framebufEnabled:
+    if self.is_framebuf_enabled():
       self.framebuf.ellipse(centerX, centerY, radiusX, radiusY, color, fill, quadrantMask)
       return
 
@@ -464,7 +441,7 @@ class LCD():
   #   fill=True is implemented only WITH framebuf
   #   rotateRad/rotateCX/rotateCY is implemented only WITHOUT framebuf
   def poly(self, coords, x, y, color, fill=False, rotateRad=0, rotateCX=0, rotateCY=0):
-    if not self.framebufEnabled:
+    if not self.is_framebuf_enabled():
       if fill:
         print("WARNING: 'fill' is not implemented in poly() for st7789_mpy")
       polygonXYPairs = []
@@ -508,7 +485,7 @@ class LCD():
       self.write_data(buf)
     buf = None
 
-    if self.framebufEnabled:
+    if self.is_framebuf_enabled():
       self.set_window_to_framebuf()
 
   def set_window_to_framebuf(self):
@@ -532,7 +509,7 @@ class LCD():
     self.write_data(bytearray([yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]))
 
   def show(self):
-    if self.framebufEnabled:
+    if self.is_framebuf_enabled():
       self.write_cmd(0x2C)
       self.write_data(self.buffer)
 
