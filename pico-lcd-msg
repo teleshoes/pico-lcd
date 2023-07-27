@@ -169,6 +169,12 @@ my $USAGE = "Usage:
     -q | --quiet
       do not print messages sent with curl
 
+    -m TIMEOUT_FRAC_SECONDS
+    --max-time TIMEOUT_FRAC_SECONDS
+    --max-time=TIMEOUT_FRAC_SECONDS
+    --timeout TIMEOUT_FRAC_SECONDS
+    --timeout=TIMEOUT_FRAC_SECONDS
+      pass '--max-time TIMEOUT_FRAC_SECONDS' to all calls to curl
     --data=DATA
       for --cmd, pass in DATA as POST payload with curl (using '--data DATA')
 
@@ -260,6 +266,7 @@ sub main(@){
   my $ipAddr = undef;
   my $devName = undef;
   my $quiet = 0;
+  my $curlMaxTime = undef;
 
   my $text = "";
   my @textParams;
@@ -280,6 +287,10 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(-q|--quiet)$/){
       $quiet = 1;
+    }elsif($arg =~ /^(-m|--max-time|--timeout)$/ and @_ > 0 and $_[0] =~ /^(\d+|\d*\.\d+)$/){
+      $curlMaxTime = shift @_;
+    }elsif($arg =~ /^(?:--max-time|--timeout)=(\d+|\d*\.\d+)$/){
+      $curlMaxTime = $1;
     }elsif($arg =~ /^--ip=(.+)$/){
       $ipAddr = $1
     }elsif($arg =~ /^(--ap)$/){
@@ -491,6 +502,7 @@ sub main(@){
   $mode = $MODE_TEXT if not defined $mode;
 
   my @curlOpts = ("--no-progress-meter");
+  @curlOpts = (@curlOpts, "--max-time", $curlMaxTime) if defined $curlMaxTime;
 
   if($mode eq $MODE_CMD){
     my $paramsFmt = "";
