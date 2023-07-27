@@ -26,10 +26,10 @@ class LCD():
     self.framebufEnabled = False
     self.buffer = None
     self.framebuf = None
-    self.framebufMaxWidth = None
-    self.framebufMaxHeight = None
-    self.framebufOffsetX = None
-    self.framebufOffsetY = None
+    self.framebufMaxWidth = 0
+    self.framebufMaxHeight = 0
+    self.framebufOffsetX = 0
+    self.framebufOffsetY = 0
 
     try:
       #used only in framebuf, st7789 is RGB565 only
@@ -81,21 +81,42 @@ class LCD():
       (winX, winY) = (self.get_width(), self.get_height())
     return (winX, winY)
 
-  def set_framebuf_enabled(self, isEnabled,
-                           maxWidth=None, maxHeight=None,
-                           offsetX=None, offsetY=None):
-   self.framebufEnabled = isEnabled
-   self.framebufMaxWidth = maxWidth
-   self.framebufMaxHeight = maxHeight
-   self.framebufOffsetX = offsetX
-   self.framebufOffsetY = offsetY
+  def get_framebuf_conf(self):
+    return { 'enabled': self.framebufEnabled
+           , 'maxW': self.framebufMaxWidth
+           , 'maxH': self.framebufMaxHeight
+           , 'x': self.framebufOffsetX
+           , 'y': self.framebufOffsetY
+           }
+  def set_framebuf_conf(self, fbConf):
+    if fbConf == None:
+      self.framebufEnabled = False
+      self.framebufMaxWidth = 0
+      self.framebufMaxHeight = 0
+      self.framebufOffsetX = 0
+      self.framebufOffsetY = 0
+    else:
+      self.framebufEnabled = fbConf['enabled']
+      self.framebufMaxWidth = fbConf['maxW']
+      self.framebufMaxHeight = fbConf['maxH']
+      self.framebufOffsetX = fbConf['x']
+      self.framebufOffsetY = fbConf['y']
 
-   if not self.framebufEnabled:
-     self.buffer = None
-   else:
-     self.create_buffer()
+      if self.framebufMaxWidth == None:
+        self.framebufMaxWidth = 0
+      if self.framebufMaxHeight == None:
+        self.framebufMaxHeight = 0
+      if self.framebufOffsetX == None:
+        self.framebufOffsetX = 0
+      if self.framebufOffsetY == None:
+        self.framebufOffsetY = 0
 
-   self.init_framebuf()
+    if not self.framebufEnabled:
+      self.buffer = None
+    else:
+      self.create_buffer()
+
+    self.init_framebuf()
 
   def get_framebuf_size(self):
     bufW = self.rotCfg['W']
@@ -105,9 +126,9 @@ class LCD():
     if bufW < bufH:
       (maxW, maxH) = (maxH, maxW)
 
-    if maxW != None and bufW > maxW:
+    if maxW != 0 and bufW > maxW:
       bufW = maxW
-    if maxH != None and bufH > maxH:
+    if maxH != 0 and bufH > maxH:
       bufH = maxH
     return (bufW, bufH)
 
@@ -119,10 +140,6 @@ class LCD():
     if bufW < bufH:
       (offsetX, offsetY) = (offsetY, offsetX)
 
-    if offsetX == None:
-      offsetX = 0
-    if offsetY == None:
-      offsetY = 0
     return (offsetX, offsetY)
 
   def create_buffer(self):
@@ -139,7 +156,7 @@ class LCD():
       except Exception as e:
         print(str(e))
         print("WARNING: COULD NOT ALLOCATE BUFFER, DISABLING FRAMEBUF\n")
-        self.set_framebuf_enabled(False)
+        self.set_framebuf_conf(None)
 
   def init_framebuf(self):
     if self.buffer != None:
@@ -236,7 +253,7 @@ class LCD():
     isLandscape = self.rotCfg['W'] >= self.rotCfg['H']
 
     # if framebuf is not the entire screen, blank the entire screen
-    if self.framebufMaxWidth != None or self.framebufMaxHeight != None:
+    if self.framebufMaxWidth != 0 or self.framebufMaxHeight != 0:
       self.fill_mem_blank()
 
     if wasLandscape != isLandscape and self.buffer != None:

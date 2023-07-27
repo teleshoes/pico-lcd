@@ -195,14 +195,16 @@ def createLCD(lcdName):
   layouts = LCD_CONFS[lcdName]["layouts"]
   lcd = LCD(layouts)
   (enabled, maxW, maxH, offsetX, offsetY) = readLastFramebufConf()
-  lcd.set_framebuf_enabled(enabled, maxW, maxH, offsetX, offsetY)
+  fb = {'enabled': enabled, 'maxW': maxW, 'maxH': maxH, 'x': offsetX, 'y': offsetY}
+  lcd.set_framebuf_conf(fb)
+  fb = lcd.get_framebuf_conf()
   print("LCD init")
   print("framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
-    lcd.framebufEnabled,
-    lcd.framebufMaxWidth,
-    lcd.framebufMaxHeight,
-    lcd.framebufOffsetX,
-    lcd.framebufOffsetY))
+    fb['enabled'],
+    fb['maxW'],
+    fb['maxH'],
+    fb['x'],
+    fb['y']))
 
   degrees = readLastRotationDegrees()
   if degrees != None:
@@ -295,20 +297,20 @@ def setFramebuf(controller, fb):
   if fb == None:
     return "ERROR: could not parse framebuf\n"
   else:
-    controller['lcd'].set_framebuf_enabled(
-      fb['enabled'], fb['maxW'], fb['maxH'], fb['x'], fb['y'])
+    controller['lcd'].set_framebuf_conf(fb)
+    fb = controller['lcd'].get_framebuf_conf()
     writeLastFramebufConf(
-      controller['lcd'].framebufEnabled,
-      controller['lcd'].framebufMaxWidth,
-      controller['lcd'].framebufMaxHeight,
-      controller['lcd'].framebufOffsetX,
-      controller['lcd'].framebufOffsetY)
+      fb['enabled'],
+      fb['maxW'],
+      fb['maxH'],
+      fb['x'],
+      fb['y'])
     return "framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
-      controller['lcd'].framebufEnabled,
-      controller['lcd'].framebufMaxWidth,
-      controller['lcd'].framebufMaxHeight,
-      controller['lcd'].framebufOffsetX,
-      controller['lcd'].framebufOffsetY)
+      fb['enabled'],
+      fb['maxW'],
+      fb['maxH'],
+      fb['x'],
+      fb['y'])
 
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
