@@ -490,13 +490,15 @@ sub main(@){
 
   $mode = $MODE_TEXT if not defined $mode;
 
+  my @curlOpts = ("--no-progress-meter");
+
   if($mode eq $MODE_CMD){
     my $paramsFmt = "";
     if(@cmdParams > 0){
       $paramsFmt = "?" . join "&", @cmdParams;
     }
 
-    my @curlCmd = ("curl", "--no-progress-meter", "http://$ipAddr/$cmd$paramsFmt");
+    my @curlCmd = ("curl", @curlOpts, "http://$ipAddr/$cmd$paramsFmt");
     @curlCmd = (@curlCmd, "--data", $cmdData) if defined $cmdData;
     system @curlCmd;
   }elsif($mode eq $MODE_TEXT){
@@ -561,7 +563,7 @@ sub main(@){
     #  or 1 if they cannot fit
     if(not defined $size){
       if(not defined $lcdWidthPx or not defined $lcdHeightPx){
-        my $info = `curl --no-progress-meter 'http://$ipAddr/info'`;
+        my $info = `curl @curlOpts 'http://$ipAddr/info'`;
         if($info =~ /window:\s+(\d+)x(\d+)/){
           $lcdWidthPx = $1;
           $lcdHeightPx = $2;
@@ -620,7 +622,7 @@ sub main(@){
       }
 
       my $paramsFmt = "?" . join "&", @params;
-      system "curl", "--no-progress-meter",
+      system "curl", @curlOpts,
         "http://$ipAddr/text$paramsFmt",
         "--data", "$msg";
     }
