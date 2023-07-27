@@ -8,7 +8,7 @@ import gc
 import machine
 import sys
 
-from lcd import LCD
+from lcd import LCD, FramebufConf
 from lcdFont import LcdFont
 
 LCD_CONFS = {
@@ -89,7 +89,7 @@ def main():
         out += "  (lcd: %sx%s, framebuf: %s)\n" % (
           controller['lcd'].get_width(),
           controller['lcd'].get_height(),
-          formatFramebufConf(controller['lcd'].get_framebuf_conf()))
+          controller['lcd'].get_framebuf_conf())
         out += "orientation: %s degrees\n" % (
           controller['lcd'].get_rotation_degrees())
         out += "RAM free: %s bytes\n" % (
@@ -150,7 +150,7 @@ def main():
         out = setOrientation(controller['lcd'], orient)
       elif cmd == "framebuf":
         fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
-        print("framebuf=" + formatFramebufConf(fbConf))
+        print("framebuf=" + str(fbConf))
         out = setFramebuf(controller['lcd'], fbConf)
       elif cmd == "text":
         isClear = maybeGetParamBool(params, "clear", True)
@@ -193,7 +193,7 @@ def createLCD(lcdName):
   msg = "LCD init\n"
 
   msg += setFramebuf(lcd, readLastFramebufConf()) + "\n"
-  msg += setOrientation(lcd, readLastRotationDegrees()) + "\n"
+  msg += setOrientation(lcd, str(readLastRotationDegrees())) + "\n"
 
   print(msg)
 
@@ -285,13 +285,13 @@ def setFramebuf(lcd, fbConf):
   #  H and Y always refers to the smaller physical dimension of the LCD
 
   if fbConf == None:
-    fbConf = {'enabled': False, 'maxW': 0, 'maxH': 0, 'x': 0, 'y': 0}
+    fbConf = FramebufConf()
 
   lcd.set_framebuf_conf(fbConf)
   # get the actual framebuf conf of the LCD (might have failed due to OOM)
   fbConf = lcd.get_framebuf_conf()
   writeLastFramebufConf(fbConf)
-  return "framebuf: " + formatFramebufConf(fbConf) + "\n"
+  return "framebuf: " + str(fbConf) + "\n"
 
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
@@ -328,54 +328,11 @@ def maybeGetParamFramebufConf(params, paramName, defaultValue=None):
   if val == None:
     return defaultValue
   else:
-    fbConf = parseFramebufConfStr(val)
+    fbConf = FramebufConf.parseFramebufConfStr(val)
     if fbConf == None:
       return defaultValue
     else:
       return fbConf
-
-def parseFramebufConfStr(fbConfStr):
-  if fbConfStr == None:
-    return None
-
-  fbConfStr = fbConfStr.lower()
-  if fbConfStr == "on" or fbConfStr == "enabled" or fbConfStr == "true":
-    return {'enabled': True, 'maxW': 0, 'maxH': 0, 'x': 0, 'y': 0}
-  elif fbConfStr == "off" or fbConfStr == "disabled" or fbConfStr == "false":
-    return {'enabled': False, 'maxW': 0, 'maxH': 0, 'x': 0, 'y': 0}
-  else:
-    nums = []
-    curNum = ""
-    for c in fbConfStr:
-      if c.isdigit():
-        curNum += c
-      elif (len(nums) == 0 and c == "x") or (len(nums) > 0 and c == "+"):
-        if len(curNum) == 0:
-          return None
-        nums.append(int(curNum))
-        curNum = ""
-    if len(curNum) > 0:
-      nums.append(int(curNum))
-
-    if len(nums) == 2:
-      return {'enabled': True, 'maxW': nums[0], 'maxH': nums[1], 'x': 0, 'y': 0}
-    elif len(nums) == 4:
-      return {'enabled': True, 'maxW': nums[0], 'maxH': nums[1], 'x': nums[2], 'y': nums[3]}
-    else:
-      return None
-
-  return fb
-def formatFramebufConf(fbConf):
-  if fbConf == None:
-    return "None"
-  elif not fbConf['enabled']:
-    return "off"
-  elif fbConf['maxW'] == 0 and fbConf['maxH'] == 0:
-    return "on"
-  elif fbConf['x'] == 0 and fbConf['y'] == 0:
-    return '%dx%d' % (fbConf['maxW'], fbConf['maxH'])
-  else:
-    return '%dx%d+%d+%d' % (fbConf['maxW'], fbConf['maxH'], fbConf['x'], fbConf['y'])
 
 def readCommandRequest(cl):
   cl.settimeout(0.25)
@@ -456,9 +413,9 @@ def writeLastRotationDegrees(degrees):
 
 def readLastFramebufConf():
   val = readFileLine("last-framebuf-conf.txt")
-  return parseFramebufConfStr(val)
+  return FramebufConf.parseFramebufConfStr(val)
 def writeLastFramebufConf(fbConf):
-  writeFile("last-framebuf-conf.txt", formatFramebufConf(fbConf) + "\n")
+  writeFile("last-framebuf-conf.txt", str(fbConf) + "\n")
 
 def readFileInt(file):
   try:

@@ -82,12 +82,12 @@ class LCD():
     return (winX, winY)
 
   def get_framebuf_conf(self):
-    return { 'enabled': self.framebufEnabled
-           , 'maxW': self.framebufMaxWidth
-           , 'maxH': self.framebufMaxHeight
-           , 'x': self.framebufOffsetX
-           , 'y': self.framebufOffsetY
-           }
+    return FramebufConf(
+           enabled=self.framebufEnabled,
+           maxW = self.framebufMaxWidth,
+           maxH = self.framebufMaxHeight,
+           x = self.framebufOffsetX,
+           y = self.framebufOffsetY)
   def set_framebuf_conf(self, fbConf):
     if fbConf == None:
       self.framebufEnabled = False
@@ -96,11 +96,11 @@ class LCD():
       self.framebufOffsetX = 0
       self.framebufOffsetY = 0
     else:
-      self.framebufEnabled = fbConf['enabled']
-      self.framebufMaxWidth = fbConf['maxW']
-      self.framebufMaxHeight = fbConf['maxH']
-      self.framebufOffsetX = fbConf['x']
-      self.framebufOffsetY = fbConf['y']
+      self.framebufEnabled = fbConf.enabled
+      self.framebufMaxWidth = fbConf.maxW
+      self.framebufMaxHeight = fbConf.maxH
+      self.framebufOffsetX = fbConf.x
+      self.framebufOffsetY = fbConf.y
 
       if self.framebufMaxWidth == None:
         self.framebufMaxWidth = 0
@@ -535,3 +535,58 @@ class LCD():
     if self.framebufEnabled:
       self.write_cmd(0x2C)
       self.write_data(self.buffer)
+
+
+class FramebufConf():
+  def __init__(self, enabled=False, maxW=0, maxH=0, x=0, y=0):
+    self.enabled = enabled
+    self.maxW = maxW
+    self.maxH = maxH
+    self.x = x
+    self.y = y
+
+  @classmethod
+  def parseFramebufConfStr(cls, fbConfStr):
+    if fbConfStr == None:
+      return None
+
+    fbConfStr = fbConfStr.lower()
+    if fbConfStr == "on" or fbConfStr == "enabled" or fbConfStr == "true":
+      return FramebufConf(enabled=True, maxW=0, maxH=0, x=0, y=0)
+    elif fbConfStr == "off" or fbConfStr == "disabled" or fbConfStr == "false":
+      return FramebufConf(enabled=False, maxW=0, maxH=0, x=0, y=0)
+    else:
+      nums = []
+      curNum = ""
+      for c in fbConfStr:
+        if c.isdigit():
+          curNum += c
+        elif (len(nums) == 0 and c == "x") or (len(nums) > 0 and c == "+"):
+          if len(curNum) == 0:
+            return None
+          nums.append(int(curNum))
+          curNum = ""
+      if len(curNum) > 0:
+        nums.append(int(curNum))
+
+      if len(nums) == 2:
+        return FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=0, y=0)
+      elif len(nums) == 4:
+        return FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=nums[2], y=nums[3])
+      else:
+        return None
+
+    return fb
+
+  def __str__(self) -> str:
+    return self.format()
+
+  def format(self):
+    if not self.enabled:
+      return "off"
+    elif self.maxW == 0 and self.maxH == 0:
+      return "on"
+    elif self.x == 0 and self.y == 0:
+      return '%dx%d' % (self.maxW, self.maxH)
+    else:
+      return '%dx%d+%d+%d' % (self.maxW, self.maxH, self.x, self.y)
