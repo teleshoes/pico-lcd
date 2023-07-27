@@ -86,14 +86,10 @@ def main():
         out += "window: %sx%s\n" % (
           winX,
           winY)
-        out += "  (lcd: %sx%s, framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s)\n" % (
+        out += "  (lcd: %sx%s, framebuf: %s)\n" % (
           controller['lcd'].get_width(),
           controller['lcd'].get_height(),
-          controller['lcd'].framebufEnabled,
-          controller['lcd'].framebufMaxWidth,
-          controller['lcd'].framebufMaxHeight,
-          controller['lcd'].framebufOffsetX,
-          controller['lcd'].framebufOffsetY)
+          formatFramebufConf(controller['lcd'].get_framebuf_conf()))
         out += "orientation: %s degrees\n" % (
           controller['lcd'].get_rotation_degrees())
         out += "RAM free: %s bytes\n" % (
