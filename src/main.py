@@ -153,13 +153,13 @@ def main():
 
         out = setOrientation(controller, orient)
       elif cmd == "framebuf":
-        fb = maybeGetParamFramebuf(params, "framebuf", None)
-        print("framebuf=" + str(fb))
-        out = setFramebuf(controller, fb)
+        fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
+        print("framebuf=" + formatFramebufConf(fbConf))
+        out = setFramebuf(controller, fbConf)
       elif cmd == "text":
         isClear = maybeGetParamBool(params, "clear", True)
         isShow = maybeGetParamBool(params, "show", True)
-        fb = maybeGetParamFramebuf(params, "framebuf", None)
+        fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
         orient = maybeGetParamStr(params, "orient", None)
         markup = data.decode("utf8")
 
@@ -167,8 +167,8 @@ def main():
 
         if orient != None:
           out += setOrientation(controller, orient)
-        if fb != None:
-          out += setFramebuf(controller, fb)
+        if fbConf != None:
+          out += setFramebuf(controller, fbConf)
 
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
@@ -194,17 +194,10 @@ def main():
 def createLCD(lcdName):
   layouts = LCD_CONFS[lcdName]["layouts"]
   lcd = LCD(layouts)
-  (enabled, maxW, maxH, offsetX, offsetY) = readLastFramebufConf()
-  fb = {'enabled': enabled, 'maxW': maxW, 'maxH': maxH, 'x': offsetX, 'y': offsetY}
-  lcd.set_framebuf_conf(fb)
-  fb = lcd.get_framebuf_conf()
+  fbConf = readLastFramebufConf()
+  lcd.set_framebuf_conf(fbConf)
   print("LCD init")
-  print("framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
-    fb['enabled'],
-    fb['maxW'],
-    fb['maxH'],
-    fb['x'],
-    fb['y']))
+  print("framebuf: " + formatFramebufConf(lcd.get_framebuf_conf()))
 
   degrees = readLastRotationDegrees()
   if degrees != None:
@@ -279,7 +272,7 @@ def setOrientation(controller, orient):
   else:
     return "unknown orient " + orient + "\n"
 
-def setFramebuf(controller, fb):
+def setFramebuf(controller, fbConf):
   #  'framebuf' param is one of:
   #     on | enabled | true
   #       enable framebuf, with no max WxH or X/Y offsets
@@ -294,23 +287,12 @@ def setFramebuf(controller, fb):
   #  W and X always refers to the larger physical dimension of the LCD
   #  H and Y always refers to the smaller physical dimension of the LCD
 
-  if fb == None:
+  if fbConf == None:
     return "ERROR: could not parse framebuf\n"
   else:
-    controller['lcd'].set_framebuf_conf(fb)
-    fb = controller['lcd'].get_framebuf_conf()
-    writeLastFramebufConf(
-      fb['enabled'],
-      fb['maxW'],
-      fb['maxH'],
-      fb['x'],
-      fb['y'])
-    return "framebuf: enabled=%s maxW=%s maxH=%s x=%s y=%s\n" % (
-      fb['enabled'],
-      fb['maxW'],
-      fb['maxH'],
-      fb['x'],
-      fb['y'])
+    controller['lcd'].set_framebuf_conf(fbConf)
+    writeLastFramebufConf(fbConf)
+    return "framebuf: " + formatFramebufConf(controller['lcd'].get_framebuf_conf()) + "\n"
 
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
@@ -342,54 +324,59 @@ def maybeGetParamInt(params, paramName, defaultValue=None):
       print("WARNING: could not parse int param " + paramName + "=" + val + "\n")
       return defaultValue
 
-def maybeGetParamFramebuf(params, paramName, defaultValue=None):
+def maybeGetParamFramebufConf(params, paramName, defaultValue=None):
   val = maybeGetParamStr(params, paramName, None)
   if val == None:
     return defaultValue
   else:
-    val = val.lower()
-    fb = {'enabled': False, 'maxW': None, 'maxH': None, 'x': None, 'y': None}
-    if val == "on" or val == "enabled" or val == "true":
-      fb['enabled'] = True
-    elif val == "off" or val == "disabled" or val == "false":
-      fb['enabled'] = False
+    fbConf = parseFramebufConfStr(val)
+    if fbConf == None:
+      return defaultValue
     else:
-      nums = []
-      curNum = ""
-      for c in val:
-        if c.isdigit():
-          curNum += c
-        elif (len(nums) == 0 and c == "x") or (len(nums) > 0 and c == "+"):
-          if len(curNum) == 0:
-            return None
-          nums.append(int(curNum))
-          curNum = ""
-      if len(curNum) > 0:
+      return fbConf
+
+def parseFramebufConfStr(fbConfStr):
+  if fbConfStr == None:
+    return None
+
+  fbConfStr = fbConfStr.lower()
+  if fbConfStr == "on" or fbConfStr == "enabled" or fbConfStr == "true":
+    return {'enabled': True, 'maxW': 0, 'maxH': 0, 'x': 0, 'y': 0}
+  elif fbConfStr == "off" or fbConfStr == "disabled" or fbConfStr == "false":
+    return {'enabled': False, 'maxW': 0, 'maxH': 0, 'x': 0, 'y': 0}
+  else:
+    nums = []
+    curNum = ""
+    for c in fbConfStr:
+      if c.isdigit():
+        curNum += c
+      elif (len(nums) == 0 and c == "x") or (len(nums) > 0 and c == "+"):
+        if len(curNum) == 0:
+          return None
         nums.append(int(curNum))
+        curNum = ""
+    if len(curNum) > 0:
+      nums.append(int(curNum))
 
-      if len(nums) == 2:
-        fb['enabled'] = True
-        fb['maxW'] = nums[0]
-        fb['maxH'] = nums[1]
-      elif len(nums) == 4:
-        fb['enabled'] = True
-        fb['maxW'] = nums[0]
-        fb['maxH'] = nums[1]
-        fb['x'] = nums[2]
-        fb['y'] = nums[3]
-        print(str(fb))
-      else:
-        return None
+    if len(nums) == 2:
+      return {'enabled': True, 'maxW': nums[0], 'maxH': nums[1], 'x': 0, 'y': 0}
+    elif len(nums) == 4:
+      return {'enabled': True, 'maxW': nums[0], 'maxH': nums[1], 'x': nums[2], 'y': nums[3]}
+    else:
+      return None
 
-    if fb['maxW'] == 0:
-      fb['maxW'] = None
-    if fb['maxH'] == 0:
-      fb['maxH'] = None
-    if fb['x'] == 0:
-      fb['x'] = None
-    if fb['y'] == 0:
-      fb['y'] = None
-    return fb
+  return fb
+def formatFramebufConf(fbConf):
+  if fbConf == None:
+    return "None"
+  elif not fbConf['enabled']:
+    return "off"
+  elif fbConf['maxW'] == 0 and fbConf['maxH'] == 0:
+    return "on"
+  elif fbConf['x'] == 0 and fbConf['y'] == 0:
+    return '%dx%d' % (fbConf['maxW'], fbConf['maxH'])
+  else:
+    return '%dx%d+%d+%d' % (fbConf['maxW'], fbConf['maxH'], fbConf['x'], fbConf['y'])
 
 def readCommandRequest(cl):
   cl.settimeout(0.25)
@@ -470,47 +457,9 @@ def writeLastRotationDegrees(degrees):
 
 def readLastFramebufConf():
   val = readFileLine("last-framebuf-conf.txt")
-  (maxW, maxH, offsetX, offsetY) = (0, 0, 0, 0)
-  enabled = True
-  if val != None:
-    arr = val.split(" ")
-    if len(arr) == 5:
-      enabledStr = arr[0]
-      if enabledStr == "true":
-        enabled = True
-      elif enabledStr == "false":
-        enabled = False
-      else:
-        enabled = True
-
-      try:
-        (maxW, maxH, offsetX, offsetY) = (int(arr[1]), int(arr[2]), int(arr[3]), int(arr[4]))
-      except:
-        (maxW, maxH, offsetX, offsetY) = (0, 0, 0, 0)
-  if maxW == 0:
-    maxW = None
-  if maxH == 0:
-    maxH = None
-  if offsetX == 0:
-    offsetX = None
-  if offsetY == 0:
-    offsetY = None
-  return (enabled, maxW, maxH, offsetX, offsetY)
-def writeLastFramebufConf(enabled, maxW, maxH, offsetX, offsetY):
-  if maxW == None:
-    maxW = 0
-  if maxH == None:
-    maxH = 0
-  if offsetX == None:
-    offsetX = 0
-  if offsetY == None:
-    offsetY = 0
-  fbConfFmt = str(enabled).lower()
-  fbConfFmt += " " + str(maxW)
-  fbConfFmt += " " + str(maxH)
-  fbConfFmt += " " + str(offsetX)
-  fbConfFmt += " " + str(offsetY)
-  writeFile("last-framebuf-conf.txt", fbConfFmt + "\n")
+  return parseFramebufConfStr(val)
+def writeLastFramebufConf(fbConf):
+  writeFile("last-framebuf-conf.txt", formatFramebufConf(fbConf) + "\n")
 
 def readFileInt(file):
   try:
