@@ -151,11 +151,11 @@ def main():
         orient = maybeGetParamStr(params, "orient", None)
         print("orient=" + orient)
 
-        out = setOrientation(controller, orient)
+        out = setOrientation(controller['lcd'], orient)
       elif cmd == "framebuf":
         fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
         print("framebuf=" + formatFramebufConf(fbConf))
-        out = setFramebuf(controller, fbConf)
+        out = setFramebuf(controller['lcd'], fbConf)
       elif cmd == "text":
         isClear = maybeGetParamBool(params, "clear", True)
         isShow = maybeGetParamBool(params, "show", True)
@@ -166,9 +166,9 @@ def main():
         print("text: " + markup)
 
         if orient != None:
-          out += setOrientation(controller, orient)
+          out += setOrientation(controller['lcd'], orient)
         if fbConf != None:
-          out += setFramebuf(controller, fbConf)
+          out += setFramebuf(controller['lcd'], fbConf)
 
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
@@ -194,14 +194,13 @@ def main():
 def createLCD(lcdName):
   layouts = LCD_CONFS[lcdName]["layouts"]
   lcd = LCD(layouts)
-  fbConf = readLastFramebufConf()
-  lcd.set_framebuf_conf(fbConf)
-  print("LCD init")
-  print("framebuf: " + formatFramebufConf(lcd.get_framebuf_conf()))
+  msg = "LCD init\n"
 
-  degrees = readLastRotationDegrees()
-  if degrees != None:
-    lcd.set_rotation_degrees(degrees)
+  msg += setFramebuf(lcd, readLastFramebufConf()) + "\n"
+  msg += setOrientation(lcd, readLastRotationDegrees()) + "\n"
+
+  print(msg)
+
   return lcd
 
 def createButtons(lcdName):
@@ -254,9 +253,11 @@ def formatButtonCount(buttons):
   return fmt
 
 
-def setOrientation(controller, orient):
+def setOrientation(lcd, orient):
   degrees = None
-  if orient == "landscape" or orient == "0" or orient == "normal" or orient == "default":
+  if orient == None:
+    degrees = 0
+  elif orient == "landscape" or orient == "0" or orient == "normal" or orient == "default":
     degrees = 0
   elif orient == "portrait" or orient == "270" or orient == "-90":
     degrees = 270
@@ -266,13 +267,13 @@ def setOrientation(controller, orient):
     degrees = 90
 
   if degrees != None:
-    controller['lcd'].set_rotation_degrees(degrees)
-    writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
+    lcd.set_rotation_degrees(degrees)
+    writeLastRotationDegrees(lcd.get_rotation_degrees())
     return "orient=" + str(degrees) + "\n"
   else:
-    return "unknown orient " + orient + "\n"
+    return "unknown orient " + str(orient) + "\n"
 
-def setFramebuf(controller, fbConf):
+def setFramebuf(lcd, fbConf):
   #  'framebuf' param is one of:
   #     on | enabled | true
   #       enable framebuf, with no max WxH or X/Y offsets
@@ -288,11 +289,13 @@ def setFramebuf(controller, fbConf):
   #  H and Y always refers to the smaller physical dimension of the LCD
 
   if fbConf == None:
-    return "ERROR: could not parse framebuf\n"
-  else:
-    controller['lcd'].set_framebuf_conf(fbConf)
-    writeLastFramebufConf(fbConf)
-    return "framebuf: " + formatFramebufConf(controller['lcd'].get_framebuf_conf()) + "\n"
+    fbConf = {'enabled': False, 'maxW': 0, 'maxH': 0, 'x': 0, 'y': 0}
+
+  lcd.set_framebuf_conf(fbConf)
+  # get the actual framebuf conf of the LCD (might have failed due to OOM)
+  fbConf = lcd.get_framebuf_conf()
+  writeLastFramebufConf(fbConf)
+  return "framebuf: " + formatFramebufConf(fbConf) + "\n"
 
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
