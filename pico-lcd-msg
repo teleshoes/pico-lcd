@@ -85,10 +85,12 @@ my $USAGE = "Usage:
     show the framebuffer, if any
       -same as: $EXEC [OPTS] --cmd show
 
-  $EXEC [OPTS] --set-timeout TIMEOUT_S TIMEOUT_TEXT
+  $EXEC [OPTS] --set-timeout [TIMEOUT_S TIMEOUT_TEXT]
     write \"TIMEOUT_S,TIMEOUT_TEXT\" to timeout.txt file
       after TIMEOUT_S of no network commands,
       clear LCD, set LCD text to TIMEOUT_TEXT, and show LCD
+    if TIMEOUT_S is omitted, the timeout is removed,
+      and the socket blocks forever
 
   $EXEC [OPTS] buttons | --buttons
     fetch button press counts and print them
