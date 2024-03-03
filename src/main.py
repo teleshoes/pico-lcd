@@ -64,13 +64,30 @@ def main():
 
   setupWifi(controller['lcdFont'])
 
+  (timeoutS, timeoutText) = readTimeoutFile()
+
   while True:
     try:
       #something allocates memory that GC is not aware of
       gc.collect()
 
-      cl, addr = controller['socket'].accept()
-      print('client connected from', addr)
+      #positive is blocking+timeout, 0 is non-blocking, None is blocking
+      if timeoutS != None and timeoutS > 0:
+        controller['socket'].settimeout(timeoutS)
+      else:
+        controller['socket'].settimeout(None)
+
+      try:
+        cl, addr = controller['socket'].accept()
+        print('client connected from', addr)
+      except:
+        print("SOCKET TIMEOUT (" + str(timeoutS) + "s)\n")
+        if timeoutText == None:
+          timeoutText = "TIMEOUT"
+        controller['lcd'].fill(controller['lcd'].black)
+        controller['lcdFont'].drawMarkup(timeoutText)
+        controller['lcd'].show()
+        continue
 
       (cmd, params, data) = readCommandRequest(cl)
 
@@ -416,6 +433,17 @@ def readLastFramebufConf():
   return FramebufConf.parseFramebufConfStr(val)
 def writeLastFramebufConf(fbConf):
   writeFile("last-framebuf-conf.txt", str(fbConf) + "\n")
+
+def readTimeoutFile():
+  val = readFileLine("timeout.txt")
+  if val != None:
+    val = val.strip()
+    segments = val.split(",")
+    if len(segments) == 2:
+      timeoutS = int(segments[0])
+      timeoutText = segments[1]
+      return (timeoutS, timeoutText)
+  return (None, None)
 
 def readFileInt(file):
   try:
