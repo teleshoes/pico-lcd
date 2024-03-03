@@ -130,6 +130,11 @@ def main():
         writeFile("wifi-conf.txt", "")
         out = "WARNING: all wifi networks removed for next boot\n"
         print(out)
+      elif cmd == "timeout":
+        timeoutS = maybeGetParamInt(params, "timeoutS", None)
+        timeoutText = data.decode("utf8")
+        print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
+        writeTimeoutFile(timeoutS, timeoutText)
       elif cmd == "clear":
         print("clear")
         controller['lcd'].fill_mem_blank()
@@ -444,6 +449,11 @@ def readTimeoutFile():
       timeoutText = segments[1]
       return (timeoutS, timeoutText)
   return (None, None)
+def writeTimeoutFile(timeoutS, timeoutText):
+  if timeoutS == None or timeoutText == None:
+    writeFile("timeout.txt", "")
+  else:
+    writeFile("timeout.txt", str(timeoutS) + "," + timeoutText + "\n")
 
 def readFileInt(file):
   try:
