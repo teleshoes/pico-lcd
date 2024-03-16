@@ -139,6 +139,16 @@ def main():
         timeoutText = data.decode("utf8")
         print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
         writeTimeoutFile(timeoutS, timeoutText)
+      elif cmd == "rtc":
+        #epoch param must be in seconds since midnight 1970-01-01 UTC
+        epoch = maybeGetParamInt(params, "epoch", None)
+        if rtc == None:
+          out = "NO RTC"
+        elif epoch != None:
+          rtc.setTimeEpoch(epoch)
+          out += "SET RTC=" + str(rtc.getTimeEpoch()) + "\n"
+        out += "RTC EPOCH=" + str(rtc.getTimeEpoch()) + "\n"
+        out += "RTC ISO=" + str(rtc.getTimeISO()) + "\n"
       elif cmd == "clear":
         print("clear")
         controller['lcd'].fill_mem_blank()
