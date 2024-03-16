@@ -3,6 +3,7 @@
 #Copyright 2023 Elliot Wolk
 #License: GPLv2
 
+import time
 import ustruct
 
 class LcdFont:
@@ -139,6 +140,54 @@ class LcdFont:
     except:
       return defaultVal
 
+  def formatTime(self, formatSpec, epoch):
+    val = ""
+    i = 0
+    tspec = time.gmtime(epoch)
+
+    while i < len(formatSpec):
+      ch = formatSpec[i]
+      i += 1
+      if ch == "%" and i<len(formatSpec):
+        formatCh = formatSpec[i]
+        i += 1
+
+        if formatCh == "%":
+          val += "%"
+        elif formatCh == "s":
+          val += str(epoch)
+        elif formatCh == "Y":
+          val += "%04d" % tspec[0]
+        elif formatCh == "m":
+          val += "%02d" % tspec[1]
+        elif formatCh == "d":
+          val += "%02d" % tspec[2]
+        elif formatCh == "H":
+          val += "%02d" % tspec[3]
+        elif formatCh == "I":
+          hr = tspec[3] % 12
+          hr = 12 if hr == 0 else hr
+          val += "%02d" % hr
+        elif formatCh == "p":
+          val += "AM" if tspec[3] < 12 else "PM"
+        elif formatCh == "M":
+          val += "%02d" % tspec[4]
+        elif formatCh == "S":
+          val += "%02d" % tspec[5]
+        elif formatCh == "a":
+          weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+          val += weekDays(tspec[6] % 6)
+        elif formatCh == "b":
+          months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+          val += months((tspec[1] - 1) % 12)
+        else:
+          #invalid format char, treat as literal
+          val += "%" + ch
+      else:
+        val += ch
+    return val
+
   def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtcEpoch=0):
     #  markup syntax is:
     #    !CMD=VAL!
@@ -158,6 +207,24 @@ class LcdFont:
     #        e.g.:   !color=white! A !color=blue! B !color=prev! C
     #                  is the same as:
     #                !color=white! A !color=blue! B !color=white! C
+    #    !rtc=FORMAT!
+    #        use time from DS3231 rtc clock (if supported) and format with FORMAT string
+    #        NOTE: all !rtc=FORMAT! entries in markup share a single epoch time,
+    #              multiple entries cannot show different times due to race conditions
+    #
+    #        FORMAT is any string, with the following replacements:
+    #          %s   EPOCH number of seconds since
+    #          %Y   year, formatted as YYYY
+    #          %m   month 1-12, formatted as MM
+    #          %d   day 1-31, formatted as DD
+    #          %H   hour 0-23, formatted as HH
+    #          %I   hour 1-12, formatted as II
+    #          %p   'AM' if %H is less than 12, otherwise 'PM'
+    #          %M   minute, 0-59
+    #          %S   second, 0-59
+    #          %a   abbreviated day of week Mon/Tue/Wed/Thu/Fri/Sat/Sun
+    #          %b   abbreviated month Jan/Feb/Mar/Apr/May/Jun/Jul/Aug/Sep/Oct/Nov/Dec
+    #          %%   literal '%' character
     #    !n!
     #        treated the same as a newline literal
     #          moves the cursor down (8+vspace)*size px,
@@ -211,6 +278,8 @@ class LcdFont:
         elif cmd == "hline" or cmd == "hl" or cmd == "hr":
           # '!hr!' => hline
           self.cursorHline()
+        elif cmd == "rtc":
+          self.cursorDrawText(self.formatTime(val, rtcEpoch))
         elif cmd in self.cursor and len(val) > 0:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
           if val == "prev":
