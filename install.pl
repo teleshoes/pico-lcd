@@ -17,6 +17,7 @@ my $TZ_START_YEAR = 1900;
 my $TZ_END_YEAR = 2100;
 
 my @TZ_ZONENAMES = qw(
+  America/New_York
 );
 
 sub main(@){
