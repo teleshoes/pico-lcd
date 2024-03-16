@@ -20,15 +20,16 @@ my $USAGE = "Usage:
   $0 -h | --help
     show this message
 
-  $0 [OPTS] ZONE_NAME
-    -run `zdump -v ZONE_NAME`
-    -parse the lines to extract:
-      -TZ_CHANGE_UTC = time of offset change in UTC
-      -OFFSET_SECONDS = target offset in seconds
-    -convert TZ_CHANGE_UTC to TZ_CHANGE_UTC_EPOCH
-    -sort changes by TZ_CHANGE_UTC_EPOCH, ascending
-    -write each change, one per line, formatted as \"TZ_CHANGE_UTC,OFFSET_SECONDS\"
-      to: $DEST_ZONEINFO_CSV/<ZONE_NAME>.csv
+  $0 [OPTS] ZONE_NAME [ZONE_NAME ZONE_NAME ..]
+    -for each ZONE_NAME:
+      -run `zdump -v ZONE_NAME`
+      -parse the lines to extract:
+        -TZ_CHANGE_UTC = time of offset change in UTC
+        -OFFSET_SECONDS = target offset in seconds
+      -convert TZ_CHANGE_UTC to TZ_CHANGE_UTC_EPOCH
+      -sort changes by TZ_CHANGE_UTC_EPOCH, ascending
+      -write each change, one per line, formatted as \"TZ_CHANGE_UTC,OFFSET_SECONDS\"
+        to: $DEST_ZONEINFO_CSV/<ZONE_NAME>.csv
 
   OPTS
     --skip-existing
@@ -44,7 +45,7 @@ my $USAGE = "Usage:
 sub main(@){
   my $skipExisting = 0;
   my $minMaxYear = undef;
-  my $targetZoneName = undef;
+  my @zoneNames;
   while(@_ > 0){
     my $arg = shift @_;
     if($arg =~ /^(-h|--help)$/){
@@ -57,17 +58,15 @@ sub main(@){
     }elsif($arg =~ /^(?:--year|--years)=(-?\d+,-?\d+)$/){
       $minMaxYear = $1;
     }elsif(-f "$SYS_ZONEINFO_DIR/$arg"){
-      $targetZoneName = $arg;
+      push @zoneNames, $arg;
     }else{
       die "$USAGE\nERROR: unknown arg $arg\n";
     }
   }
 
-  if(not defined $targetZoneName){
+  if(@zoneNames == 0){
     die "ERROR: missing ZONE_NAME\n";
   }
-
-  my @zoneNames = ($targetZoneName);
 
   for my $zoneName(@zoneNames){
     my $destCsv = "$DEST_ZONEINFO_CSV/$zoneName.csv";
