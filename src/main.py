@@ -88,9 +88,10 @@ def main():
         if timeoutText == None:
           timeoutText = "TIMEOUT"
         rtcEpoch = None
-        #only fetch RTC epoch if markup looks like it might want it
+        #only fetch RTC epoch and timezone if markup looks like it might want it
         if rtc != None and "!rtc" in timeoutText:
           rtcEpoch = rtc.getTimeEpoch()
+          rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
         controller['lcd'].fill(controller['lcd'].black)
         controller['lcdFont'].drawMarkup(timeoutText, rtcEpoch=rtcEpoch)
         controller['lcd'].show()
@@ -210,9 +211,10 @@ def main():
           out += setFramebuf(controller['lcd'], fbConf)
 
         rtcEpoch = None
-        #only fetch RTC epoch if markup looks like it might want it
+        #only fetch RTC epoch and timezone if markup looks like it might want it
         if rtc != None and "!rtc" in markup:
           rtcEpoch = rtc.getTimeEpoch()
+          rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
 
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
@@ -234,6 +236,29 @@ def main():
           cl.close()
       except:
         pass
+
+def adjustRTCEpochWithTZOffset(rtcEpoch):
+  tzName = readTZFile()
+  if rtcEpoch != None and tzName != None:
+    foundOffset = None
+    tzCsvFile = "zoneinfo" + "/" + tzName + ".csv"
+    try:
+      with open(tzCsvFile, "r") as fh:
+        for line in fh:
+          cols = line.split(',')
+          if len(cols) == 2:
+            (offsetStartEpochStr, offsetSecondsStr) = cols
+            offsetStartEpoch = int(offsetStartEpochStr)
+            offsetSeconds = int(offsetSecondsStr)
+            if offsetStartEpoch >= rtcEpoch:
+              foundOffset = offsetSeconds
+              break
+    except:
+      print("WARNING: failed to set offset from timezone\n")
+      foundOffset = None
+    if foundOffset != None:
+      rtcEpoch += foundOffset
+  return rtcEpoch
 
 def createLCD(lcdName):
   layouts = LCD_CONFS[lcdName]["layouts"]
