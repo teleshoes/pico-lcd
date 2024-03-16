@@ -162,6 +162,10 @@ class LcdFont:
     #        treated the same as a newline literal
     #          moves the cursor down (8+vspace)*size px,
     #          and resets the left to initial
+    #    !hline!
+    #    !hl!
+    #    !hr!
+    #        draw a horizontal line at cursor
     #    !!
     #        literal '!' character
     #  e.g.:
