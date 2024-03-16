@@ -87,8 +87,9 @@ def main():
         print("SOCKET TIMEOUT (" + str(timeoutS) + "s)\n")
         if timeoutText == None:
           timeoutText = "TIMEOUT"
+        rtcEpoch = None
         controller['lcd'].fill(controller['lcd'].black)
-        controller['lcdFont'].drawMarkup(timeoutText)
+        controller['lcdFont'].drawMarkup(timeoutText, rtcEpoch=rtcEpoch)
         controller['lcd'].show()
         continue
 
@@ -191,9 +192,10 @@ def main():
         if fbConf != None:
           out += setFramebuf(controller['lcd'], fbConf)
 
+        rtcEpoch = None
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
-        controller['lcdFont'].drawMarkup(markup)
+        controller['lcdFont'].drawMarkup(markup, rtcEpoch=rtcEpoch)
         if isShow:
           controller['lcd'].show()
       else:
