@@ -2,6 +2,9 @@
 use strict;
 use warnings;
 use File::Basename qw(dirname);
+use Time::HiRes qw(time);
+
+sub nowMillis();
 
 my @files = qw(
   font5x8.bin
@@ -28,13 +31,16 @@ sub main(@){
     die "ERROR: could not generate font binary\n";
   }
 
+  my $pyboardTmpDir = "pyboard-tmp-" . nowMillis();
+  system "mkdir", $pyboardTmpDir;
+
   #calculate+install tzdata CSV files
   system "./zoneinfo-tool",
     "-c", "$TZ_START_YEAR,$TZ_END_YEAR",
     "--skip-existing",
     @TZ_ZONENAMES,
   ;
-  system "./rshell", "rsync", "--mirror", "./zoneinfo", "/pyboard/zoneinfo/";
+  system "cp", "-ar", "zoneinfo/", "$pyboardTmpDir/";
 
 
   system "rm", "-rf", "mpy/";
@@ -46,12 +52,15 @@ sub main(@){
     system "mpy-cross", "-march=armv6m", $py, "-o", $mpy;
   }
 
-  for my $file(@files){
-    if(not -e $file){
-      die "ERROR: missing file $file\n";
-    }
-  }
-  system "./rshell", "cp", @files, "/pyboard";
+  system "cp", "-ar", @files, "$pyboardTmpDir/";
+
+  system "./rshell", "rsync", "$pyboardTmpDir/", "/pyboard/";
+
+  system "rm", "-rf", "$pyboardTmpDir/";
+}
+
+sub nowMillis(){
+  return int(time() * 1000.0 + 0.5);
 }
 
 &main(@ARGV);
