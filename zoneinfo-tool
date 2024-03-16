@@ -1,22 +1,115 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use File::Basename qw(dirname);
+
+sub readProcLines(@);
+sub writeFile($$);
+
+my $SYS_ZONEINFO_DIR = "/usr/share/zoneinfo";
+my $DEST_ZONEINFO_CSV = "zoneinfo";
 
 my $USAGE = "Usage:
+  Extract offset changes from UNIX zoneinfo files as CSV.
+    NOTE: ignores leapseconds
+  Format is: TZ_CHANGE_UTC_EPOCH,OFFSET_SECONDS
+  To convert a UTC_EPOCH using target local timezone CSV:
+    -find the largest TZ_CHANGE_UTC_EPOCH that is smaller than UTC_EPOCH
+    -add OFFSET_SECONDS to UTC_EPOCH
+
   $0 -h | --help
     show this message
+
+  $0 ZONE_NAME
+    -run `zdump -v ZONE_NAME`
+    -parse the lines to extract:
+      -TZ_CHANGE_UTC = time of offset change in UTC
+      -OFFSET_SECONDS = target offset in seconds
+    -convert TZ_CHANGE_UTC to TZ_CHANGE_UTC_EPOCH
+    -sort changes by TZ_CHANGE_UTC_EPOCH, ascending
+    -write each change, one per line, formatted as \"TZ_CHANGE_UTC,OFFSET_SECONDS\"
+      to: $DEST_ZONEINFO_CSV/<ZONE_NAME>.csv
 ";
 
 sub main(@){
+  my $targetZoneName = undef;
   while(@_ > 0){
     my $arg = shift @_;
     if($arg =~ /^(-h|--help)$/){
       print $USAGE;
       exit 0;
+    }elsif(-f "$SYS_ZONEINFO_DIR/$arg"){
+      $targetZoneName = $arg;
     }else{
       die "$USAGE\nERROR: unknown arg $arg\n";
     }
   }
+
+  if(not defined $targetZoneName){
+    die "ERROR: missing ZONE_NAME\n";
+  }
+
+  my @zoneNames = ($targetZoneName);
+
+  for my $zoneName(@zoneNames){
+    my $destCsv = "$DEST_ZONEINFO_CSV/$zoneName.csv";
+
+    print "converting tz $zoneName\n";
+
+    my @zdumpCmd;
+    @zdumpCmd = (@zdumpCmd, "zdump", "-v");
+    @zdumpCmd = (@zdumpCmd, $zoneName);
+
+    my @zdumpLines = readProcLines(@zdumpCmd);
+    my %changes;
+
+    for my $line(@zdumpLines){
+      if($line =~ /^
+         ([a-zA-Z0-9_\-\/]+)
+         \s+
+         (\w+ \s+ \w+ \s+ \d+ \s+ \d\d:\d\d:\d\d \s+ \d\d\d\d \s+ UT)
+         \s* = \s*
+         (\w+ \s+ \w+ \s+ \d+ \s+ \d\d:\d\d:\d\d \s+ \d\d\d\d \s+ \w+)
+         \s+
+         isdst=([01])
+         \s+
+         gmtoff=(-?\d+)
+         $/x
+      ){
+        my ($zoneName, $utc, $local, $dst, $offsetSec) = ($1, $2, $3, $4, $5);
+        my $epoch = `date --date='$utc' +%s`;
+        chomp $epoch;
+        $changes{$epoch} = $offsetSec;
+      }
+    }
+
+    my @changeEpochs = sort {$a <=> $b} keys %changes;
+    if(@changeEpochs == 0){
+      die "ERROR: no changes found in $zoneName with zdump\n";
+    }
+
+    my $contents = join "", map {"$_,$changes{$_}\n"} @changeEpochs;
+
+    system "mkdir", "-p", dirname($destCsv);
+    writeFile $destCsv, $contents;
+  }
+}
+
+sub readProcLines(@){
+  open my $cmdH, "-|", @_ or die "ERROR: could not run '@_'\n$!\n";
+  my @lines = <$cmdH>;
+  close $cmdH;
+  if($? != 0){
+    die "ERROR: command '@_' failed\n";
+  }
+  return @lines;
+}
+
+sub writeFile($$){
+  my ($file, $content) = @_;
+  open my $fh, "> $file" or die "ERROR: could not write file $file\n$!\n";
+  print $fh $content;
+  close $fh;
 }
 
 &main(@ARGV);
