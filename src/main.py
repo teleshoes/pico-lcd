@@ -142,6 +142,10 @@ def main():
         timeoutText = data.decode("utf8")
         print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
         writeTimeoutFile(timeoutS, timeoutText)
+      elif cmd == "tz":
+        tzName = maybeGetParamStr(params, "name", None)
+        writeTZFile(tzName)
+        print("set timezone for rtc = " + tzName)
       elif cmd == "rtc":
         #epoch param must be in seconds since midnight 1970-01-01 UTC
         epoch = maybeGetParamInt(params, "epoch", None)
@@ -476,6 +480,17 @@ def writeTimeoutFile(timeoutS, timeoutText):
     writeFile("timeout.txt", "")
   else:
     writeFile("timeout.txt", str(timeoutS) + "," + timeoutText + "\n")
+
+def readTZFile():
+  val =  readFileLine("current_tz")
+  if val != None:
+    val = val.strip()
+  return val
+def writeTZFile(tzName):
+  if tzName == None:
+    os.remove("current_tz")
+  else:
+    writeFile("current_tz", tzName + "\n")
 
 def readFileInt(file):
   try:
