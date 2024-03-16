@@ -110,7 +110,7 @@ sub main(@){
 
     my @changeEpochs = sort {$a <=> $b} keys %changes;
     if(@changeEpochs == 0){
-      die "ERROR: no changes found in $zoneName with zdump\n";
+      print STDERR "WARNING: no changes found in $zoneName with zdump\n";
     }
 
     my $contents = join "", map {"$_,$changes{$_}\n"} @changeEpochs;
