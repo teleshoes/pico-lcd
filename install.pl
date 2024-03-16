@@ -50,6 +50,7 @@ sub main(@){
     $mpy =~ s/src\//mpy\//;
     $mpy =~ s/\.py$/.mpy/;
     system "mpy-cross", "-march=armv6m", $py, "-o", $mpy;
+    system "touch", $mpy, "-r", $py;
   }
 
   system "cp", "-ar", @files, "$pyboardTmpDir/";
