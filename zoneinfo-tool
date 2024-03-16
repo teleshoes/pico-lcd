@@ -3,7 +3,9 @@ use strict;
 use warnings;
 use File::Basename qw(dirname);
 
+sub fetchAllZoneNames();
 sub readProcLines(@);
+sub readFileLines($);
 sub writeFile($$);
 
 my $SYS_ZONEINFO_DIR = "/usr/share/zoneinfo";
@@ -31,6 +33,10 @@ my $USAGE = "Usage:
       -write each change, one per line, formatted as \"TZ_CHANGE_UTC,OFFSET_SECONDS\"
         to: $DEST_ZONEINFO_CSV/<ZONE_NAME>.csv
 
+  $0 [OPTS] --all
+    -fetch all ZONE_NAME entries from $SYS_ZONEINFO_DIR/tzdata.zi
+    -same as: $0 ZONE_NAME ZONE_NAME ...
+
   OPTS
     --skip-existing
       skip processing if CSV already exists
@@ -57,6 +63,8 @@ sub main(@){
       $minMaxYear = shift @_;
     }elsif($arg =~ /^(?:--year|--years)=(-?\d+,-?\d+)$/){
       $minMaxYear = $1;
+    }elsif($arg =~ /^(--all)$/){
+      @zoneNames = fetchAllZoneNames();
     }elsif(-f "$SYS_ZONEINFO_DIR/$arg"){
       push @zoneNames, $arg;
     }else{
@@ -119,6 +127,21 @@ sub main(@){
   }
 }
 
+sub fetchAllZoneNames(){
+  my @zoneNames;
+  my @tzdataLines = readFileLines("$SYS_ZONEINFO_DIR/tzdata.zi");
+  for my $line(@tzdataLines){
+    if($line =~ /^Z (\S+) /){
+      my $zoneName = $1;
+      if(not -f "$SYS_ZONEINFO_DIR/$zoneName"){
+        die "ERROR: tzdata.zi contains $zoneName, but not in $SYS_ZONEINFO_DIR\n";
+      }
+      push @zoneNames, $zoneName;
+    }
+  }
+  return @zoneNames;
+}
+
 sub readProcLines(@){
   open my $cmdH, "-|", @_ or die "ERROR: could not run '@_'\n$!\n";
   my @lines = <$cmdH>;
@@ -129,6 +152,13 @@ sub readProcLines(@){
   return @lines;
 }
 
+sub readFileLines($){
+  my ($file) = @_;
+  open my $fh, "< $file" or die "ERROR: could not write file $file\n$!\n";
+  my @lines = <$fh>;
+  close $fh;
+  return @lines;
+}
 sub writeFile($$){
   my ($file, $content) = @_;
   open my $fh, "> $file" or die "ERROR: could not write file $file\n$!\n";
