@@ -33,10 +33,17 @@ my $USAGE = "Usage:
   OPTS
     --skip-existing
       skip processing if CSV already exists
+
+    -c MIN_YEAR,MAX_YEAR
+    --year=MIN_YEAR,MAX_YEAR
+    --years=MIN_YEAR,MAX_YEAR
+      pass '-c MIN_YEAR,MAX_YEAR' to zdump
+      (default in zdump is -500,2500)
 ";
 
 sub main(@){
   my $skipExisting = 0;
+  my $minMaxYear = undef;
   my $targetZoneName = undef;
   while(@_ > 0){
     my $arg = shift @_;
@@ -45,6 +52,10 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(--skip-existing)$/){
       $skipExisting = 1;
+    }elsif($arg =~ /^(-c)$/ and @_ > 0 and $_[0] =~ /^(-?\d+,-?\d+)$/){
+      $minMaxYear = shift @_;
+    }elsif($arg =~ /^(?:--year|--years)=(-?\d+,-?\d+)$/){
+      $minMaxYear = $1;
     }elsif(-f "$SYS_ZONEINFO_DIR/$arg"){
       $targetZoneName = $arg;
     }else{
@@ -69,6 +80,9 @@ sub main(@){
 
     my @zdumpCmd;
     @zdumpCmd = (@zdumpCmd, "zdump", "-v");
+    if(defined $minMaxYear){
+      @zdumpCmd = (@zdumpCmd, "-c", $minMaxYear);
+    }
     @zdumpCmd = (@zdumpCmd, $zoneName);
 
     my @zdumpLines = readProcLines(@zdumpCmd);
