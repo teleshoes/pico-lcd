@@ -139,7 +139,7 @@ class LcdFont:
     except:
       return defaultVal
 
-  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
+  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtcEpoch=0):
     #  markup syntax is:
     #    !CMD=VAL!
     #      CMD=COLOR  set the color to COLOR
@@ -234,7 +234,7 @@ class LcdFont:
         self.cursorDrawChar(ch)
         i += 1
 
-  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
+  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtcEpoch=0):
     self.lcd.fill(0)
-    self.drawMarkup(markup, x, y, size, color, hspace, vspace)
+    self.drawMarkup(markup, x, y, size, color, hspace, vspace, rtcEpoch)
     self.lcd.show()
