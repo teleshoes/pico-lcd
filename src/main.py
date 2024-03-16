@@ -88,6 +88,9 @@ def main():
         if timeoutText == None:
           timeoutText = "TIMEOUT"
         rtcEpoch = None
+        #only fetch RTC epoch if markup looks like it might want it
+        if rtc != None and "!rtc" in timeoutText:
+          rtcEpoch = rtc.getTimeEpoch()
         controller['lcd'].fill(controller['lcd'].black)
         controller['lcdFont'].drawMarkup(timeoutText, rtcEpoch=rtcEpoch)
         controller['lcd'].show()
@@ -203,6 +206,10 @@ def main():
           out += setFramebuf(controller['lcd'], fbConf)
 
         rtcEpoch = None
+        #only fetch RTC epoch if markup looks like it might want it
+        if rtc != None and "!rtc" in markup:
+          rtcEpoch = rtc.getTimeEpoch()
+
         if isClear:
           controller['lcd'].fill(controller['lcd'].black)
         controller['lcdFont'].drawMarkup(markup, rtcEpoch=rtcEpoch)
