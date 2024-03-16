@@ -8,6 +8,7 @@ import gc
 import machine
 import sys
 
+from rtc import RTC_DS3231
 from lcd import LCD, FramebufConf
 from lcdFont import LcdFont
 
@@ -65,6 +66,8 @@ def main():
   setupWifi(controller['lcdFont'])
 
   (timeoutS, timeoutText) = readTimeoutFile()
+
+  rtc = RTC_DS3231()
 
   while True:
     try:
