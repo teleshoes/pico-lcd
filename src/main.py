@@ -8,6 +8,7 @@ import gc
 import machine
 import sys
 
+import doc
 from rtc import RTC_DS3231
 from lcd import LCD, FramebufConf
 from lcdFont import LcdFont
