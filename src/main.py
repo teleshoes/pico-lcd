@@ -14,7 +14,7 @@ from lcd import LCD, FramebufConf
 from lcdFont import LcdFont
 
 LCD_CONFS = {
-  "1_3": {
+  doc.LCD_NAME_1_3: {
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
                 'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
     "layouts": [
@@ -24,7 +24,7 @@ LCD_CONFS = {
       {'DEG':270, 'W':240, 'H':240, 'X':  0, 'Y': 80, 'MY':1, 'MX':1, 'MV':0},
     ],
   },
-  "2_0": {
+  doc.LCD_NAME_2_0: {
     "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
     "layouts": [
       {'DEG':  0, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
@@ -35,7 +35,7 @@ LCD_CONFS = {
   },
 }
 
-DEFAULT_LCD_NAME = "1_3"
+DEFAULT_LCD_NAME = doc.LCD_NAME_1_3
 
 def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
