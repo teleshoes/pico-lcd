@@ -201,6 +201,8 @@ def handleCmd(controller, cmd, params, data):
 
       controller['lcdFont'].setLCD(controller['lcd'])
       writeLastLCDName(name)
+    else:
+      raise ValueError("ERROR: missing LCD param 'name'\n")
   elif cmd == doc.CMD_ORIENT['name']:
     orient = maybeGetParamStr(params, "orient", None)
     print("orient=" + orient)
