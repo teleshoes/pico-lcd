@@ -13,6 +13,8 @@ from rtc import RTC_DS3231
 from lcd import LCD, FramebufConf
 from lcdFont import LcdFont
 
+ALL_COMMANDS = doc.getAllCommands()
+
 LCD_CONFS = {
   doc.LCD_NAME_1_3: {
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
@@ -42,7 +44,6 @@ def buttonPressedActions(btnName, controller):
     controller['lcd'].set_rotation_next()
     writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
 
-
 def main():
   controller = {
     'lcdName': None, 'lcd': None, 'lcdFont': None,
@@ -69,6 +70,16 @@ def main():
   (timeoutS, timeoutText) = readTimeoutFile()
 
   controller['rtc'] = RTC_DS3231()
+
+  cmdFunctionsByName = {}
+  symDict = globals()
+  for cmd in ALL_COMMANDS:
+    for symName in symDict:
+      if symName.lower() == "cmd" + cmd['name']:
+        cmdFunctionsByName[cmd['name']] = symDict[symName]
+        break
+    if not cmdFunctionsByName[cmd['name']]:
+      raise RuntimeError("ERROR: no function defined for cmd " + cmd['name'])
 
   while True:
     try:
@@ -98,10 +109,16 @@ def main():
         controller['lcd'].show()
         continue
 
-      (cmd, params, data) = readCommandRequest(cl)
+      (cmdName, params, data) = readCommandRequest(cl)
 
-      out = handleCmd(controller, cmd, params, data)
+      if cmdName in cmdFunctionsByName:
+        cmdFunction = cmdFunctionsByName[cmdName]
+        out = cmdFunction(controller, params, data)
+      else:
+        raise(Exception("ERROR: could not parse cmdName in payload"))
 
+      if out == None:
+        out = ""
 
       cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n' + out)
       cl.close()
@@ -116,9 +133,10 @@ def main():
       except:
         pass
 
+#####
+#####
 
-def handleCmd(controller, cmd, params, data):
-  if cmd == doc.CMD_INFO['name']:
+def cmdInfo(controller, params, data):
     if controller['lcd'].is_framebuf_enabled():
       (winX, winY) = controller['lcd'].get_framebuf_size()
     else:
@@ -143,10 +161,12 @@ def handleCmd(controller, cmd, params, data):
       charX,
       charY)
     return out
-  elif cmd == doc.CMD_CONNECT['name']:
+
+def cmdConnect(controller, params, data):
     setupWifi(controller['lcdFont'])
     return None
-  elif cmd == doc.CMD_SSID['name']:
+
+def cmdSSID(controller, params, data):
     ssid = maybeGetParamStr(params, "ssid", None)
     password = maybeGetParamStr(params, "password", None)
     if ssid != None and password != None:
@@ -155,23 +175,26 @@ def handleCmd(controller, cmd, params, data):
     else:
       out = "ERROR: missing ssid or password\n"
     return out
-  elif cmd == doc.CMD_RESETWIFI['name']:
+
+def cmdResetWifi(controller, params, data):
     writeFile("wifi-conf.txt", "")
     out = "WARNING: all wifi networks removed for next boot\n"
-    print(out)
     return out
-  elif cmd == doc.CMD_TIMEOUT['name']:
+
+def cmdTimeout(controller, params, data):
     timeoutS = maybeGetParamInt(params, "timeoutS", None)
     timeoutText = data.decode("utf8")
     print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
     writeTimeoutFile(timeoutS, timeoutText)
     return None
-  elif cmd == doc.CMD_TZ['name']:
+
+def cmdTZ(controller, params, data):
     tzName = maybeGetParamStr(params, "name", None)
     writeTZFile(tzName)
     print("set timezone for rtc = " + tzName)
     return None
-  elif cmd == doc.CMD_RTC['name']:
+
+def cmdRTC(controller, params, data):
     #epoch param must be in seconds since midnight 1970-01-01 UTC
     epoch = maybeGetParamInt(params, "epoch", None)
     out = ""
@@ -183,15 +206,19 @@ def handleCmd(controller, cmd, params, data):
     out += "RTC EPOCH=" + str(controller['rtc'].getTimeEpoch()) + "\n"
     out += "RTC ISO=" + str(controller['rtc'].getTimeISO()) + "\n"
     return out
-  elif cmd == doc.CMD_CLEAR['name']:
+
+def cmdClear(controller, params, data):
     controller['lcd'].fill_mem_blank()
     return None
-  elif cmd == doc.CMD_SHOW['name']:
+
+def cmdShow(controller, params, data):
     controller['lcd'].show()
     return None
-  elif cmd == doc.CMD_BUTTONS['name']:
+
+def cmdButtons(controller, params, data):
     return formatButtonCount(controller['buttons']) + "\n"
-  elif cmd == doc.CMD_FILL['name']:
+
+def cmdFill(controller, params, data):
     colorName = maybeGetParamStr(params, "color", None)
     color = controller['lcd'].get_color_by_name(colorName)
     out = ""
@@ -201,7 +228,8 @@ def handleCmd(controller, cmd, params, data):
       controller['lcd'].fill(color)
       controller['lcd'].show()
     return out
-  elif cmd == doc.CMD_LCD['name']:
+
+def cmdLCD(controller, params, data):
     name = maybeGetParamStr(params, "name", None)
     if name in LCD_CONFS:
       removeButtonHandlers(controller['buttons'])
@@ -216,16 +244,19 @@ def handleCmd(controller, cmd, params, data):
     else:
       raise ValueError("ERROR: missing LCD param 'name'\n")
     return None
-  elif cmd == doc.CMD_ORIENT['name']:
+
+def cmdOrient(controller, params, data):
     orient = maybeGetParamStr(params, "orient", None)
     print("orient=" + orient)
 
     return setOrientation(controller['lcd'], orient)
-  elif cmd == doc.CMD_FRAMEBUF['name']:
+
+def cmdFramebuf(controller, params, data):
     fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
     print("framebuf=" + str(fbConf))
     return setFramebuf(controller['lcd'], fbConf)
-  elif cmd == doc.CMD_TEXT['name']:
+
+def cmdText(controller, params, data):
     isClear = maybeGetParamBool(params, "clear", True)
     isShow = maybeGetParamBool(params, "show", True)
     fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
@@ -251,10 +282,11 @@ def handleCmd(controller, cmd, params, data):
     controller['lcdFont'].drawMarkup(markup, rtcEpoch=rtcEpoch)
     if isShow:
       controller['lcd'].show()
-    return out
-  else:
-    raise(Exception("ERROR: could not parse payload"))
 
+    return out
+
+#####
+#####
 
 def adjustRTCEpochWithTZOffset(rtcEpoch):
   tzName = readTZFile()
