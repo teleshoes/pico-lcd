@@ -176,16 +176,12 @@ def handleCmd(controller, cmd, params, data):
     out += "RTC EPOCH=" + str(controller['rtc'].getTimeEpoch()) + "\n"
     out += "RTC ISO=" + str(controller['rtc'].getTimeISO()) + "\n"
   elif cmd == doc.CMD_CLEAR['name']:
-    print("clear")
     controller['lcd'].fill_mem_blank()
   elif cmd == doc.CMD_SHOW['name']:
-    print("show")
     controller['lcd'].show()
   elif cmd == doc.CMD_BUTTONS['name']:
-    print("buttons")
     out = formatButtonCount(controller['buttons']) + "\n"
   elif cmd == doc.CMD_FILL['name']:
-    print("fill")
     colorName = maybeGetParamStr(params, "color", None)
     color = controller['lcd'].get_color_by_name(colorName)
     if color == None:
