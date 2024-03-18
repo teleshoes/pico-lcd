@@ -137,153 +137,153 @@ def main():
 #####
 
 def cmdInfo(controller, params, data):
-    if controller['lcd'].is_framebuf_enabled():
-      (winX, winY) = controller['lcd'].get_framebuf_size()
-    else:
-      (winX, winY) = (controller['lcd'].get_width(), controller['lcd'].get_height())
-    (charX, charY) = controller['lcdFont'].getCharGridSize(1)
+  if controller['lcd'].is_framebuf_enabled():
+    (winX, winY) = controller['lcd'].get_framebuf_size()
+  else:
+    (winX, winY) = (controller['lcd'].get_width(), controller['lcd'].get_height())
+  (charX, charY) = controller['lcdFont'].getCharGridSize(1)
 
-    out = ""
-    out += "window: %sx%s\n" % (
-      winX,
-      winY)
-    out += "  (lcd: %sx%s, framebuf: %s)\n" % (
-      controller['lcd'].get_width(),
-      controller['lcd'].get_height(),
-      controller['lcd'].get_framebuf_conf())
-    out += "orientation: %s degrees\n" % (
-      controller['lcd'].get_rotation_degrees())
-    out += "RAM free: %s bytes\n" % (
-      gc.mem_free())
-    out += "buttons: %s\n" % (
-      formatButtonCount(controller['buttons']))
-    out += "char8px: %sx%s\n" % (
-      charX,
-      charY)
-    return out
+  out = ""
+  out += "window: %sx%s\n" % (
+    winX,
+    winY)
+  out += "  (lcd: %sx%s, framebuf: %s)\n" % (
+    controller['lcd'].get_width(),
+    controller['lcd'].get_height(),
+    controller['lcd'].get_framebuf_conf())
+  out += "orientation: %s degrees\n" % (
+    controller['lcd'].get_rotation_degrees())
+  out += "RAM free: %s bytes\n" % (
+    gc.mem_free())
+  out += "buttons: %s\n" % (
+    formatButtonCount(controller['buttons']))
+  out += "char8px: %sx%s\n" % (
+    charX,
+    charY)
+  return out
 
 def cmdConnect(controller, params, data):
-    setupWifi(controller['lcdFont'])
-    return None
+  setupWifi(controller['lcdFont'])
+  return None
 
 def cmdSSID(controller, params, data):
-    ssid = maybeGetParamStr(params, "ssid", None)
-    password = maybeGetParamStr(params, "password", None)
-    if ssid != None and password != None:
-      appendSSID(ssid, password)
-      out = "added wifi network:\n ssid=" + ssid +"\n password=" + password + "\n"
-    else:
-      out = "ERROR: missing ssid or password\n"
-    return out
+  ssid = maybeGetParamStr(params, "ssid", None)
+  password = maybeGetParamStr(params, "password", None)
+  if ssid != None and password != None:
+    appendSSID(ssid, password)
+    out = "added wifi network:\n ssid=" + ssid +"\n password=" + password + "\n"
+  else:
+    out = "ERROR: missing ssid or password\n"
+  return out
 
 def cmdResetWifi(controller, params, data):
-    writeFile("wifi-conf.txt", "")
-    out = "WARNING: all wifi networks removed for next boot\n"
-    return out
+  writeFile("wifi-conf.txt", "")
+  out = "WARNING: all wifi networks removed for next boot\n"
+  return out
 
 def cmdTimeout(controller, params, data):
-    timeoutS = maybeGetParamInt(params, "timeoutS", None)
-    timeoutText = data.decode("utf8")
-    print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
-    writeTimeoutFile(timeoutS, timeoutText)
-    return None
+  timeoutS = maybeGetParamInt(params, "timeoutS", None)
+  timeoutText = data.decode("utf8")
+  print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
+  writeTimeoutFile(timeoutS, timeoutText)
+  return None
 
 def cmdTZ(controller, params, data):
-    tzName = maybeGetParamStr(params, "name", None)
-    writeTZFile(tzName)
-    print("set timezone for rtc = " + tzName)
-    return None
+  tzName = maybeGetParamStr(params, "name", None)
+  writeTZFile(tzName)
+  print("set timezone for rtc = " + tzName)
+  return None
 
 def cmdRTC(controller, params, data):
-    #epoch param must be in seconds since midnight 1970-01-01 UTC
-    epoch = maybeGetParamInt(params, "epoch", None)
-    out = ""
-    if controller['rtc'] == None:
-      out += "NO RTC"
-    elif epoch != None:
-      controller['rtc'].setTimeEpoch(epoch)
-      out += "SET RTC=" + str(controller['rtc'].getTimeEpoch()) + "\n"
-    out += "RTC EPOCH=" + str(controller['rtc'].getTimeEpoch()) + "\n"
-    out += "RTC ISO=" + str(controller['rtc'].getTimeISO()) + "\n"
-    return out
+  #epoch param must be in seconds since midnight 1970-01-01 UTC
+  epoch = maybeGetParamInt(params, "epoch", None)
+  out = ""
+  if controller['rtc'] == None:
+    out += "NO RTC"
+  elif epoch != None:
+    controller['rtc'].setTimeEpoch(epoch)
+    out += "SET RTC=" + str(controller['rtc'].getTimeEpoch()) + "\n"
+  out += "RTC EPOCH=" + str(controller['rtc'].getTimeEpoch()) + "\n"
+  out += "RTC ISO=" + str(controller['rtc'].getTimeISO()) + "\n"
+  return out
 
 def cmdClear(controller, params, data):
-    controller['lcd'].fill_mem_blank()
-    return None
+  controller['lcd'].fill_mem_blank()
+  return None
 
 def cmdShow(controller, params, data):
-    controller['lcd'].show()
-    return None
+  controller['lcd'].show()
+  return None
 
 def cmdButtons(controller, params, data):
-    return formatButtonCount(controller['buttons']) + "\n"
+  return formatButtonCount(controller['buttons']) + "\n"
 
 def cmdFill(controller, params, data):
-    colorName = maybeGetParamStr(params, "color", None)
-    color = controller['lcd'].get_color_by_name(colorName)
-    out = ""
-    if color == None:
-      out = "ERROR: could not parse color " + colorName + "\n"
-    else:
-      controller['lcd'].fill(color)
-      controller['lcd'].show()
-    return out
+  colorName = maybeGetParamStr(params, "color", None)
+  color = controller['lcd'].get_color_by_name(colorName)
+  out = ""
+  if color == None:
+    out = "ERROR: could not parse color " + colorName + "\n"
+  else:
+    controller['lcd'].fill(color)
+    controller['lcd'].show()
+  return out
 
 def cmdLCD(controller, params, data):
-    name = maybeGetParamStr(params, "name", None)
-    if name in LCD_CONFS:
-      removeButtonHandlers(controller['buttons'])
+  name = maybeGetParamStr(params, "name", None)
+  if name in LCD_CONFS:
+    removeButtonHandlers(controller['buttons'])
 
-      controller['lcdName'] = name
-      controller['lcd'] = createLCD(controller['lcdName'])
-      controller['buttons'] = createButtons(controller['lcdName'])
-      addButtonHandlers(controller['buttons'], controller)
+    controller['lcdName'] = name
+    controller['lcd'] = createLCD(controller['lcdName'])
+    controller['buttons'] = createButtons(controller['lcdName'])
+    addButtonHandlers(controller['buttons'], controller)
 
-      controller['lcdFont'].setLCD(controller['lcd'])
-      writeLastLCDName(name)
-    else:
-      raise ValueError("ERROR: missing LCD param 'name'\n")
-    return None
+    controller['lcdFont'].setLCD(controller['lcd'])
+    writeLastLCDName(name)
+  else:
+    raise ValueError("ERROR: missing LCD param 'name'\n")
+  return None
 
 def cmdOrient(controller, params, data):
-    orient = maybeGetParamStr(params, "orient", None)
-    print("orient=" + orient)
+  orient = maybeGetParamStr(params, "orient", None)
+  print("orient=" + orient)
 
-    return setOrientation(controller['lcd'], orient)
+  return setOrientation(controller['lcd'], orient)
 
 def cmdFramebuf(controller, params, data):
-    fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
-    print("framebuf=" + str(fbConf))
-    return setFramebuf(controller['lcd'], fbConf)
+  fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
+  print("framebuf=" + str(fbConf))
+  return setFramebuf(controller['lcd'], fbConf)
 
 def cmdText(controller, params, data):
-    isClear = maybeGetParamBool(params, "clear", True)
-    isShow = maybeGetParamBool(params, "show", True)
-    fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
-    orient = maybeGetParamStr(params, "orient", None)
-    markup = data.decode("utf8")
+  isClear = maybeGetParamBool(params, "clear", True)
+  isShow = maybeGetParamBool(params, "show", True)
+  fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
+  orient = maybeGetParamStr(params, "orient", None)
+  markup = data.decode("utf8")
 
-    print("text: " + markup)
+  print("text: " + markup)
 
-    out = ""
-    if orient != None:
-      out += setOrientation(controller['lcd'], orient)
-    if fbConf != None:
-      out += setFramebuf(controller['lcd'], fbConf)
+  out = ""
+  if orient != None:
+    out += setOrientation(controller['lcd'], orient)
+  if fbConf != None:
+    out += setFramebuf(controller['lcd'], fbConf)
 
-    rtcEpoch = None
-    #only fetch RTC epoch and timezone if markup looks like it might want it
-    if controller['rtc'] != None and "!rtc" in markup:
-      rtcEpoch = controller['rtc'].getTimeEpoch()
-      rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
+  rtcEpoch = None
+  #only fetch RTC epoch and timezone if markup looks like it might want it
+  if controller['rtc'] != None and "!rtc" in markup:
+    rtcEpoch = controller['rtc'].getTimeEpoch()
+    rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
 
-    if isClear:
-      controller['lcd'].fill(controller['lcd'].black)
-    controller['lcdFont'].drawMarkup(markup, rtcEpoch=rtcEpoch)
-    if isShow:
-      controller['lcd'].show()
+  if isClear:
+    controller['lcd'].fill(controller['lcd'].black)
+  controller['lcdFont'].drawMarkup(markup, rtcEpoch=rtcEpoch)
+  if isShow:
+    controller['lcd'].show()
 
-    return out
+  return out
 
 #####
 #####
