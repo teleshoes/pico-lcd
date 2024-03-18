@@ -475,7 +475,7 @@ class LCD():
   def fill_mem_blank(self):
     numberOfChunks = 256
     memWidth = 320
-    memHeight = 240
+    memHeight = 320
 
     self.set_window(0, memWidth, 0, memHeight)
     self.write_cmd(0x2C)
