@@ -68,7 +68,7 @@ def main():
 
   (timeoutS, timeoutText) = readTimeoutFile()
 
-  rtc = RTC_DS3231()
+  controller['rtc'] = RTC_DS3231()
 
   while True:
     try:
@@ -90,8 +90,8 @@ def main():
           timeoutText = "TIMEOUT"
         rtcEpoch = None
         #only fetch RTC epoch and timezone if markup looks like it might want it
-        if rtc != None and "!rtc" in timeoutText:
-          rtcEpoch = rtc.getTimeEpoch()
+        if controller['rtc'] != None and "!rtc" in timeoutText:
+          rtcEpoch = controller['rtc'].getTimeEpoch()
           rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
         controller['lcd'].fill(controller['lcd'].black)
         controller['lcdFont'].drawMarkup(timeoutText, rtcEpoch=rtcEpoch)
@@ -151,13 +151,13 @@ def main():
       elif cmd == doc.CMD_RTC['name']:
         #epoch param must be in seconds since midnight 1970-01-01 UTC
         epoch = maybeGetParamInt(params, "epoch", None)
-        if rtc == None:
+        if controller['rtc'] == None:
           out = "NO RTC"
         elif epoch != None:
-          rtc.setTimeEpoch(epoch)
-          out += "SET RTC=" + str(rtc.getTimeEpoch()) + "\n"
-        out += "RTC EPOCH=" + str(rtc.getTimeEpoch()) + "\n"
-        out += "RTC ISO=" + str(rtc.getTimeISO()) + "\n"
+          controller['rtc'].setTimeEpoch(epoch)
+          out += "SET RTC=" + str(controller['rtc'].getTimeEpoch()) + "\n"
+        out += "RTC EPOCH=" + str(controller['rtc'].getTimeEpoch()) + "\n"
+        out += "RTC ISO=" + str(controller['rtc'].getTimeISO()) + "\n"
       elif cmd == doc.CMD_CLEAR['name']:
         print("clear")
         controller['lcd'].fill_mem_blank()
@@ -213,8 +213,8 @@ def main():
 
         rtcEpoch = None
         #only fetch RTC epoch and timezone if markup looks like it might want it
-        if rtc != None and "!rtc" in markup:
-          rtcEpoch = rtc.getTimeEpoch()
+        if controller['rtc'] != None and "!rtc" in markup:
+          rtcEpoch = controller['rtc'].getTimeEpoch()
           rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
 
         if isClear:
