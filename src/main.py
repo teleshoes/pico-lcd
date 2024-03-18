@@ -102,7 +102,7 @@ def main():
 
       out = ""
 
-      if cmd == "info":
+      if cmd == doc.CMD_INFO['name']:
         if controller['lcd'].is_framebuf_enabled():
           (winX, winY) = controller['lcd'].get_framebuf_size()
         else:
@@ -125,9 +125,9 @@ def main():
         out += "char8px: %sx%s\n" % (
           charX,
           charY)
-      elif cmd == "connect":
+      elif cmd == doc.CMD_CONNECT['name']:
         setupWifi(controller['lcdFont'])
-      elif cmd == "ssid":
+      elif cmd == doc.CMD_SSID['name']:
         ssid = maybeGetParamStr(params, "ssid", None)
         password = maybeGetParamStr(params, "password", None)
         if ssid != None and password != None:
@@ -135,20 +135,20 @@ def main():
           out = "added wifi network:\n ssid=" + ssid +"\n password=" + password + "\n"
         else:
           out = "ERROR: missing ssid or password\n"
-      elif cmd == "resetwifi":
+      elif cmd == doc.CMD_RESETWIFI['name']:
         writeFile("wifi-conf.txt", "")
         out = "WARNING: all wifi networks removed for next boot\n"
         print(out)
-      elif cmd == "timeout":
+      elif cmd == doc.CMD_TIMEOUT['name']:
         timeoutS = maybeGetParamInt(params, "timeoutS", None)
         timeoutText = data.decode("utf8")
         print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
         writeTimeoutFile(timeoutS, timeoutText)
-      elif cmd == "tz":
+      elif cmd == doc.CMD_TZ['name']:
         tzName = maybeGetParamStr(params, "name", None)
         writeTZFile(tzName)
         print("set timezone for rtc = " + tzName)
-      elif cmd == "rtc":
+      elif cmd == doc.CMD_RTC['name']:
         #epoch param must be in seconds since midnight 1970-01-01 UTC
         epoch = maybeGetParamInt(params, "epoch", None)
         if rtc == None:
@@ -158,16 +158,16 @@ def main():
           out += "SET RTC=" + str(rtc.getTimeEpoch()) + "\n"
         out += "RTC EPOCH=" + str(rtc.getTimeEpoch()) + "\n"
         out += "RTC ISO=" + str(rtc.getTimeISO()) + "\n"
-      elif cmd == "clear":
+      elif cmd == doc.CMD_CLEAR['name']:
         print("clear")
         controller['lcd'].fill_mem_blank()
-      elif cmd == "show":
+      elif cmd == doc.CMD_SHOW['name']:
         print("show")
         controller['lcd'].show()
-      elif cmd == "buttons":
+      elif cmd == doc.CMD_BUTTONS['name']:
         print("buttons")
         out = formatButtonCount(controller['buttons']) + "\n"
-      elif cmd == "fill":
+      elif cmd == doc.CMD_FILL['name']:
         print("fill")
         colorName = maybeGetParamStr(params, "color", None)
         color = controller['lcd'].get_color_by_name(colorName)
@@ -176,7 +176,7 @@ def main():
         else:
           controller['lcd'].fill(color)
           controller['lcd'].show()
-      elif cmd == "lcd":
+      elif cmd == doc.CMD_LCD['name']:
         name = maybeGetParamStr(params, "name", None)
         if name in LCD_CONFS:
           removeButtonHandlers(controller['buttons'])
@@ -188,16 +188,16 @@ def main():
 
           controller['lcdFont'].setLCD(controller['lcd'])
           writeLastLCDName(name)
-      elif cmd == "orient":
+      elif cmd == doc.CMD_ORIENT['name']:
         orient = maybeGetParamStr(params, "orient", None)
         print("orient=" + orient)
 
         out = setOrientation(controller['lcd'], orient)
-      elif cmd == "framebuf":
+      elif cmd == doc.CMD_FRAMEBUF['name']:
         fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
         print("framebuf=" + str(fbConf))
         out = setFramebuf(controller['lcd'], fbConf)
-      elif cmd == "text":
+      elif cmd == doc.CMD_TEXT['name']:
         isClear = maybeGetParamBool(params, "clear", True)
         isShow = maybeGetParamBool(params, "show", True)
         fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
