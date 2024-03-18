@@ -169,7 +169,7 @@ def handleCmd(controller, cmd, params, data):
     #epoch param must be in seconds since midnight 1970-01-01 UTC
     epoch = maybeGetParamInt(params, "epoch", None)
     if controller['rtc'] == None:
-      out = "NO RTC"
+      out += "NO RTC"
     elif epoch != None:
       controller['rtc'].setTimeEpoch(epoch)
       out += "SET RTC=" + str(controller['rtc'].getTimeEpoch()) + "\n"
