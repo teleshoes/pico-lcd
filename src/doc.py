@@ -1,3 +1,12 @@
+
+def getAllCommands():
+  cmds = []
+  symbols = globals()
+  for name in globals():
+    if name.startswith("CMD_"):
+      cmds.append(symbols[name])
+  return cmds
+
 LCD_NAME_1_3 = "1_3"
 LCD_NAME_2_0 = "2_0"
 
