@@ -112,6 +112,7 @@ def main():
       (cmdName, params, data) = readCommandRequest(cl)
 
       if cmdName in cmdFunctionsByName:
+        print('cmd: ' + cmdName)
         cmdFunction = cmdFunctionsByName[cmdName]
         out = cmdFunction(controller, params, data)
       else:
