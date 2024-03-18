@@ -187,7 +187,7 @@ def main():
 
           controller['lcdFont'].setLCD(controller['lcd'])
           writeLastLCDName(name)
-      elif cmd == "orient" or cmd == "rotation":
+      elif cmd == "orient":
         orient = maybeGetParamStr(params, "orient", None)
         print("orient=" + orient)
 
