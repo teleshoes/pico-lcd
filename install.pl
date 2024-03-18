@@ -11,10 +11,10 @@ my @files = qw(
   wifi-conf.txt
   src/main.py
   mpy/doc.mpy
-  src/rtc.py
   mpy/font-generator.mpy
   mpy/lcdFont.mpy
   mpy/lcd.mpy
+  mpy/rtc.mpy
 );
 
 #DS3231 rtc can only handle 2 centuries anyway
