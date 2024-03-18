@@ -125,7 +125,7 @@ my $USAGE = "Usage:
           inverted-landscape | 180
             set rotation to 180 degrees
           inverted-portrait | 90
-            set rotateion to 90 degrees
+            set rotation to 90 degrees
 
   $EXEC [OPTS] framebuf   FRAMEBUF
   $EXEC [OPTS] --framebuf FRAMEBUF
