@@ -189,8 +189,8 @@ my $USAGE = "Usage:
       use IP_ADDRESS in calls to curl
     --ap
       use IP_ADDRESS=192.168.4.1
-    DEV_NAME | --dev=DEV_NAME
-    DEV_NAME | --dev=DEV_NAME
+    DEV_NAME | --dev=DEV_NAME | --dev DEV_NAME
+    DEV_NAME | --dev=DEV_NAME | --dev DEV_NAME
       -parse contents of $DEVICE_CONFIG_FILE
       -find line that matches this device: DEV_NAME = IP_ADDRESS
       -same as: --ip=IP_ADDRESS
@@ -304,6 +304,8 @@ sub main(@){
       $ipAddr = '192.168.4.1';
     }elsif($arg =~ /^--dev=(\w+)$/){
       $devName = $1;
+    }elsif($arg =~ /^--dev$/ and @_ > 0 and $_[0] =~ /^(\w+)$/){
+      $devName = shift @_;
     }elsif($arg =~ /^($DEVICE_NAME_REGEX)$/){
       $devName = $1;
     }elsif($arg =~ /^(--default-dev|--any-dev)$/){
