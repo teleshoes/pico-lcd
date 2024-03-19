@@ -65,7 +65,9 @@ def main():
 
   setupWifi(controller['lcdFont'])
 
-  (timeoutS, timeoutText) = readTimeoutFile()
+  (prevTimeoutS, prevTimeoutText) = readTimeoutFile()
+  controller['timeoutS'] = prevTimeoutS
+  controller['timeoutText'] = prevTimeoutText
 
   controller['rtc'] = RTC_DS3231()
 
@@ -85,8 +87,8 @@ def main():
       gc.collect()
 
       #positive is blocking+timeout, 0 is non-blocking, None is blocking
-      if timeoutS != None and timeoutS > 0:
-        controller['socket'].settimeout(timeoutS)
+      if controller['timeoutS'] != None and controller['timeoutS'] > 0:
+        controller['socket'].settimeout(controller['timeoutS'])
       else:
         controller['socket'].settimeout(None)
 
@@ -94,16 +96,16 @@ def main():
         cl, addr = controller['socket'].accept()
         print('client connected from', addr)
       except:
-        print("SOCKET TIMEOUT (" + str(timeoutS) + "s)\n")
-        if timeoutText == None:
-          timeoutText = "TIMEOUT"
+        print("SOCKET TIMEOUT (" + str(controller['timeoutS']) + "s)\n")
+        if controller['timeoutText'] == None:
+          controller['timeoutText'] = "TIMEOUT"
         rtcEpoch = None
         #only fetch RTC epoch and timezone if markup looks like it might want it
-        if controller['rtc'] != None and "!rtc" in timeoutText:
+        if controller['rtc'] != None and "!rtc" in controller['timeoutText']:
           rtcEpoch = controller['rtc'].getTimeEpoch()
           rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
         controller['lcd'].fill(controller['lcd'].black)
-        controller['lcdFont'].drawMarkup(timeoutText, rtcEpoch=rtcEpoch)
+        controller['lcdFont'].drawMarkup(controller['timeoutText'], rtcEpoch=rtcEpoch)
         controller['lcd'].show()
         continue
 
@@ -185,6 +187,8 @@ def cmdTimeout(controller, params, data):
   timeoutText = data.decode("utf8")
   print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
   writeTimeoutFile(timeoutS, timeoutText)
+  controller['timeoutS'] = timeoutS
+  controller['timeoutText'] = timeoutText
   return None
 
 def cmdTZ(controller, params, data):
