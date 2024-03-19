@@ -13,8 +13,6 @@ from rtc import RTC_DS3231
 from lcd import LCD, FramebufConf
 from lcdFont import LcdFont
 
-ALL_COMMANDS = doc.getAllCommands()
-
 LCD_CONFS = {
   doc.LCD_NAME_1_3: {
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
@@ -73,7 +71,7 @@ def main():
 
   cmdFunctionsByName = {}
   symDict = globals()
-  for cmd in ALL_COMMANDS:
+  for cmd in doc.getAllCommands():
     for symName in symDict:
       if symName.lower() == "cmd" + cmd['name']:
         cmdFunctionsByName[cmd['name']] = symDict[symName]
