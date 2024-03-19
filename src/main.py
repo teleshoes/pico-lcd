@@ -70,6 +70,13 @@ def main():
   controller['timeoutText'] = prevTimeoutText
 
   controller['rtc'] = RTC_DS3231()
+  try:
+    controller['rtc'].getTimeEpoch()
+  except OSError as e:
+    if e.errno == 5:
+      #I/O error in I2C, probably no DS3231 device
+      controller['rtc'] = None
+
 
   cmdFunctionsByName = {}
   symDict = globals()
