@@ -405,8 +405,6 @@ def setOrientation(lcd, orient):
 
 def setFramebuf(lcd, fbConf):
   #  'framebuf' param is one of:
-  #     on | enabled | true
-  #       enable framebuf, with no max WxH or X/Y offsets
   #     off | disabled | false
   #       disable framebuf
   #     WxH

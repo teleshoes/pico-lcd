@@ -98,14 +98,17 @@ class LCD():
   def get_framebuf_size(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
+    if not self.fbConf.enabled:
+      return (bufW, bufH)
+
     (maxW, maxH) = (self.fbConf.maxW, self.fbConf.maxH)
 
     if bufW < bufH:
       (maxW, maxH) = (maxH, maxW)
 
-    if maxW != 0 and bufW > maxW:
+    if bufW > maxW:
       bufW = maxW
-    if maxH != 0 and bufH > maxH:
+    if bufH > maxH:
       bufH = maxH
     return (bufW, bufH)
 
@@ -229,8 +232,12 @@ class LCD():
     self.tft.rotation(self.rotationIdx)
     isLandscape = self.rotCfg['W'] >= self.rotCfg['H']
 
+    (lcdW, lcdH) = (self.rotCfg['W'], self.rotCfg['H'])
+    if lcdW < lcdH:
+      (lcdW, lcdH) = (lcdH, lcdW)
+
     # if framebuf is not the entire screen, blank the entire screen
-    if self.fbConf.maxW != 0 or self.fbConf.maxH != 0:
+    if not self.fbConf.enabled or self.fbConf.maxW != lcdW or self.fbConf.maxH != lcdH:
       self.fill_mem_blank()
 
     if wasLandscape != isLandscape and self.buffer != None:
@@ -528,9 +535,7 @@ class FramebufConf():
       return None
 
     fbConfStr = fbConfStr.lower()
-    if fbConfStr == "on" or fbConfStr == "enabled" or fbConfStr == "true":
-      return FramebufConf(enabled=True, maxW=0, maxH=0, x=0, y=0)
-    elif fbConfStr == "off" or fbConfStr == "disabled" or fbConfStr == "false":
+    if fbConfStr == "off" or fbConfStr == "disabled" or fbConfStr == "false":
       return FramebufConf(enabled=False, maxW=0, maxH=0, x=0, y=0)
     else:
       nums = []
@@ -561,8 +566,6 @@ class FramebufConf():
   def format(self):
     if not self.enabled:
       return "off"
-    elif self.maxW == 0 and self.maxH == 0:
-      return "on"
     elif self.x == 0 and self.y == 0:
       return '%dx%d' % (self.maxW, self.maxH)
     else:
