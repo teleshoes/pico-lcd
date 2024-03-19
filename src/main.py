@@ -65,8 +65,8 @@ def main():
 
   setupWifi(controller['lcdFont'])
 
-  (prevTimeoutS, prevTimeoutText) = readTimeoutFile()
-  controller['timeoutS'] = prevTimeoutS
+  (prevTimeoutMillis, prevTimeoutText) = readTimeoutFile()
+  controller['timeoutMillis'] = prevTimeoutMillis
   controller['timeoutText'] = prevTimeoutText
 
   controller['rtc'] = RTC_DS3231()
@@ -87,8 +87,8 @@ def main():
       gc.collect()
 
       #positive is blocking+timeout, 0 is non-blocking, None is blocking
-      if controller['timeoutS'] != None and controller['timeoutS'] > 0:
-        controller['socket'].settimeout(controller['timeoutS'])
+      if controller['timeoutMillis'] != None and controller['timeoutMillis'] > 0:
+        controller['socket'].settimeout(controller['timeoutMillis']/1000.0)
       else:
         controller['socket'].settimeout(None)
 
@@ -96,7 +96,7 @@ def main():
         cl, addr = controller['socket'].accept()
         print('client connected from', addr)
       except:
-        print("SOCKET TIMEOUT (" + str(controller['timeoutS']) + "s)\n")
+        print("SOCKET TIMEOUT (" + str(controller['timeoutMillis']) + "ms)\n")
         if controller['timeoutText'] == None:
           controller['timeoutText'] = "TIMEOUT"
         rtcEpoch = None
@@ -183,11 +183,11 @@ def cmdResetWifi(controller, params, data):
   return out
 
 def cmdTimeout(controller, params, data):
-  timeoutS = maybeGetParamInt(params, "timeoutS", None)
+  timeoutMillis = maybeGetParamInt(params, "timeoutMillis", None)
   timeoutText = data.decode("utf8")
-  print("timeout: " + str(timeoutS) + "s = " + str(timeoutText))
-  writeTimeoutFile(timeoutS, timeoutText)
-  controller['timeoutS'] = timeoutS
+  print("timeout: " + str(timeoutMillis) + "ms = " + str(timeoutText))
+  writeTimeoutFile(timeoutMillis, timeoutText)
+  controller['timeoutMillis'] = timeoutMillis
   controller['timeoutText'] = timeoutText
   return None
 
@@ -550,15 +550,15 @@ def readTimeoutFile():
     val = val.strip()
     segments = val.split(",")
     if len(segments) == 2:
-      timeoutS = int(segments[0])
+      timeoutMillis = int(segments[0])
       timeoutText = segments[1]
-      return (timeoutS, timeoutText)
+      return (timeoutMillis, timeoutText)
   return (None, None)
-def writeTimeoutFile(timeoutS, timeoutText):
-  if timeoutS == None or timeoutText == None:
+def writeTimeoutFile(timeoutMillis, timeoutText):
+  if timeoutMillis == None or timeoutText == None:
     writeFile("timeout.txt", "")
   else:
-    writeFile("timeout.txt", str(timeoutS) + "," + timeoutText + "\n")
+    writeFile("timeout.txt", str(timeoutMillis) + "," + timeoutText + "\n")
 
 def readTZFile():
   val =  readFileLine("current_tz")
