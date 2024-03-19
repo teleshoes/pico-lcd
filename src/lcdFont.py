@@ -279,6 +279,9 @@ class LcdFont:
           # '!hr!' => hline
           self.cursorHline()
         elif cmd == "rtc":
+          if rtcEpoch == None:
+            print("WARNING: external rtc epoch not available, using system rtc\n")
+            rtcEpoch = time.time()
           self.cursorDrawText(self.formatTime(val, rtcEpoch))
         elif cmd in self.cursor and len(val) > 0:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
