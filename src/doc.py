@@ -156,10 +156,23 @@ CMD_ORIENT = {
 CMD_FRAMEBUF = {
   "name":   "framebuf",
   "params": {
-    "framebuf": "[OPTIONAL] geometry WxH or WxH+X+Y, or off (missing is off)",
+    "framebuf": "[OPTIONAL] off | <FB_W>x<FB_H> | <FB_W>x<FB_H>+<FB_X>+<FB_Y>"
   },
   "body":   None,
-  "desc":   "disable framebuf, or enable with width+height and optional (x, y) offset",
+  "desc":   """
+    disable the framebuf, or enable framebuf and set the dimensions and offset
+    NOTE: 'framebuf' param is *unaffected* by orientation
+          <FB_W> and <FB_X> always refer to the longest dimension of the physical LCD
+          <FB_H> and <FB_Y> always refer to the shortest dimension of the physical LCD
+    NOTE: 'framebuf' uses a lot of memory. if memory allocation fails, framebuf is disabled
+          the framebuf, if any, that is actually successfully allocated is returned
+          if 'framebuf: off' is returned instead of a framebuf, allocation likely failed
+
+    'framebuf' param:
+      <FB_W>x<FB_H>+<FB_X>+<FB_Y> = enable framebuf with WxH and offset (0, 0)
+      <FB_W>x<FB_H> = same as <FB_W>x<FB_H>+0+0
+      off           = disable the framebuf
+  """
 }
 CMD_TEXT = {
   "name":   "text",
