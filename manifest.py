@@ -1,0 +1,5 @@
+module("main.py", base_path="src/")
+module("doc.py", base_path="src/")
+module("lcdFont.py", base_path="src/")
+module("lcd.py", base_path="src/")
+module("rtc.py", base_path="src/")
