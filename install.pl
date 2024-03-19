@@ -10,6 +10,7 @@ my @files = qw(
   font5x8.bin
   wifi-conf.txt
   src/main.py
+  mpy/app.mpy
   mpy/doc.mpy
   mpy/lcdFont.mpy
   mpy/lcd.mpy
