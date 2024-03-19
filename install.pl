@@ -11,7 +11,6 @@ my @files = qw(
   wifi-conf.txt
   src/main.py
   mpy/doc.mpy
-  mpy/font-generator.mpy
   mpy/lcdFont.mpy
   mpy/lcd.mpy
   mpy/rtc.mpy
