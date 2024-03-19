@@ -85,11 +85,11 @@ my $USAGE = "Usage:
     show the framebuffer, if any
       -same as: $EXEC [OPTS] --cmd show
 
-  $EXEC [OPTS] --set-timeout [TIMEOUT_S TIMEOUT_TEXT]
-    write \"TIMEOUT_S,TIMEOUT_TEXT\" to timeout.txt file
-      after TIMEOUT_S of no network commands,
+  $EXEC [OPTS] --set-timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
+    write \"TIMEOUT_MILLIS,TIMEOUT_TEXT\" to timeout.txt file
+      after TIMEOUT_MILLIS milliseconds of no network commands,
       clear LCD, set LCD text to TIMEOUT_TEXT, and show LCD
-    if TIMEOUT_S is omitted, the timeout is removed,
+    if TIMEOUT_MILLIS or TIMEOUT_TEXT is omitted, the timeout is removed,
       and the socket blocks forever
 
   $EXEC [OPTS] buttons | --buttons
@@ -494,7 +494,7 @@ sub main(@){
       $text .= $arg;
       $mode = $MODE_TEXT;
     }elsif((defined $cmd and $cmd eq "timeout") and @cmdParams == 0){
-      push @cmdParams, "timeoutS=$arg";
+      push @cmdParams, "timeoutMillis=$arg";
     }elsif((defined $cmd and $cmd eq "timeout") and @cmdParams == 1 and not defined $cmdData){
       $cmdData = $arg;
     }else{
