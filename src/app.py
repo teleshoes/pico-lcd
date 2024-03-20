@@ -150,7 +150,8 @@ def main():
 
 def cmdInfo(controller, params, data):
   (winW, winH) = controller['lcd'].get_target_window_size()
-  (charX, charY) = controller['lcdFont'].getCharGridSize(1)
+
+  (charW, charH) = controller['lcdFont'].getCharGridSize(1)
 
   out = ""
   out += "window: %sx%s\n" % (
@@ -167,8 +168,8 @@ def cmdInfo(controller, params, data):
   out += "buttons: %s\n" % (
     formatButtonCount(controller['buttons']))
   out += "char8px: %sx%s\n" % (
-    charX,
-    charY)
+    charW,
+    charH)
   return out
 
 def cmdConnect(controller, params, data):
