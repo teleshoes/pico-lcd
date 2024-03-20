@@ -73,8 +73,8 @@ class LcdFont:
     color = self.cursor['color']
     if color == None:
       color = self.lcd.get_color_by_name(self.defaultColorName)
-    self.lcd.hline(self.cursor['startX'], self.cursor['y'],
-      self.lcd.get_width(), color)
+    (winW, winH) = self.lcd.get_target_window_size()
+    self.lcd.hline(self.cursor['startX'], self.cursor['y'], winW, color)
     self.cursor['x'] = self.cursor['startX']
     self.cursor['y'] += 1
   def cursorDrawText(self, text):
