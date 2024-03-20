@@ -18,7 +18,10 @@ MADCTL_MH  = 0 #0:refresh-left-to-right  1:refresh-right-to-left
 MADCTL_RGB = 0 #0:RGB                    1:BGR
 
 class LCD():
-  def __init__(self, layouts):
+  def __init__(self, landscapeWidth, landscapeHeight, layouts):
+    self.lcdLandscapeWidth = landscapeWidth
+    self.lcdLandscapeHeight = landscapeHeight
+
     self.layouts = layouts
     self.rotationIdx = 0
     self.rotCfg = self.layouts[self.rotationIdx]
@@ -45,7 +48,11 @@ class LCD():
         | MADCTL_RGB << 3
         | MADCTL_MH  << 2
       )
-      self.rotationsArr.append((rot['MADCTL'], rot['W'], rot['H'], rot['X'], rot['Y']))
+      if rot['LANDSCAPE']:
+        (w, h) = (self.lcdLandscapeWidth, self.lcdLandscapeHeight)
+      else:
+        (h, w) = (self.lcdLandscapeHeight, self.lcdLandscapeWidth)
+      self.rotationsArr.append((rot['MADCTL'], w, h, rot['X'], rot['Y']))
 
     self.spi = machine.SPI(1, 100000_000, polarity=0, phase=0,
       sck=machine.Pin(SCK), mosi=machine.Pin(MOSI), miso=None)
@@ -56,7 +63,7 @@ class LCD():
     self.reset = machine.Pin(RST, machine.Pin.OUT)
 
     self.tft = st7789.ST7789(
-      self.spi, self.get_height(), self.get_width(),
+      self.spi, self.lcdLandscapeHeight, self.lcdLandscapeWidth,
       rotation=self.rotationIdx, rotations=self.rotationsArr,
       reset=self.reset, dc=self.dc, cs=self.cs, backlight=self.backlight)
 
@@ -66,9 +73,15 @@ class LCD():
     self.fill_mem_blank()
 
   def get_width(self):
-    return self.rotCfg['W']
+    if self.rotCfg['LANDSCAPE']:
+      return self.lcdLandscapeWidth
+    else:
+      return self.lcdLandscapeHeight
   def get_height(self):
-    return self.rotCfg['H']
+    if self.rotCfg['LANDSCAPE']:
+      return self.lcdLandscapeHeight
+    else:
+      return self.lcdLandscapeWidth
 
   def get_target_window_size(self):
     if self.is_framebuf_enabled():

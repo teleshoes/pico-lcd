@@ -17,20 +17,24 @@ LCD_CONFS = {
   doc.LCD_NAME_1_3: {
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
                 'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
+    "landscapeWidth":  240,
+    "landscapeHeight": 240,
     "layouts": [
-      {'DEG':  0, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
-      {'DEG': 90, 'W':240, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
-      {'DEG':180, 'W':240, 'H':240, 'X': 80, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
-      {'DEG':270, 'W':240, 'H':240, 'X':  0, 'Y': 80, 'MY':1, 'MX':1, 'MV':0},
+      {'DEG':  0, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
+      {'DEG': 90, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
+      {'DEG':180, 'LANDSCAPE': True,  'X': 80, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
+      {'DEG':270, 'LANDSCAPE': False, 'X':  0, 'Y': 80, 'MY':1, 'MX':1, 'MV':0},
     ],
   },
   doc.LCD_NAME_2_0: {
     "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
+    "landscapeWidth":  320,
+    "landscapeHeight": 240,
     "layouts": [
-      {'DEG':  0, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
-      {'DEG': 90, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
-      {'DEG':180, 'W':320, 'H':240, 'X':  0, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
-      {'DEG':270, 'W':240, 'H':320, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
+      {'DEG':  0, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
+      {'DEG': 90, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
+      {'DEG':180, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
+      {'DEG':270, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
     ],
   },
 }
@@ -322,8 +326,8 @@ def adjustRTCEpochWithTZOffset(rtcEpoch):
   return rtcEpoch
 
 def createLCD(lcdName):
-  layouts = LCD_CONFS[lcdName]["layouts"]
-  lcd = LCD(layouts)
+  lcdConf = LCD_CONFS[lcdName]
+  lcd = LCD(lcdConf['landscapeWidth'], lcdConf['landscapeHeight'], lcdConf['layouts'])
   msg = "LCD init\n"
 
   msg += setFramebuf(lcd, readLastFramebufConf()) + "\n"
