@@ -74,22 +74,27 @@ class LCD():
     (layoutOffsetX, layoutOffsetY) = (rotationLayout['X'], rotationLayout['Y'])
     return (madctl, width, height, layoutOffsetX, layoutOffsetY)
 
-  def get_width(self):
+  def get_lcd_landscape_width(self):
+    return self.lcdLandscapeWidth
+  def get_lcd_landscape_height(self):
+    return self.lcdLandscapeHeight
+
+  def get_lcd_rotated_width(self):
     if self.is_landscape():
-      return self.lcdLandscapeWidth
+      return self.get_lcd_landscape_width()
     else:
-      return self.lcdLandscapeHeight
-  def get_height(self):
+      return self.get_lcd_landscape_height()
+  def get_lcd_rotated_height(self):
     if self.is_landscape():
-      return self.lcdLandscapeHeight
+      return self.get_lcd_landscape_height()
     else:
-      return self.lcdLandscapeWidth
+      return self.get_lcd_landscape_width()
 
   def get_target_window_size(self):
     if self.is_framebuf_enabled():
       (winX, winY) = self.get_framebuf_rotated_size()
     else:
-      (winX, winY) = (self.get_width(), self.get_height())
+      (winX, winY) = (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
     return (winX, winY)
 
   def is_framebuf_enabled(self):
@@ -241,7 +246,7 @@ class LCD():
     self.curRotationLayout = self.rotationLayouts[rotationIdx]
     self.tft.rotation(rotationIdx)
 
-    (lcdW, lcdH) = (self.get_width(), self.get_height())
+    (lcdW, lcdH) = (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
     if lcdW < lcdH:
       (lcdW, lcdH) = (lcdH, lcdW)
 
