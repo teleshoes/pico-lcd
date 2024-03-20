@@ -37,22 +37,10 @@ class LCD():
       print("WARNING: framebuf compiled without RGB444")
       self.framebufColorProfile = framebuf.RGB565
 
-    self.rotationsArr = []
-    for i in range(0, len(self.rotationLayouts)):
-      rot = self.rotationLayouts[i]
-      rot['MADCTL'] = (0
-        | rot['MY']  << 7 #0:nothing  1:mirror row address
-        | rot['MX']  << 6 #0:nothing  1:mirror col address
-        | rot['MV']  << 5 #0:nothing  1:swap row and col address
-        | MADCTL_ML  << 4
-        | MADCTL_RGB << 3
-        | MADCTL_MH  << 2
-      )
-      if rot['LANDSCAPE']:
-        (w, h) = (self.lcdLandscapeWidth, self.lcdLandscapeHeight)
-      else:
-        (h, w) = (self.lcdLandscapeHeight, self.lcdLandscapeWidth)
-      self.rotationsArr.append((rot['MADCTL'], w, h, rot['X'], rot['Y']))
+    tftRotationTuples = []
+    for rotationLayout in self.rotationLayouts:
+      tftRotationTuples.append(self.convert_rotation_layout_to_tft_tuple(
+        self.lcdLandscapeWidth, self.lcdLandscapeHeight, rotationLayout))
 
     self.spi = machine.SPI(1, 100000_000, polarity=0, phase=0,
       sck=machine.Pin(SCK), mosi=machine.Pin(MOSI), miso=None)
@@ -64,13 +52,27 @@ class LCD():
 
     self.tft = st7789.ST7789(
       self.spi, self.lcdLandscapeHeight, self.lcdLandscapeWidth,
-      rotation=self.curRotationIdx, rotations=self.rotationsArr,
+      rotation=self.curRotationIdx, rotations=tftRotationTuples,
       reset=self.reset, dc=self.dc, cs=self.cs, backlight=self.backlight)
 
     self.tft.init()
 
     # blank entire memory, not just display size
     self.fill_mem_blank()
+
+  def convert_rotation_layout_to_tft_tuple(self, width, height, rotationLayout):
+    madctl = (0
+      | rotationLayout['MY']  << 7 #0:nothing  1:mirror row address
+      | rotationLayout['MX']  << 6 #0:nothing  1:mirror col address
+      | rotationLayout['MV']  << 5 #0:nothing  1:swap row and col address
+      | MADCTL_ML             << 4
+      | MADCTL_RGB            << 3
+      | MADCTL_MH             << 2
+    )
+    if not rotationLayout['LANDSCAPE']:
+      (width, height) = (height, width)
+    (layoutOffsetX, layoutOffsetY) = (rotationLayout['X'], rotationLayout['Y'])
+    return (madctl, width, height, layoutOffsetX, layoutOffsetY)
 
   def get_width(self):
     if self.curRotationLayout['LANDSCAPE']:
