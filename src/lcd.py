@@ -23,8 +23,8 @@ class LCD():
     self.lcdLandscapeHeight = landscapeHeight
 
     self.rotationLayouts = rotationLayouts
-    self.rotationIdx = 0
-    self.curRotationLayout = self.rotationLayouts[self.rotationIdx]
+    self.curRotationIdx = 0
+    self.curRotationLayout = self.rotationLayouts[self.curRotationIdx]
 
     self.buffer = None
     self.framebuf = None
@@ -64,7 +64,7 @@ class LCD():
 
     self.tft = st7789.ST7789(
       self.spi, self.lcdLandscapeHeight, self.lcdLandscapeWidth,
-      rotation=self.rotationIdx, rotations=self.rotationsArr,
+      rotation=self.curRotationIdx, rotations=self.rotationsArr,
       reset=self.reset, dc=self.dc, cs=self.cs, backlight=self.backlight)
 
     self.tft.init()
@@ -239,13 +239,14 @@ class LCD():
         break
 
   def set_rotation_next(self):
-    self.set_rotation_index((self.rotationIdx + 1) % len(self.rotationLayouts))
+    self.set_rotation_index((self.curRotationIdx + 1) % len(self.rotationLayouts))
 
   def set_rotation_index(self, rotationIdx):
     wasLandscape = self.is_landscape()
-    self.rotationIdx = rotationIdx
+
+    self.curRotationIdx = rotationIdx
     self.curRotationLayout = self.rotationLayouts[rotationIdx]
-    self.tft.rotation(self.rotationIdx)
+    self.tft.rotation(rotationIdx)
 
     (lcdW, lcdH) = (self.get_width(), self.get_height())
     if lcdW < lcdH:
