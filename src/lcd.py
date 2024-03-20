@@ -94,12 +94,30 @@ class LCD():
     else:
       return self.get_lcd_landscape_width()
 
+  def get_framebuf_landscape_size(self):
+    return (self.fbConf.fbW, self.fbConf.fbH)
+  def get_framebuf_rotated_size(self):
+    (fbW, fbH) = self.get_framebuf_landscape_size()
+    if self.is_landscape():
+      return (fbW, fbH)
+    else:
+      return (fbH, fbW)
+
   def get_target_window_size(self):
     if self.is_framebuf_enabled():
       (winX, winY) = self.get_framebuf_rotated_size()
     else:
       (winX, winY) = (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
     return (winX, winY)
+
+  def get_framebuf_landscape_offset(self):
+    return (self.fbConf.fbX, self.fbConf.fbY)
+  def get_framebuf_rotated_offset(self):
+    (fbX, fbY) = self.get_framebuf_landscape_offset()
+    if self.is_landscape():
+      return (fbX, fbY)
+    else:
+      return (fbY, fbX)
 
   #either no framebuf, or framebuf is the same size as LCD
   def is_fullscreen(self):
@@ -122,24 +140,6 @@ class LCD():
       self.create_buffer()
 
     self.init_framebuf()
-
-  def get_framebuf_landscape_size(self):
-    return (self.fbConf.fbW, self.fbConf.fbH)
-  def get_framebuf_rotated_size(self):
-    (fbW, fbH) = self.get_framebuf_landscape_size()
-    if self.is_landscape():
-      return (fbW, fbH)
-    else:
-      return (fbH, fbW)
-
-  def get_framebuf_landscape_offset(self):
-    return (self.fbConf.fbX, self.fbConf.fbY)
-  def get_framebuf_rotated_offset(self):
-    (fbX, fbY) = self.get_framebuf_landscape_offset()
-    if self.is_landscape():
-      return (fbX, fbY)
-    else:
-      return (fbY, fbX)
 
   def is_landscape(self):
     return self.curRotationLayout['LANDSCAPE']
