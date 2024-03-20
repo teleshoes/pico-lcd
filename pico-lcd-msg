@@ -130,30 +130,18 @@ my $USAGE = "Usage:
   $EXEC [OPTS] framebuf   FRAMEBUF
   $EXEC [OPTS] --framebuf FRAMEBUF
   $EXEC [OPTS] --framebuf=FRAMEBUF
-    -same as: $EXEC [OPTS] --cmd framebuf enabled=ENABLED \\
-                maxwidth=MAX_WIDTH maxheight=MAX_HEIGHT x=OFFSET_X y=OFFSET_Y
-      FRAMEBUF
-        one of:
-          on | enabled | true
-            enable framebuf, with no max WxH or X/Y offsets
-          off | disabled | false
-            disable framebuf
-          WxH
-            enable framebuf, and set max WxH with no X/Y offsets
-          WxH+X+Y
-            enable framebuf, and set max WxH and X/Y offsets
-      W
-        limit the framebuf max width, 0 means no maximum
-      H
-        limit the framebuf max height, 0 means no maximum
-      X
-        shift the framebuf window to the right, 0 means no offset
-      Y
-        shift the framebuf window down, 0 means no offset
+    -same as: $EXEC [OPTS] --cmd framebuf framebuf=FRAMEBUF
+        FRAMEBUF:
+          <FB_W>x<FB_H>+<FB_X>+<FB_Y> = enable framebuf with WxH and offset (0, 0)
+          <FB_W>x<FB_H> = same as <FB_W>x<FB_H>+0+0
+          off           = disable the framebuf
 
-      NOTE: regardless of current orientation:
-        W and X always refers to the larger physical dimension of the LCD
-        H and Y always refers to the smaller physical dimension of the LCD
+        NOTE: 'framebuf' param is *unaffected* by orientation
+              <FB_W> and <FB_X> always refer to the longest dimension of the physical LCD
+              <FB_H> and <FB_Y> always refer to the shortest dimension of the physical LCD
+        NOTE: 'framebuf' uses a lot of memory. if memory allocation fails, framebuf is disabled
+              the framebuf, if any, that is actually successfully allocated is returned
+              if 'framebuf: off' is returned instead of a framebuf, allocation likely failed
 
   $EXEC [OPTS] full | --full
     -same as: $EXEC [OPTS] framebuf 320x240+0+0
