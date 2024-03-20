@@ -101,6 +101,10 @@ class LCD():
       (winX, winY) = (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
     return (winX, winY)
 
+  #either no framebuf, or framebuf is the same size as LCD
+  def is_fullscreen(self):
+    return self.get_target_window_size() == self.get_lcd_rotated_size()
+
   def is_framebuf_enabled(self):
     return self.fbConf.enabled
 
@@ -250,12 +254,8 @@ class LCD():
     self.curRotationLayout = self.rotationLayouts[rotationIdx]
     self.tft.rotation(rotationIdx)
 
-    (lcdW, lcdH) = (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
-    if lcdW < lcdH:
-      (lcdW, lcdH) = (lcdH, lcdW)
-
     # if framebuf is not the entire screen, blank the entire screen
-    if not self.fbConf.enabled or self.fbConf.fbW != lcdW or self.fbConf.fbH != lcdH:
+    if not self.is_fullscreen():
       self.fill_mem_blank()
 
     if wasLandscape != self.is_landscape() and self.buffer != None:
