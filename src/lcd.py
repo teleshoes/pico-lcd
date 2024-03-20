@@ -75,12 +75,12 @@ class LCD():
     return (madctl, width, height, layoutOffsetX, layoutOffsetY)
 
   def get_width(self):
-    if self.curRotationLayout['LANDSCAPE']:
+    if self.is_landscape():
       return self.lcdLandscapeWidth
     else:
       return self.lcdLandscapeHeight
   def get_height(self):
-    if self.curRotationLayout['LANDSCAPE']:
+    if self.is_landscape():
       return self.lcdLandscapeHeight
     else:
       return self.lcdLandscapeWidth
@@ -130,7 +130,7 @@ class LCD():
     return (fbX, fbY)
 
   def is_landscape(self):
-    return self.get_width() >= self.get_height()
+    return self.curRotationLayout['LANDSCAPE']
 
   def create_buffer(self):
     (bufW, bufH) = self.get_framebuf_landscape_size()
