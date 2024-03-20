@@ -56,7 +56,7 @@ class LCD():
     self.reset = machine.Pin(RST, machine.Pin.OUT)
 
     self.tft = st7789.ST7789(
-      self.spi, self.rotCfg['H'], self.rotCfg['W'],
+      self.spi, self.get_height(), self.get_width(),
       rotation=self.rotationIdx, rotations=self.rotationsArr,
       reset=self.reset, dc=self.dc, cs=self.cs, backlight=self.backlight)
 
@@ -96,8 +96,8 @@ class LCD():
     self.init_framebuf()
 
   def get_framebuf_size(self):
-    bufW = self.rotCfg['W']
-    bufH = self.rotCfg['H']
+    bufW = self.get_width()
+    bufH = self.get_height()
     if not self.fbConf.enabled:
       return (bufW, bufH)
 
@@ -113,8 +113,8 @@ class LCD():
     return (bufW, bufH)
 
   def get_framebuf_offset(self):
-    bufW = self.rotCfg['W']
-    bufH = self.rotCfg['H']
+    bufW = self.get_width()
+    bufH = self.get_height()
     (fbX, fbY) = (self.fbConf.fbX, self.fbConf.fbY)
 
     if bufW < bufH:
@@ -123,7 +123,7 @@ class LCD():
     return (fbX, fbY)
 
   def is_landscape(self):
-    return self.rotCfg['W'] >= self.rotCfg['H']
+    return self.get_width() >= self.get_height()
 
   def create_buffer(self):
     (bufW, bufH) = self.get_framebuf_size()
@@ -234,7 +234,7 @@ class LCD():
     self.rotCfg = self.layouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
 
-    (lcdW, lcdH) = (self.rotCfg['W'], self.rotCfg['H'])
+    (lcdW, lcdH) = (self.get_width(), self.get_height())
     if lcdW < lcdH:
       (lcdW, lcdH) = (lcdH, lcdW)
 
