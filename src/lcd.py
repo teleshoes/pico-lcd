@@ -87,7 +87,7 @@ class LCD():
 
   def get_target_window_size(self):
     if self.is_framebuf_enabled():
-      (winX, winY) = self.get_framebuf_size()
+      (winX, winY) = self.get_framebuf_rotated_size()
     else:
       (winX, winY) = (self.get_width(), self.get_height())
     return (winX, winY)
@@ -110,22 +110,14 @@ class LCD():
 
     self.init_framebuf()
 
-  def get_framebuf_size(self):
-    bufW = self.get_width()
-    bufH = self.get_height()
-    if not self.fbConf.enabled:
-      return (bufW, bufH)
-
-    (fbW, fbH) = (self.fbConf.fbW, self.fbConf.fbH)
-
-    if bufW < bufH:
-      (fbW, fbH) = (fbH, fbW)
-
-    if bufW > fbW:
-      bufW = fbW
-    if bufH > fbH:
-      bufH = fbH
-    return (bufW, bufH)
+  def get_framebuf_landscape_size(self):
+    return (self.fbConf.fbW, self.fbConf.fbH)
+  def get_framebuf_rotated_size(self):
+    (fbW, fbH) = self.get_framebuf_landscape_size()
+    if self.is_landscape():
+      return (fbW, fbH)
+    else:
+      return (fbH, fbW)
 
   def get_framebuf_offset(self):
     bufW = self.get_width()
@@ -141,7 +133,7 @@ class LCD():
     return self.get_width() >= self.get_height()
 
   def create_buffer(self):
-    (bufW, bufH) = self.get_framebuf_size()
+    (bufW, bufH) = self.get_framebuf_landscape_size()
     framebufSizeBytes = bufW * bufH * self.bits_per_px() // 8
 
     if self.buffer == None or len(self.buffer) != framebufSizeBytes:
@@ -158,9 +150,9 @@ class LCD():
 
   def init_framebuf(self):
     if self.buffer != None:
-      (bufW, bufH) = self.get_framebuf_size()
+      (rotFBW, rotFBH) = self.get_framebuf_rotated_size()
       self.framebuf = framebuf.FrameBuffer(
-        self.buffer, bufW, bufH, self.framebufColorProfile)
+        self.buffer, rotFBW, rotFBH, self.framebufColorProfile)
 
       self.set_window_to_framebuf()
     else:
@@ -260,9 +252,9 @@ class LCD():
 
     if wasLandscape != self.is_landscape() and self.buffer != None:
       # if framebuf is not a square, transpose row/col count (cut off right or bottom)
-      (bufW, bufH) = self.get_framebuf_size()
-      if bufW != bufH:
-        if bufW % 2 == 1 or bufH % 2 == 1:
+      (fbW, fbH) = self.get_framebuf_landscape_size()
+      if fbW != fbH:
+        if fbW % 2 == 1 or fbH % 2 == 1:
           # skip transpose of odd-width or odd-height framebuffers
           self.fill(0)
         else:
@@ -294,7 +286,7 @@ class LCD():
   @micropython.viper
   def transposeBufferRowColCount(self):
     buf = ptr8(self.buffer)
-    (bufWObj, bufHObj) = self.get_framebuf_size()
+    (bufWObj, bufHObj) = self.get_framebuf_rotated_size()
     bufW = int(bufWObj)
     bufH = int(bufHObj)
     bitsPerPx = int(self.bits_per_px())
@@ -514,9 +506,9 @@ class LCD():
       self.set_window_to_framebuf()
 
   def set_window_to_framebuf(self):
-    (bufW, bufH) = self.get_framebuf_size()
+    (rotFBW, rotFBH) = self.get_framebuf_rotated_size()
     (fbX, fbY) = self.get_framebuf_offset()
-    self.set_window_with_rotation_offset(fbX, fbY, bufW, bufH)
+    self.set_window_with_rotation_offset(fbX, fbY, rotFBW, rotFBH)
 
   def set_window_with_rotation_offset(self, x, y, w, h):
     xStart = self.curRotationLayout['X'] + x

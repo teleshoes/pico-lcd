@@ -150,7 +150,7 @@ def main():
 
 def cmdInfo(controller, params, data):
   if controller['lcd'].is_framebuf_enabled():
-    (winX, winY) = controller['lcd'].get_framebuf_size()
+    (winX, winY) = controller['lcd'].get_framebuf_rotated_size()
   else:
     (winX, winY) = (controller['lcd'].get_width(), controller['lcd'].get_height())
   (charX, charY) = controller['lcdFont'].getCharGridSize(1)
