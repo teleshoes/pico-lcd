@@ -122,6 +122,9 @@ class LCD():
 
     return (fbX, fbY)
 
+  def is_landscape(self):
+    return self.rotCfg['W'] >= self.rotCfg['H']
+
   def create_buffer(self):
     (bufW, bufH) = self.get_framebuf_size()
     framebufSizeBytes = bufW * bufH * self.bits_per_px() // 8
@@ -226,11 +229,10 @@ class LCD():
     self.set_rotation_index((self.rotationIdx + 1) % len(self.layouts))
 
   def set_rotation_index(self, rotationIdx):
-    wasLandscape = self.rotCfg['W'] >= self.rotCfg['H']
+    wasLandscape = self.is_landscape()
     self.rotationIdx = rotationIdx
     self.rotCfg = self.layouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
-    isLandscape = self.rotCfg['W'] >= self.rotCfg['H']
 
     (lcdW, lcdH) = (self.rotCfg['W'], self.rotCfg['H'])
     if lcdW < lcdH:
@@ -240,7 +242,7 @@ class LCD():
     if not self.fbConf.enabled or self.fbConf.fbW != lcdW or self.fbConf.fbH != lcdH:
       self.fill_mem_blank()
 
-    if wasLandscape != isLandscape and self.buffer != None:
+    if wasLandscape != self.is_landscape() and self.buffer != None:
       # if framebuf is not a square, transpose row/col count (cut off right or bottom)
       (bufW, bufH) = self.get_framebuf_size()
       if bufW != bufH:
