@@ -420,9 +420,10 @@ def setFramebuf(lcd, fbConf):
     fbConf = FramebufConf(enabled=False)
 
   lcd.set_framebuf_conf(fbConf)
+  # write the ATTEMPTED framebuf to last framebuf
+  writeLastFramebufConf(fbConf)
   # get the actual framebuf conf of the LCD (might have failed due to OOM)
   fbConf = lcd.get_framebuf_conf()
-  writeLastFramebufConf(fbConf)
   return "framebuf: " + str(fbConf) + "\n"
 
 
