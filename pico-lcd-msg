@@ -155,6 +155,8 @@ my $USAGE = "Usage:
         W and X always refers to the larger physical dimension of the LCD
         H and Y always refers to the smaller physical dimension of the LCD
 
+  $EXEC [OPTS] full | --full
+    -same as: $EXEC [OPTS] framebuf 320x240+0+0
 
   $EXEC [OPTS] left | --left
     -same as: $EXEC [OPTS] framebuf 160x240+0+0
@@ -204,6 +206,7 @@ my $USAGE = "Usage:
 
     --framebuf=FRAMEBUF
     --orient=ORIENT
+    --full
     --left
     --top
     --right
@@ -395,6 +398,18 @@ sub main(@){
         push @cmdParams, "framebuf=$1";
       }elsif($mode eq $MODE_TEXT){
         push @textParams, "framebuf=$1";
+      }
+    }elsif($arg =~ /^(full)$/ and not defined $mode){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @cmdParams, "framebuf=320x240+0+0";
+    }elsif($arg =~ /^(--full)$/){
+      if(not defined $mode or $mode eq $MODE_CMD){
+        $cmd = "framebuf";
+        $mode = $MODE_CMD;
+        push @cmdParams, "framebuf=320x240+0+0";
+      }elsif($mode eq $MODE_TEXT){
+        push @textParams, "framebuf=320x240+0+0";
       }
     }elsif($arg =~ /^(left)$/ and not defined $mode){
       $cmd = "framebuf";
