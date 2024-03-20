@@ -263,7 +263,9 @@ def cmdOrient(controller, params, data):
 def cmdFramebuf(controller, params, data):
   fbConfStr = maybeGetParamStr(params, "framebuf", None)
   fbConf = FramebufConf.parseFramebufConfStr(
-    fbConfStr)
+    fbConfStr,
+    controller['lcd'].get_lcd_landscape_width(),
+    controller['lcd'].get_lcd_landscape_height())
   print("framebuf=" + str(fbConf))
   return setFramebuf(controller['lcd'], fbConf)
 
@@ -275,7 +277,9 @@ def cmdText(controller, params, data):
   markup = data.decode("utf8")
 
   fbConf = FramebufConf.parseFramebufConfStr(
-    fbConfStr)
+    fbConfStr,
+    controller['lcd'].get_lcd_landscape_width(),
+    controller['lcd'].get_lcd_landscape_height())
 
   print("text: " + markup)
 
@@ -335,7 +339,9 @@ def createLCD(lcdName):
 
   fbConfStr = readLastFramebufConf()
   fbConf = FramebufConf.parseFramebufConfStr(
-    fbConfStr)
+    fbConfStr,
+    lcd.get_lcd_landscape_width(),
+    lcd.get_lcd_landscape_height())
 
   msg += setFramebuf(lcd, fbConf) + "\n"
   msg += setOrientation(lcd, str(readLastRotationDegrees())) + "\n"

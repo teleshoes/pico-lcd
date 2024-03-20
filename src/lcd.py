@@ -554,7 +554,7 @@ class FramebufConf():
     self.fbY = fbY
 
   @classmethod
-  def parseFramebufConfStr(cls, fbConfStr):
+  def parseFramebufConfStr(cls, fbConfStr, lcdLandscapeWidth, lcdLandscapeHeight):
     if fbConfStr == None:
       return None
 
