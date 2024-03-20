@@ -74,11 +74,15 @@ class LCD():
     (layoutOffsetX, layoutOffsetY) = (rotationLayout['X'], rotationLayout['Y'])
     return (madctl, width, height, layoutOffsetX, layoutOffsetY)
 
+  def get_lcd_landscape_size(self):
+    return (self.get_lcd_landscape_width(), self.get_lcd_landscape_height())
   def get_lcd_landscape_width(self):
     return self.lcdLandscapeWidth
   def get_lcd_landscape_height(self):
     return self.lcdLandscapeHeight
 
+  def get_lcd_rotated_size(self):
+    return (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
   def get_lcd_rotated_width(self):
     if self.is_landscape():
       return self.get_lcd_landscape_width()
