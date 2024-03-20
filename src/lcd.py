@@ -560,7 +560,7 @@ class FramebufConf():
 
     fbConf = None
     fbConfStr = fbConfStr.lower()
-    if fbConfStr == "off" or fbConfStr == "disabled" or fbConfStr == "false":
+    if fbConfStr == "off":
       fbConf = None
     else:
       nums = []

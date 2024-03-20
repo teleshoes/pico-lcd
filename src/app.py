@@ -407,7 +407,7 @@ def setOrientation(lcd, orient):
 
 def setFramebuf(lcd, fbConf):
   #  'framebuf' param is one of:
-  #     off | disabled | false
+  #     off
   #       disable framebuf
   #     <FB_W>x<FB_H>+<FB_X>+<FB_Y>
   #       enable framebuf with size=<FB_W>x<FB_H> and offset=(<FB_X>,<FB_Y>)
