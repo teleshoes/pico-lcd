@@ -554,14 +554,29 @@ class FramebufConf():
     self.fbY = fbY
 
   @classmethod
+  def getNamedConfs(self, width, height):
+    return {
+      "full":   FramebufConf(True, width,    height,    0,        0),
+      "left":   FramebufConf(True, width//2, height,    0,        0),
+      "right":  FramebufConf(True, width//2, height,    width//2, 0),
+      "top":    FramebufConf(True, width,    height//2, 0,        0),
+      "bottom": FramebufConf(True, width,    height//2, 0,        height//2),
+      "square": FramebufConf(True, height,   height,    0,        0),
+    }
+
+  @classmethod
   def parseFramebufConfStr(cls, fbConfStr, lcdLandscapeWidth, lcdLandscapeHeight):
     if fbConfStr == None:
       return None
+
+    namedConfs = cls.getNamedConfs(lcdLandscapeWidth, lcdLandscapeHeight)
 
     fbConf = None
     fbConfStr = fbConfStr.lower()
     if fbConfStr == "off":
       fbConf = None
+    elif fbConfStr in namedConfs:
+      return namedConfs[fbConfStr]
     else:
       nums = []
       curNum = ""

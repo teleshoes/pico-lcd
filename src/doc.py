@@ -156,7 +156,7 @@ CMD_ORIENT = {
 CMD_FRAMEBUF = {
   "name":   "framebuf",
   "params": {
-    "framebuf": "[OPTIONAL] off | <FB_W>x<FB_H> | <FB_W>x<FB_H>+<FB_X>+<FB_Y>"
+    "framebuf": "[OPTIONAL] off | <FB_W>x<FB_H> | <FB_W>x<FB_H>+<FB_X>+<FB_Y> | <FB_NAME>"
   },
   "body":   None,
   "desc":   """
@@ -172,6 +172,18 @@ CMD_FRAMEBUF = {
       <FB_W>x<FB_H>+<FB_X>+<FB_Y> = enable framebuf with WxH and offset (0, 0)
       <FB_W>x<FB_H> = same as <FB_W>x<FB_H>+0+0
       off           = disable the framebuf
+      <FB_NAME>     = one of: full | left | right | top | bottom | square
+      full          = same as <LCD_W>x<LCD_H>                      e.g.: 320x240
+      left          = same as <HALF_LCD_W>x<LCD_H>                 e.g.: 160x240
+      right         = same as <HALF_LCD_W>x<LCD_H>+<HALF_LCD_W>+0  e.g.: 160x240+160+0
+      top           = same as <LCD_W>x<HALF_LCD_H>                 e.g.: 320x120
+      bottom        = same as <LCD_W>x<HALF_LCD_H>+0+<HALF_LCD_H>  e.g.: 320x120+0+120
+      square        = same as <LCD_H>x<LCD_H>                      e.g.: 240x240
+
+    <LCD_W>:      320 for lcd=2_0 or 240 for lcd=1_3
+    <LCD_H>:      240 for lcd=2_0 or 240 for lcd=1_3
+    <HALF_LCD_W>: 160 for lcd=2_0 or 120 for lcd_1_3
+    <HALF_LCD_H>: 120 for lcd_2_0 or 120 for lcd_1_3
   """
 }
 CMD_TEXT = {
