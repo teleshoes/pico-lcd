@@ -74,6 +74,7 @@ class LCD():
     (layoutOffsetX, layoutOffsetY) = (rotationLayout['X'], rotationLayout['Y'])
     return (madctl, width, height, layoutOffsetX, layoutOffsetY)
 
+  #physical LCD size, un-rotated (width is the dimension that is longer on the physical LCD)
   def get_lcd_landscape_size(self):
     return (self.lcdLandscapeWidth, self.lcdLandscapeHeight)
   def get_lcd_landscape_width(self):
@@ -81,6 +82,7 @@ class LCD():
   def get_lcd_landscape_height(self):
     return self.get_lcd_landscape_size()[1]
 
+  #physical LCD size, rotated (width is current horizontal dimension)
   def get_lcd_rotated_size(self):
     if self.is_landscape():
       return (self.get_lcd_landscape_width(), self.get_lcd_landscape_height())
@@ -91,6 +93,7 @@ class LCD():
   def get_lcd_rotated_height(self):
     return self.get_lcd_rotated_size()[1]
 
+  #framebuf size, un-rotated (width is the dimension that is longer on the physical LCD)
   def get_framebuf_landscape_size(self):
     return (self.fbConf.fbW, self.fbConf.fbH)
   def get_framebuf_landscape_width(self):
@@ -98,6 +101,7 @@ class LCD():
   def get_framebuf_landscape_height(self):
     return self.get_framebuf_landscape_size()[1]
 
+  #framebuf size, rotated (width is current horizontal dimension)
   def get_framebuf_rotated_size(self):
     (fbW, fbH) = self.get_framebuf_landscape_size()
     if self.is_landscape():
@@ -109,6 +113,7 @@ class LCD():
   def get_framebuf_rotated_height(self):
     return self.get_framebuf_rotated_size()[1]
 
+  #framebuf if enabled, LCD otherwise, rotated (width is current horizontal dimension)
   def get_target_window_size(self):
     if self.is_framebuf_enabled():
       return self.get_framebuf_rotated_size()
