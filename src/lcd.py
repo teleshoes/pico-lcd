@@ -145,8 +145,8 @@ class LCD():
     return self.curRotationLayout['LANDSCAPE']
 
   def create_buffer(self):
-    (bufW, bufH) = self.get_framebuf_landscape_size()
-    framebufSizeBytes = bufW * bufH * self.bits_per_px() // 8
+    (fbW, fbH) = self.get_framebuf_landscape_size()
+    framebufSizeBytes = fbW * fbH * self.bits_per_px() // 8
 
     if self.buffer == None or len(self.buffer) != framebufSizeBytes:
       self.framebuf = None
