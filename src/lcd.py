@@ -18,13 +18,13 @@ MADCTL_MH  = 0 #0:refresh-left-to-right  1:refresh-right-to-left
 MADCTL_RGB = 0 #0:RGB                    1:BGR
 
 class LCD():
-  def __init__(self, landscapeWidth, landscapeHeight, layouts):
+  def __init__(self, landscapeWidth, landscapeHeight, rotationLayouts):
     self.lcdLandscapeWidth = landscapeWidth
     self.lcdLandscapeHeight = landscapeHeight
 
-    self.layouts = layouts
+    self.rotationLayouts = rotationLayouts
     self.rotationIdx = 0
-    self.rotCfg = self.layouts[self.rotationIdx]
+    self.curRotationLayout = self.rotationLayouts[self.rotationIdx]
 
     self.buffer = None
     self.framebuf = None
@@ -38,8 +38,8 @@ class LCD():
       self.framebufColorProfile = framebuf.RGB565
 
     self.rotationsArr = []
-    for i in range(0, len(self.layouts)):
-      rot = self.layouts[i]
+    for i in range(0, len(self.rotationLayouts)):
+      rot = self.rotationLayouts[i]
       rot['MADCTL'] = (0
         | rot['MY']  << 7 #0:nothing  1:mirror row address
         | rot['MX']  << 6 #0:nothing  1:mirror col address
@@ -73,12 +73,12 @@ class LCD():
     self.fill_mem_blank()
 
   def get_width(self):
-    if self.rotCfg['LANDSCAPE']:
+    if self.curRotationLayout['LANDSCAPE']:
       return self.lcdLandscapeWidth
     else:
       return self.lcdLandscapeHeight
   def get_height(self):
-    if self.rotCfg['LANDSCAPE']:
+    if self.curRotationLayout['LANDSCAPE']:
       return self.lcdLandscapeHeight
     else:
       return self.lcdLandscapeWidth
@@ -230,21 +230,21 @@ class LCD():
     return (bLo << 8) | (bHi & 0xff)
 
   def get_rotation_degrees(self):
-    return self.rotCfg['DEG']
+    return self.curRotationLayout['DEG']
 
   def set_rotation_degrees(self, degrees):
-    for rotationIdx in range(0, len(self.layouts)):
-      if self.layouts[rotationIdx]['DEG'] == degrees:
+    for rotationIdx in range(0, len(self.rotationLayouts)):
+      if self.rotationLayouts[rotationIdx]['DEG'] == degrees:
         self.set_rotation_index(rotationIdx)
         break
 
   def set_rotation_next(self):
-    self.set_rotation_index((self.rotationIdx + 1) % len(self.layouts))
+    self.set_rotation_index((self.rotationIdx + 1) % len(self.rotationLayouts))
 
   def set_rotation_index(self, rotationIdx):
     wasLandscape = self.is_landscape()
     self.rotationIdx = rotationIdx
-    self.rotCfg = self.layouts[rotationIdx]
+    self.curRotationLayout = self.rotationLayouts[rotationIdx]
     self.tft.rotation(self.rotationIdx)
 
     (lcdW, lcdH) = (self.get_width(), self.get_height())
@@ -516,10 +516,10 @@ class LCD():
     self.set_window_with_rotation_offset(fbX, fbY, bufW, bufH)
 
   def set_window_with_rotation_offset(self, x, y, w, h):
-    xStart = self.rotCfg['X'] + x
-    xEnd = w + self.rotCfg['X'] + x - 1
-    yStart = self.rotCfg['Y'] + y
-    yEnd = h + self.rotCfg['Y'] + y - 1
+    xStart = self.curRotationLayout['X'] + x
+    xEnd = w + self.curRotationLayout['X'] + x - 1
+    yStart = self.curRotationLayout['Y'] + y
+    yEnd = h + self.curRotationLayout['Y'] + y - 1
 
     self.set_window(xStart, xEnd, yStart, yEnd)
 

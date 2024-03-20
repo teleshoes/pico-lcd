@@ -19,7 +19,7 @@ LCD_CONFS = {
                 'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
     "landscapeWidth":  240,
     "landscapeHeight": 240,
-    "layouts": [
+    "rotationLayouts": [
       {'DEG':  0, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
       {'DEG': 90, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
       {'DEG':180, 'LANDSCAPE': True,  'X': 80, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
@@ -30,7 +30,7 @@ LCD_CONFS = {
     "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
     "landscapeWidth":  320,
     "landscapeHeight": 240,
-    "layouts": [
+    "rotationLayouts": [
       {'DEG':  0, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
       {'DEG': 90, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
       {'DEG':180, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
@@ -327,7 +327,10 @@ def adjustRTCEpochWithTZOffset(rtcEpoch):
 
 def createLCD(lcdName):
   lcdConf = LCD_CONFS[lcdName]
-  lcd = LCD(lcdConf['landscapeWidth'], lcdConf['landscapeHeight'], lcdConf['layouts'])
+  lcd = LCD(
+    lcdConf['landscapeWidth'],
+    lcdConf['landscapeHeight'],
+    lcdConf['rotationLayouts'])
   msg = "LCD init\n"
 
   msg += setFramebuf(lcd, readLastFramebufConf()) + "\n"
