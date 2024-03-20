@@ -153,7 +153,7 @@ class LCD():
       self.framebuf = framebuf.FrameBuffer(
         self.buffer, rotFBW, rotFBH, self.framebufColorProfile)
 
-      self.set_window_to_framebuf()
+      self.set_window_to_rotated_framebuf()
     else:
       self.framebuf = None
 
@@ -502,9 +502,9 @@ class LCD():
     buf = None
 
     if self.is_framebuf_enabled():
-      self.set_window_to_framebuf()
+      self.set_window_to_rotated_framebuf()
 
-  def set_window_to_framebuf(self):
+  def set_window_to_rotated_framebuf(self):
     (rotFBW, rotFBH) = self.get_framebuf_rotated_size()
     (rotFBX, rotFBY) = self.get_framebuf_rotated_offset()
     self.set_window_with_rotation_offset(rotFBX, rotFBY, rotFBW, rotFBH)
