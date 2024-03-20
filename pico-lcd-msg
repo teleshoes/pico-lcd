@@ -165,7 +165,7 @@ my $USAGE = "Usage:
   $EXEC [OPTS] top | --top
     -same as: $EXEC [OPTS] framebuf 320x120+0+0
 
-  $EXEC [OPTS] bot | --bot | bottom | --bottom
+  $EXEC [OPTS] bottom | --bottom
     -same as: $EXEC [OPTS] framebuf 320x120+0+120
 
 
@@ -207,7 +207,6 @@ my $USAGE = "Usage:
     --left
     --top
     --right
-    --bot
     --bottom
     --square
       if specified after TEXT, send orient/framebuf params as part of the /text cmd
@@ -433,11 +432,11 @@ sub main(@){
       }elsif($mode eq $MODE_TEXT){
         push @textParams, "framebuf=160x240+160+0";
       }
-    }elsif($arg =~ /^(bot|bottom)$/ and not defined $mode){
+    }elsif($arg =~ /^(bottom)$/ and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=320x120+0+120";
-    }elsif($arg =~ /^(--bot|--bottom)$/){
+    }elsif($arg =~ /^(--bottom)$/){
       if(not defined $mode or $mode eq $MODE_CMD){
         $cmd = "framebuf";
         $mode = $MODE_CMD;
