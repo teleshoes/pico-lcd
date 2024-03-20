@@ -406,18 +406,7 @@ def setOrientation(lcd, orient):
     return "unknown orient " + str(orient) + "\n"
 
 def setFramebuf(lcd, fbConf):
-  #  'framebuf' param is one of:
-  #     off
-  #       disable framebuf
-  #     <FB_W>x<FB_H>+<FB_X>+<FB_Y>
-  #       enable framebuf with size=<FB_W>x<FB_H> and offset=(<FB_X>,<FB_Y>)
-  #     <FB_W>x<FB_H>
-  #       enable framebuf with size=<FB_W>x<FB_H> and offset=(0,0)
-  #
-  #NOTE: regardless of current orientation:
-  #  <FB_W> and <FB_X> always refers to the larger physical dimension of the LCD
-  #  <FB_H> and <FB_Y> always refers to the smaller physical dimension of the LCD
-
+  # see doc for 'framebuf' command for framebuf param
   if fbConf == None:
     fbConf = FramebufConf(enabled=False)
 
