@@ -75,24 +75,21 @@ class LCD():
     return (madctl, width, height, layoutOffsetX, layoutOffsetY)
 
   def get_lcd_landscape_size(self):
-    return (self.get_lcd_landscape_width(), self.get_lcd_landscape_height())
+    return (self.lcdLandscapeWidth, self.lcdLandscapeHeight)
   def get_lcd_landscape_width(self):
-    return self.lcdLandscapeWidth
+    return self.get_lcd_landscape_size()[0]
   def get_lcd_landscape_height(self):
-    return self.lcdLandscapeHeight
+    return self.get_lcd_landscape_size()[1]
 
   def get_lcd_rotated_size(self):
-    return (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
+    if self.is_landscape():
+      return (self.get_lcd_landscape_width(), self.get_lcd_landscape_height())
+    else:
+      return (self.get_lcd_landscape_height(), self.get_lcd_landscape_width())
   def get_lcd_rotated_width(self):
-    if self.is_landscape():
-      return self.get_lcd_landscape_width()
-    else:
-      return self.get_lcd_landscape_height()
+    return self.get_lcd_rotated_size()[0]
   def get_lcd_rotated_height(self):
-    if self.is_landscape():
-      return self.get_lcd_landscape_height()
-    else:
-      return self.get_lcd_landscape_width()
+    return self.get_lcd_rotated_size()[1]
 
   def get_framebuf_landscape_size(self):
     return (self.fbConf.fbW, self.fbConf.fbH)
