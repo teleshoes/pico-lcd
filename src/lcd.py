@@ -119,15 +119,14 @@ class LCD():
     else:
       return (fbH, fbW)
 
-  def get_framebuf_offset(self):
-    bufW = self.get_width()
-    bufH = self.get_height()
-    (fbX, fbY) = (self.fbConf.fbX, self.fbConf.fbY)
-
-    if bufW < bufH:
-      (fbX, fbY) = (fbY, fbX)
-
-    return (fbX, fbY)
+  def get_framebuf_landscape_offset(self):
+    return (self.fbConf.fbX, self.fbConf.fbY)
+  def get_framebuf_rotated_offset(self):
+    (fbX, fbY) = self.get_framebuf_landscape_offset()
+    if self.is_landscape():
+      return (fbX, fbY)
+    else:
+      return (fbY, fbX)
 
   def is_landscape(self):
     return self.curRotationLayout['LANDSCAPE']
@@ -507,8 +506,8 @@ class LCD():
 
   def set_window_to_framebuf(self):
     (rotFBW, rotFBH) = self.get_framebuf_rotated_size()
-    (fbX, fbY) = self.get_framebuf_offset()
-    self.set_window_with_rotation_offset(fbX, fbY, rotFBW, rotFBH)
+    (rotFBX, rotFBY) = self.get_framebuf_rotated_offset()
+    self.set_window_with_rotation_offset(rotFBX, rotFBY, rotFBW, rotFBH)
 
   def set_window_with_rotation_offset(self, x, y, w, h):
     xStart = self.curRotationLayout['X'] + x
