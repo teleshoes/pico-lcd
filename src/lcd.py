@@ -534,9 +534,10 @@ class FramebufConf():
     if fbConfStr == None:
       return None
 
+    fbConf = None
     fbConfStr = fbConfStr.lower()
     if fbConfStr == "off" or fbConfStr == "disabled" or fbConfStr == "false":
-      return FramebufConf(enabled=False, maxW=0, maxH=0, x=0, y=0)
+      fbConf = None
     else:
       nums = []
       curNum = ""
@@ -552,13 +553,16 @@ class FramebufConf():
         nums.append(int(curNum))
 
       if len(nums) == 2:
-        return FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=0, y=0)
+        fbConf = FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=0, y=0)
       elif len(nums) == 4:
-        return FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=nums[2], y=nums[3])
+        fbConf = FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=nums[2], y=nums[3])
       else:
-        return None
+        fbConf = None
 
-    return fb
+    if fbConf == None:
+      fbConf = FramebufConf(enabled=False)
+
+    return fbConf
 
   def __str__(self) -> str:
     return self.format()
