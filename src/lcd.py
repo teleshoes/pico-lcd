@@ -96,12 +96,21 @@ class LCD():
 
   def get_framebuf_landscape_size(self):
     return (self.fbConf.fbW, self.fbConf.fbH)
+  def get_framebuf_landscape_width(self):
+    return self.get_framebuf_landscape_size()[0]
+  def get_framebuf_landscape_height(self):
+    return self.get_framebuf_landscape_size()[1]
+
   def get_framebuf_rotated_size(self):
     (fbW, fbH) = self.get_framebuf_landscape_size()
     if self.is_landscape():
       return (fbW, fbH)
     else:
       return (fbH, fbW)
+  def get_framebuf_rotated_width(self):
+    return self.get_framebuf_rotated_size()[0]
+  def get_framebuf_rotated_height(self):
+    return self.get_framebuf_rotated_size()[1]
 
   def get_target_window_size(self):
     if self.is_framebuf_enabled():
@@ -109,6 +118,10 @@ class LCD():
     else:
       (winX, winY) = (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
     return (winX, winY)
+  def get_target_window_width(self):
+    return self.get_target_window_size()[0]
+  def get_target_window_height(self):
+    return self.get_target_window_size()[1]
 
   def get_framebuf_landscape_offset(self):
     return (self.fbConf.fbX, self.fbConf.fbY)
