@@ -261,16 +261,21 @@ def cmdOrient(controller, params, data):
   return setOrientation(controller['lcd'], orient)
 
 def cmdFramebuf(controller, params, data):
-  fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
+  fbConfStr = maybeGetParamStr(params, "framebuf", None)
+  fbConf = FramebufConf.parseFramebufConfStr(
+    fbConfStr)
   print("framebuf=" + str(fbConf))
   return setFramebuf(controller['lcd'], fbConf)
 
 def cmdText(controller, params, data):
   isClear = maybeGetParamBool(params, "clear", True)
   isShow = maybeGetParamBool(params, "show", True)
-  fbConf = maybeGetParamFramebufConf(params, "framebuf", None)
+  fbConfStr = maybeGetParamStr(params, "framebuf", None)
   orient = maybeGetParamStr(params, "orient", None)
   markup = data.decode("utf8")
+
+  fbConf = FramebufConf.parseFramebufConfStr(
+    fbConfStr)
 
   print("text: " + markup)
 
@@ -328,7 +333,11 @@ def createLCD(lcdName):
     lcdConf['rotationLayouts'])
   msg = "LCD init\n"
 
-  msg += setFramebuf(lcd, readLastFramebufConf()) + "\n"
+  fbConfStr = readLastFramebufConf()
+  fbConf = FramebufConf.parseFramebufConfStr(
+    fbConfStr)
+
+  msg += setFramebuf(lcd, fbConf) + "\n"
   msg += setOrientation(lcd, str(readLastRotationDegrees())) + "\n"
 
   print(msg)
@@ -447,17 +456,6 @@ def maybeGetParamInt(params, paramName, defaultValue=None):
       print("WARNING: could not parse int param " + paramName + "=" + val + "\n")
       return defaultValue
 
-def maybeGetParamFramebufConf(params, paramName, defaultValue=None):
-  val = maybeGetParamStr(params, paramName, None)
-  if val == None:
-    return defaultValue
-  else:
-    fbConf = FramebufConf.parseFramebufConfStr(val)
-    if fbConf == None:
-      return defaultValue
-    else:
-      return fbConf
-
 def readCommandRequest(cl):
   cl.settimeout(0.25)
   start_ms = time.ticks_ms()
@@ -536,8 +534,7 @@ def writeLastRotationDegrees(degrees):
   writeFile("last-rotation-degrees.txt", str(degrees) + "\n")
 
 def readLastFramebufConf():
-  val = readFileLine("last-framebuf-conf.txt")
-  return FramebufConf.parseFramebufConfStr(val)
+  return readFileLine("last-framebuf-conf.txt")
 def writeLastFramebufConf(fbConf):
   writeFile("last-framebuf-conf.txt", str(fbConf) + "\n")
 
