@@ -516,9 +516,9 @@ class LCD():
   def set_window_to_rotated_framebuf(self):
     (rotFBW, rotFBH) = self.get_framebuf_rotated_size()
     (rotFBX, rotFBY) = self.get_framebuf_rotated_offset()
-    self.set_window_with_rotation_offset(rotFBX, rotFBY, rotFBW, rotFBH)
+    self.set_window_with_rotation_offset(rotFBW, rotFBH, rotFBX, rotFBY)
 
-  def set_window_with_rotation_offset(self, x, y, w, h):
+  def set_window_with_rotation_offset(self, w, h, x, y):
     xStart = self.curRotationLayout['X'] + x
     xEnd = w + self.curRotationLayout['X'] + x - 1
     yStart = self.curRotationLayout['Y'] + y
