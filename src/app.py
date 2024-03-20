@@ -409,14 +409,14 @@ def setFramebuf(lcd, fbConf):
   #  'framebuf' param is one of:
   #     off | disabled | false
   #       disable framebuf
-  #     WxH
-  #       enable framebuf, and set max WxH with no X/Y offsets
-  #     WxH+X+Y
-  #       enable framebuf, and set max WxH and X/Y offsets
+  #     <FB_W>x<FB_H>+<FB_X>+<FB_Y>
+  #       enable framebuf with size=<FB_W>x<FB_H> and offset=(<FB_X>,<FB_Y>)
+  #     <FB_W>x<FB_H>
+  #       enable framebuf with size=<FB_W>x<FB_H> and offset=(0,0)
   #
   #NOTE: regardless of current orientation:
-  #  W and X always refers to the larger physical dimension of the LCD
-  #  H and Y always refers to the smaller physical dimension of the LCD
+  #  <FB_W> and <FB_X> always refers to the larger physical dimension of the LCD
+  #  <FB_H> and <FB_Y> always refers to the smaller physical dimension of the LCD
 
   if fbConf == None:
     fbConf = FramebufConf(enabled=False)
