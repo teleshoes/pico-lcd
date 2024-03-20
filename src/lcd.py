@@ -84,10 +84,7 @@ class LCD():
 
   #physical LCD size, rotated (width is current horizontal dimension)
   def get_lcd_rotated_size(self):
-    if self.is_landscape():
-      return (self.get_lcd_landscape_width(), self.get_lcd_landscape_height())
-    else:
-      return (self.get_lcd_landscape_height(), self.get_lcd_landscape_width())
+    return self.swapIfNotLandscape(self.get_lcd_landscape_size())
   def get_lcd_rotated_width(self):
     return self.get_lcd_rotated_size()[0]
   def get_lcd_rotated_height(self):
@@ -103,11 +100,7 @@ class LCD():
 
   #framebuf size, rotated (width is current horizontal dimension)
   def get_framebuf_rotated_size(self):
-    (fbW, fbH) = self.get_framebuf_landscape_size()
-    if self.is_landscape():
-      return (fbW, fbH)
-    else:
-      return (fbH, fbW)
+    return self.swapIfNotLandscape(self.get_framebuf_landscape_size())
   def get_framebuf_rotated_width(self):
     return self.get_framebuf_rotated_size()[0]
   def get_framebuf_rotated_height(self):
@@ -127,11 +120,10 @@ class LCD():
   def get_framebuf_landscape_offset(self):
     return (self.fbConf.fbX, self.fbConf.fbY)
   def get_framebuf_rotated_offset(self):
-    (fbX, fbY) = self.get_framebuf_landscape_offset()
-    if self.is_landscape():
-      return (fbX, fbY)
-    else:
-      return (fbY, fbX)
+    return self.swapIfNotLandscape(self.get_framebuf_landscape_offset())
+
+  def swapIfNotLandscape(self, pair):
+    return (pair[0], pair[1]) if self.is_landscape() else (pair[1], pair[0])
 
   #either no framebuf, or framebuf is the same size as LCD
   def is_fullscreen(self):
