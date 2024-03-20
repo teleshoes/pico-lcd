@@ -150,17 +150,14 @@ def main():
 
 def cmdInfo(controller, params, data):
   (winW, winH) = controller['lcd'].get_target_window_size()
+  (lcdW, lcdH) = controller['lcd'].get_lcd_rotated_size()
+  fbConf = controller['lcd'].get_framebuf_conf()
 
   (charW, charH) = controller['lcdFont'].getCharGridSize(1)
 
   out = ""
-  out += "window: %sx%s\n" % (
-    winW,
-    winH)
-  out += "  (lcd: %sx%s, framebuf: %s)\n" % (
-    controller['lcd'].get_width(),
-    controller['lcd'].get_height(),
-    controller['lcd'].get_framebuf_conf())
+  out += "window: %sx%s\n" % (winW, winH)
+  out += "  (lcd: %sx%s, framebuf: %s)\n" % (lcdW, lcdH, fbConf)
   out += "orientation: %s degrees\n" % (
     controller['lcd'].get_rotation_degrees())
   out += "RAM free: %s bytes\n" % (
