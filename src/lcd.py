@@ -101,26 +101,26 @@ class LCD():
     if not self.fbConf.enabled:
       return (bufW, bufH)
 
-    (maxW, maxH) = (self.fbConf.maxW, self.fbConf.maxH)
+    (fbW, fbH) = (self.fbConf.fbW, self.fbConf.fbH)
 
     if bufW < bufH:
-      (maxW, maxH) = (maxH, maxW)
+      (fbW, fbH) = (fbH, fbW)
 
-    if bufW > maxW:
-      bufW = maxW
-    if bufH > maxH:
-      bufH = maxH
+    if bufW > fbW:
+      bufW = fbW
+    if bufH > fbH:
+      bufH = fbH
     return (bufW, bufH)
 
   def get_framebuf_offset(self):
     bufW = self.rotCfg['W']
     bufH = self.rotCfg['H']
-    (offsetX, offsetY) = (self.fbConf.x, self.fbConf.y)
+    (fbX, fbY) = (self.fbConf.fbX, self.fbConf.fbY)
 
     if bufW < bufH:
-      (offsetX, offsetY) = (offsetY, offsetX)
+      (fbX, fbY) = (fbY, fbX)
 
-    return (offsetX, offsetY)
+    return (fbX, fbY)
 
   def create_buffer(self):
     (bufW, bufH) = self.get_framebuf_size()
@@ -237,7 +237,7 @@ class LCD():
       (lcdW, lcdH) = (lcdH, lcdW)
 
     # if framebuf is not the entire screen, blank the entire screen
-    if not self.fbConf.enabled or self.fbConf.maxW != lcdW or self.fbConf.maxH != lcdH:
+    if not self.fbConf.enabled or self.fbConf.fbW != lcdW or self.fbConf.fbH != lcdH:
       self.fill_mem_blank()
 
     if wasLandscape != isLandscape and self.buffer != None:
@@ -497,8 +497,8 @@ class LCD():
 
   def set_window_to_framebuf(self):
     (bufW, bufH) = self.get_framebuf_size()
-    (offsetX, offsetY) = self.get_framebuf_offset()
-    self.set_window_with_rotation_offset(offsetX, offsetY, bufW, bufH)
+    (fbX, fbY) = self.get_framebuf_offset()
+    self.set_window_with_rotation_offset(fbX, fbY, bufW, bufH)
 
   def set_window_with_rotation_offset(self, x, y, w, h):
     xStart = self.rotCfg['X'] + x
@@ -522,12 +522,12 @@ class LCD():
 
 
 class FramebufConf():
-  def __init__(self, enabled=False, maxW=0, maxH=0, x=0, y=0):
+  def __init__(self, enabled=False, fbW=0, fbH=0, fbX=0, fbY=0):
     self.enabled = enabled
-    self.maxW = maxW
-    self.maxH = maxH
-    self.x = x
-    self.y = y
+    self.fbW = fbW
+    self.fbH = fbH
+    self.fbX = fbX
+    self.fbY = fbY
 
   @classmethod
   def parseFramebufConfStr(cls, fbConfStr):
@@ -553,9 +553,9 @@ class FramebufConf():
         nums.append(int(curNum))
 
       if len(nums) == 2:
-        fbConf = FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=0, y=0)
+        fbConf = FramebufConf(enabled=True, fbW=nums[0], fbH=nums[1], fbX=0, fbY=0)
       elif len(nums) == 4:
-        fbConf = FramebufConf(enabled=True, maxW=nums[0], maxH=nums[1], x=nums[2], y=nums[3])
+        fbConf = FramebufConf(enabled=True, fbW=nums[0], fbH=nums[1], fbX=nums[2], fbY=nums[3])
       else:
         fbConf = None
 
@@ -570,7 +570,7 @@ class FramebufConf():
   def format(self):
     if not self.enabled:
       return "off"
-    elif self.x == 0 and self.y == 0:
-      return '%dx%d' % (self.maxW, self.maxH)
+    elif self.fbX == 0 and self.fbY == 0:
+      return '%dx%d' % (self.fbW, self.fbH)
     else:
-      return '%dx%d+%d+%d' % (self.maxW, self.maxH, self.x, self.y)
+      return '%dx%d+%d+%d' % (self.fbW, self.fbH, self.fbX, self.fbY)
