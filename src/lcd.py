@@ -111,10 +111,9 @@ class LCD():
 
   def get_target_window_size(self):
     if self.is_framebuf_enabled():
-      (winX, winY) = self.get_framebuf_rotated_size()
+      return self.get_framebuf_rotated_size()
     else:
-      (winX, winY) = (self.get_lcd_rotated_width(), self.get_lcd_rotated_height())
-    return (winX, winY)
+      return self.get_lcd_rotated_size()
   def get_target_window_width(self):
     return self.get_target_window_size()[0]
   def get_target_window_height(self):
