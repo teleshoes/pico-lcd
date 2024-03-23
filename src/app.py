@@ -155,6 +155,8 @@ def cmdInfo(controller, params, data):
 
   (charW, charH) = controller['lcdFont'].getCharGridSize(1)
 
+  fbConfBootState = readLastFramebufConf()
+
   out = ""
   out += "window: %sx%s\n" % (winW, winH)
   out += "  (lcd: %sx%s, framebuf: %s)\n" % (lcdW, lcdH, fbConf)
@@ -166,6 +168,7 @@ def cmdInfo(controller, params, data):
   out += "buttons: %s\n" % (
     formatButtonCount(controller['buttons']))
   out += "lcdconf: %s\n" % controller['lcdName']
+  out += "framebuf-boot: %s\n" % fbConfBootState
   return out
 
 def cmdConnect(controller, params, data):
