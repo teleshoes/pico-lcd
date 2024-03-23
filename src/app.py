@@ -539,7 +539,10 @@ def writeLastRotationDegrees(degrees):
   writeFile("last-rotation-degrees.txt", str(degrees) + "\n")
 
 def readLastFramebufConf():
-  return readFileLine("last-framebuf-conf.txt")
+  val = readFileLine("last-framebuf-conf.txt")
+  if val != None:
+    val = val.strip()
+  return val
 def writeLastFramebufConf(fbConf):
   writeFile("last-framebuf-conf.txt", str(fbConf) + "\n")
 
