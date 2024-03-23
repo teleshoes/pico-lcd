@@ -158,15 +158,13 @@ def cmdInfo(controller, params, data):
   out = ""
   out += "window: %sx%s\n" % (winW, winH)
   out += "  (lcd: %sx%s, framebuf: %s)\n" % (lcdW, lcdH, fbConf)
+  out += "char8px: %sx%s\n" % (charW, charH)
   out += "orientation: %s degrees\n" % (
     controller['lcd'].get_rotation_degrees())
   out += "RAM free: %s bytes\n" % (
     gc.mem_free())
   out += "buttons: %s\n" % (
     formatButtonCount(controller['buttons']))
-  out += "char8px: %sx%s\n" % (
-    charW,
-    charH)
   return out
 
 def cmdConnect(controller, params, data):
