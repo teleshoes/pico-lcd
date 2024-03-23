@@ -39,7 +39,7 @@ LCD_CONFS = {
   },
 }
 
-DEFAULT_LCD_NAME = doc.LCD_NAME_1_3
+DEFAULT_LCD_NAME = doc.LCD_NAME_2_0
 
 def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
