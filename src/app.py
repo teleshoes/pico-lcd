@@ -204,7 +204,7 @@ def cmdTimeout(controller, params, data):
 def cmdTZ(controller, params, data):
   tzName = maybeGetParamStr(params, "name", None)
   writeTZFile(tzName)
-  print("set timezone for rtc = " + tzName)
+  print("set timezone for rtc = " + str(tzName))
   return None
 
 def cmdRTC(controller, params, data):
@@ -574,7 +574,10 @@ def readTZFile():
   return val
 def writeTZFile(tzName):
   if tzName == None:
-    os.remove("current_tz")
+    try:
+      os.remove("current_tz")
+    except OSError:
+      pass
   else:
     writeFile("current_tz", tzName + "\n")
 
