@@ -2,6 +2,7 @@
 # Copyright 2023 Elliot Wolk
 # License: GPLv2
 import network
+import os
 import time
 import socket
 import gc
@@ -173,6 +174,8 @@ def cmdInfo(controller, params, data):
   out += "timeout-millis: %s\n" % controller['timeoutMillis']
   out += "timeout-text: %s\n" % controller['timeoutText']
   out += "timezone: %s\n" % tz
+  out += "firmware: %s\n" % os.uname().version
+  out += "board: %s\n" % os.uname().machine
   return out
 
 def cmdConnect(controller, params, data):
