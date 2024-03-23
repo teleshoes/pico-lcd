@@ -169,6 +169,8 @@ def cmdInfo(controller, params, data):
     formatButtonCount(controller['buttons']))
   out += "lcdconf: %s\n" % controller['lcdName']
   out += "framebuf-boot: %s\n" % fbConfBootState
+  out += "timeout-millis: %s\n" % controller['timeoutMillis']
+  out += "timeout-text: %s\n" % controller['timeoutText']
   return out
 
 def cmdConnect(controller, params, data):
