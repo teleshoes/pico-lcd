@@ -156,6 +156,7 @@ def cmdInfo(controller, params, data):
   (charW, charH) = controller['lcdFont'].getCharGridSize(1)
 
   fbConfBootState = readLastFramebufConf()
+  tz = readTZFile()
 
   out = ""
   out += "window: %sx%s\n" % (winW, winH)
@@ -171,6 +172,7 @@ def cmdInfo(controller, params, data):
   out += "framebuf-boot: %s\n" % fbConfBootState
   out += "timeout-millis: %s\n" % controller['timeoutMillis']
   out += "timeout-text: %s\n" % controller['timeoutText']
+  out += "timezone: %s\n" % tz
   return out
 
 def cmdConnect(controller, params, data):
