@@ -165,6 +165,7 @@ def cmdInfo(controller, params, data):
     gc.mem_free())
   out += "buttons: %s\n" % (
     formatButtonCount(controller['buttons']))
+  out += "lcdconf: %s\n" % controller['lcdName']
   return out
 
 def cmdConnect(controller, params, data):
