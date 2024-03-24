@@ -209,8 +209,12 @@ def cmdTimeout(controller, params, data):
   timeoutText = data.decode("utf8")
   print("timeout: " + str(timeoutMillis) + "ms = " + str(timeoutText))
   writeTimeoutFile(timeoutMillis, timeoutText)
-  controller['timeoutMillis'] = timeoutMillis
-  controller['timeoutText'] = timeoutText
+  if timeoutMillis == None or timeoutMillis == 0:
+    controller['timeoutMillis'] = None
+    controller['timeoutText'] = None
+  else:
+    controller['timeoutMillis'] = timeoutMillis
+    controller['timeoutText'] = timeoutText
   return None
 
 def cmdTZ(controller, params, data):
