@@ -567,7 +567,7 @@ def readTimeoutFile():
       return (timeoutMillis, timeoutText)
   return (None, None)
 def writeTimeoutFile(timeoutMillis, timeoutText):
-  if timeoutMillis == None or timeoutText == None:
+  if timeoutMillis == 0 or timeoutMillis == None or timeoutText == None:
     writeFile("timeout.txt", "")
   else:
     writeFile("timeout.txt", str(timeoutMillis) + "," + timeoutText + "\n")
