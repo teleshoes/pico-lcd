@@ -8,7 +8,7 @@ sub nowMillis();
 
 my @files = qw(
   font5x8.bin
-  wifi-conf.txt
+  state-wifi-conf
   src/main.py
   mpy/app.mpy
   mpy/doc.mpy
