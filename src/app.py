@@ -200,7 +200,7 @@ def cmdSSID(controller, params, data):
   return out
 
 def cmdResetWifi(controller, params, data):
-  writeFile(STATE_FILE_WIFI_CONF, "")
+  resetWifiConf()
   out = "WARNING: all wifi networks removed for next boot\n"
   return out
 
@@ -553,6 +553,8 @@ def readWifiConfNetworks():
   return networks
 def appendSSID(ssid, password):
   appendFile(STATE_FILE_WIFI_CONF, ssid + " = " + password + "\n")
+def resetWifiConf():
+  writeFile(STATE_FILE_WIFI_CONF, "")
 
 def readLastLCDName():
   val = readFileLine(STATE_FILE_LCD_NAME)
