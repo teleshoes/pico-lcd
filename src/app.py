@@ -42,6 +42,13 @@ LCD_CONFS = {
 
 DEFAULT_LCD_NAME = doc.LCD_NAME_2_0
 
+STATE_FILE_WIFI_CONF = "wifi-conf.txt"
+STATE_FILE_LCD_NAME = "last-lcd-name.txt"
+STATE_FILE_ORIENTATION = "last-rotation-degrees.txt"
+STATE_FILE_FRAMEBUF = "last-framebuf-conf.txt"
+STATE_FILE_TIMEOUT = "timeout.txt"
+STATE_FILE_TIMEZONE = "current_tz"
+
 def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
     controller['lcd'].set_rotation_next()
@@ -193,7 +200,7 @@ def cmdSSID(controller, params, data):
   return out
 
 def cmdResetWifi(controller, params, data):
-  writeFile("wifi-conf.txt", "")
+  writeFile(STATE_FILE_WIFI_CONF, "")
   out = "WARNING: all wifi networks removed for next boot\n"
   return out
 
@@ -529,35 +536,35 @@ def readCommandRequest(cl):
 
 def appendSSID(ssid, password):
   try:
-    with open("wifi-conf.txt", "a") as fh:
+    with open(STATE_FILE_WIFI_CONF, "a") as fh:
       fh.write(ssid + " = " + password + "\n")
   except:
     pass
 
 def readLastLCDName():
-  val = readFileLine("last-lcd-name.txt")
+  val = readFileLine(STATE_FILE_LCD_NAME)
   if val != None:
     val = val.strip()
   if val in LCD_CONFS:
     return val
 def writeLastLCDName(lcdName):
-  writeFile("last-lcd-name.txt", lcdName + "\n")
+  writeFile(STATE_FILE_LCD_NAME, lcdName + "\n")
 
 def readLastRotationDegrees():
-  return readFileInt("last-rotation-degrees.txt")
+  return readFileInt(STATE_FILE_ORIENTATION)
 def writeLastRotationDegrees(degrees):
-  writeFile("last-rotation-degrees.txt", str(degrees) + "\n")
+  writeFile(STATE_FILE_ORIENTATION, str(degrees) + "\n")
 
 def readLastFramebufConf():
-  val = readFileLine("last-framebuf-conf.txt")
+  val = readFileLine(STATE_FILE_FRAMEBUF)
   if val != None:
     val = val.strip()
   return val
 def writeLastFramebufConf(fbConf):
-  writeFile("last-framebuf-conf.txt", str(fbConf) + "\n")
+  writeFile(STATE_FILE_FRAMEBUF, str(fbConf) + "\n")
 
 def readTimeoutFile():
-  val = readFileLine("timeout.txt")
+  val = readFileLine(STATE_FILE_TIMEOUT)
   if val != None:
     val = val.strip()
     segments = val.split(",")
@@ -568,23 +575,23 @@ def readTimeoutFile():
   return (None, None)
 def writeTimeoutFile(timeoutMillis, timeoutText):
   if timeoutMillis == 0 or timeoutMillis == None or timeoutText == None:
-    writeFile("timeout.txt", "")
+    writeFile(STATE_FILE_TIMEOUT, "")
   else:
-    writeFile("timeout.txt", str(timeoutMillis) + "," + timeoutText + "\n")
+    writeFile(STATE_FILE_TIMEOUT, str(timeoutMillis) + "," + timeoutText + "\n")
 
 def readTZFile():
-  val =  readFileLine("current_tz")
+  val =  readFileLine(STATE_FILE_TIMEZONE)
   if val != None:
     val = val.strip()
   return val
 def writeTZFile(tzName):
   if tzName == None:
     try:
-      os.remove("current_tz")
+      os.remove(STATE_FILE_TIMEZONE)
     except OSError:
       pass
   else:
-    writeFile("current_tz", tzName + "\n")
+    writeFile(STATE_FILE_TIMEZONE, tzName + "\n")
 
 def readFileInt(file):
   try:
@@ -608,7 +615,7 @@ def writeFile(file, contents):
 
 def setupWifi(lcdFont):
   networks = []
-  with open("wifi-conf.txt", "r") as fh:
+  with open(STATE_FILE_WIFI_CONF, "r") as fh:
     for line in fh:
       idx = line.find("=")
       if idx > 0:
