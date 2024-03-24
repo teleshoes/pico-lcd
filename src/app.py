@@ -569,9 +569,12 @@ def readTimeoutFile():
     val = val.strip()
     segments = val.split(",")
     if len(segments) == 2:
-      timeoutMillis = int(segments[0])
-      timeoutText = segments[1]
-      return (timeoutMillis, timeoutText)
+      try:
+        timeoutMillis = int(segments[0])
+        timeoutText = segments[1]
+        return (timeoutMillis, timeoutText)
+      except:
+        return (None, None)
   return (None, None)
 def writeTimeoutFile(timeoutMillis, timeoutText):
   if timeoutMillis == 0 or timeoutMillis == None or timeoutText == None:
