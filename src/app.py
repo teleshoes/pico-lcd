@@ -538,6 +538,19 @@ def readCommandRequest(cl):
 
   return (cmd, params, data)
 
+def readWifiConfNetworks():
+  networks = []
+  try:
+    with open(STATE_FILE_WIFI_CONF, "r") as fh:
+      for line in fh:
+        idx = line.find("=")
+        if idx > 0:
+          ssid = line[:idx].strip()
+          password = line[idx+1:].strip()
+          networks.append([ssid, password])
+  except:
+    networks = []
+  return networks
 def appendSSID(ssid, password):
   appendFile(STATE_FILE_WIFI_CONF, ssid + " = " + password + "\n")
 
@@ -624,14 +637,7 @@ def appendFile(file, contents):
     pass
 
 def setupWifi(lcdFont):
-  networks = []
-  with open(STATE_FILE_WIFI_CONF, "r") as fh:
-    for line in fh:
-      idx = line.find("=")
-      if idx > 0:
-        ssid = line[:idx].strip()
-        password = line[idx+1:].strip()
-        networks.append([ssid, password])
+  networks = readWifiConfNetworks()
 
   connected = False
   connectedSSID = None
