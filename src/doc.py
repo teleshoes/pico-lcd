@@ -78,8 +78,8 @@ CMD_TIMEOUT = {
   "body":   "message markup to show on timeout, missing means no timeout",
   "desc":   "set a timeout on network. when reached, display the indicated markup",
 }
-CMD_TZ = {
-  "name":   "tz",
+CMD_TIMEZONE = {
+  "name":   "timezone",
   "params": {
     "name": "[OPTIONAL] tzdata zone name, missing is the same as UTC",
   },

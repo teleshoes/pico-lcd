@@ -217,7 +217,7 @@ def cmdTimeout(controller, params, data):
     controller['timeoutText'] = timeoutText
   return None
 
-def cmdTZ(controller, params, data):
+def cmdTimezone(controller, params, data):
   tzName = maybeGetParamStr(params, "name", None)
   writeTZFile(tzName)
   print("set timezone for rtc = " + str(tzName))
