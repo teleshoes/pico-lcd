@@ -176,8 +176,6 @@ my $USAGE = "Usage:
     -m CURL_MAX_TIME_FRAC_SECONDS
     --max-time CURL_MAX_TIME_FRAC_SECONDS
     --max-time=CURL_MAX_TIME_FRAC_SECONDS
-    --timeout CURL_MAX_TIME_FRAC_SECONDS
-    --timeout=CURL_MAX_TIME_FRAC_SECONDS
       pass '--max-time CURL_MAX_TIME_FRAC_SECONDS' to all calls to curl
     --data=DATA
       for --cmd, pass in DATA as POST payload with curl (using '--data DATA')
@@ -291,9 +289,9 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(-q|--quiet)$/){
       $quiet = 1;
-    }elsif($arg =~ /^(-m|--max-time|--timeout)$/ and @_ > 0 and $_[0] =~ /^(\d+|\d*\.\d+)$/){
+    }elsif($arg =~ /^(-m|--max-time)$/ and @_ > 0 and $_[0] =~ /^(\d+|\d*\.\d+)$/){
       $curlMaxTime = shift @_;
-    }elsif($arg =~ /^(?:--max-time|--timeout)=(\d+|\d*\.\d+)$/){
+    }elsif($arg =~ /^(?:--max-time)=(\d+|\d*\.\d+)$/){
       $curlMaxTime = $1;
     }elsif($arg =~ /^--ip=(.+)$/){
       $ipAddr = $1
