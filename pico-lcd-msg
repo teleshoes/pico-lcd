@@ -87,7 +87,6 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
   $EXEC [OPTS] --timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
-  $EXEC [OPTS] --set-timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
     write \"TIMEOUT_MILLIS,TIMEOUT_TEXT\" to timeout.txt file
       after TIMEOUT_MILLIS milliseconds of no network commands,
       clear LCD, set LCD text to TIMEOUT_TEXT, and show LCD
@@ -351,7 +350,7 @@ sub main(@){
     }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
       $cmd = "buttons";
       $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--timeout|timeout|--set-timeout)$/ and not defined $mode){
+    }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $mode){
       $cmd = "timeout";
       $mode = $MODE_CMD;
     }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $mode){
