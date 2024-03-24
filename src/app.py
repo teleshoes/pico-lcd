@@ -539,11 +539,7 @@ def readCommandRequest(cl):
   return (cmd, params, data)
 
 def appendSSID(ssid, password):
-  try:
-    with open(STATE_FILE_WIFI_CONF, "a") as fh:
-      fh.write(ssid + " = " + password + "\n")
-  except:
-    pass
+  appendFile(STATE_FILE_WIFI_CONF, ssid + " = " + password + "\n")
 
 def readLastLCDName():
   val = readFileLine(STATE_FILE_LCD_NAME)
@@ -616,6 +612,13 @@ def readFileLine(file):
 def writeFile(file, contents):
   try:
     with open(file, "w") as fh:
+      fh.write(contents)
+  except:
+    pass
+
+def appendFile(file, contents):
+  try:
+    with open(file, "a") as fh:
       fh.write(contents)
   except:
     pass
