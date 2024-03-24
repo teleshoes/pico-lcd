@@ -42,12 +42,12 @@ LCD_CONFS = {
 
 DEFAULT_LCD_NAME = doc.LCD_NAME_2_0
 
-STATE_FILE_WIFI_CONF = "wifi-conf.txt"
-STATE_FILE_LCD_NAME = "last-lcd-name.txt"
-STATE_FILE_ORIENTATION = "last-rotation-degrees.txt"
-STATE_FILE_FRAMEBUF = "last-framebuf-conf.txt"
-STATE_FILE_TIMEOUT = "timeout.txt"
-STATE_FILE_TIMEZONE = "current_tz"
+STATE_FILE_WIFI_CONF = "state-wifi-conf"
+STATE_FILE_LCD_NAME = "state-lcd-name"
+STATE_FILE_ORIENTATION = "state-orientation"
+STATE_FILE_FRAMEBUF = "state-framebuf"
+STATE_FILE_TIMEOUT = "state-timeout"
+STATE_FILE_TIMEZONE = "state-timezone"
 
 def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
