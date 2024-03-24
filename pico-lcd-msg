@@ -85,6 +85,8 @@ my $USAGE = "Usage:
     show the framebuffer, if any
       -same as: $EXEC [OPTS] --cmd show
 
+  $EXEC [OPTS] timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
+  $EXEC [OPTS] --timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
   $EXEC [OPTS] --set-timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
     write \"TIMEOUT_MILLIS,TIMEOUT_TEXT\" to timeout.txt file
       after TIMEOUT_MILLIS milliseconds of no network commands,
@@ -349,7 +351,7 @@ sub main(@){
     }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
       $cmd = "buttons";
       $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--set-timeout)$/ and not defined $mode){
+    }elsif($arg =~ /^(--timeout|timeout|--set-timeout)$/ and not defined $mode){
       $cmd = "timeout";
       $mode = $MODE_CMD;
     }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $mode){
