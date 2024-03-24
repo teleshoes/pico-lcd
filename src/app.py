@@ -52,7 +52,7 @@ STATE_FILE_TIMEZONE = "current_tz"
 def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
     controller['lcd'].set_rotation_next()
-    writeLastRotationDegrees(controller['lcd'].get_rotation_degrees())
+    writeStateOrientation(controller['lcd'].get_rotation_degrees())
 
 def main():
   controller = {
@@ -61,7 +61,7 @@ def main():
     'buttons': None,
   }
 
-  lcdName = readLastLCDName()
+  lcdName = readStateLCDName()
   if lcdName == None:
     lcdName = DEFAULT_LCD_NAME
 
@@ -77,7 +77,7 @@ def main():
 
   setupWifi(controller['lcdFont'])
 
-  (prevTimeoutMillis, prevTimeoutText) = readTimeoutFile()
+  (prevTimeoutMillis, prevTimeoutText) = readStateTimeout()
   controller['timeoutMillis'] = prevTimeoutMillis
   controller['timeoutText'] = prevTimeoutText
 
@@ -163,8 +163,8 @@ def cmdInfo(controller, params, data):
 
   (charW, charH) = controller['lcdFont'].getCharGridSize(1)
 
-  fbConfBootState = readLastFramebufConf()
-  tz = readTZFile()
+  fbConfBootState = readStateFramebuf()
+  tz = readStateTimezone()
 
   out = ""
   out += "window: %sx%s\n" % (winW, winH)
@@ -193,14 +193,14 @@ def cmdSSID(controller, params, data):
   ssid = maybeGetParamStr(params, "ssid", None)
   password = maybeGetParamStr(params, "password", None)
   if ssid != None and password != None:
-    appendSSID(ssid, password)
+    writeStateWifiConfAppendSSID(ssid, password)
     out = "added wifi network:\n ssid=" + ssid +"\n password=" + password + "\n"
   else:
     out = "ERROR: missing ssid or password\n"
   return out
 
 def cmdResetWifi(controller, params, data):
-  resetWifiConf()
+  writeStateWifiConfReset()
   out = "WARNING: all wifi networks removed for next boot\n"
   return out
 
@@ -208,7 +208,7 @@ def cmdTimeout(controller, params, data):
   timeoutMillis = maybeGetParamInt(params, "timeoutMillis", None)
   timeoutText = data.decode("utf8")
   print("timeout: " + str(timeoutMillis) + "ms = " + str(timeoutText))
-  writeTimeoutFile(timeoutMillis, timeoutText)
+  writeStateTimeout(timeoutMillis, timeoutText)
   if timeoutMillis == None or timeoutMillis == 0:
     controller['timeoutMillis'] = None
     controller['timeoutText'] = None
@@ -219,7 +219,7 @@ def cmdTimeout(controller, params, data):
 
 def cmdTimezone(controller, params, data):
   tzName = maybeGetParamStr(params, "name", None)
-  writeTZFile(tzName)
+  writeStateTimezone(tzName)
   print("set timezone for rtc = " + str(tzName))
   return None
 
@@ -269,7 +269,7 @@ def cmdLCD(controller, params, data):
     addButtonHandlers(controller['buttons'], controller)
 
     controller['lcdFont'].setLCD(controller['lcd'])
-    writeLastLCDName(name)
+    writeStateLCDName(name)
   else:
     raise ValueError("ERROR: missing LCD param 'name'\n")
   return None
@@ -327,7 +327,7 @@ def cmdText(controller, params, data):
 #####
 
 def adjustRTCEpochWithTZOffset(rtcEpoch):
-  tzName = readTZFile()
+  tzName = readStateTimezone()
   if rtcEpoch != None and tzName != None:
     foundOffset = None
     tzCsvFile = "zoneinfo" + "/" + tzName + ".csv"
@@ -357,14 +357,14 @@ def createLCD(lcdName):
     lcdConf['rotationLayouts'])
   msg = "LCD init\n"
 
-  fbConfStr = readLastFramebufConf()
+  fbConfStr = readStateFramebuf()
   fbConf = FramebufConf.parseFramebufConfStr(
     fbConfStr,
     lcd.get_lcd_landscape_width(),
     lcd.get_lcd_landscape_height())
 
   msg += setFramebuf(lcd, fbConf) + "\n"
-  msg += setOrientation(lcd, str(readLastRotationDegrees())) + "\n"
+  msg += setOrientation(lcd, str(readStateOrientation())) + "\n"
 
   print(msg)
 
@@ -435,7 +435,7 @@ def setOrientation(lcd, orient):
 
   if degrees != None:
     lcd.set_rotation_degrees(degrees)
-    writeLastRotationDegrees(lcd.get_rotation_degrees())
+    writeStateOrientation(lcd.get_rotation_degrees())
     return "orient=" + str(degrees) + "\n"
   else:
     return "unknown orient " + str(orient) + "\n"
@@ -447,7 +447,7 @@ def setFramebuf(lcd, fbConf):
 
   lcd.set_framebuf_conf(fbConf)
   # write the ATTEMPTED framebuf to last framebuf
-  writeLastFramebufConf(fbConf)
+  writeStateFramebuf(fbConf)
   # get the actual framebuf conf of the LCD (might have failed due to OOM)
   fbConf = lcd.get_framebuf_conf()
   return "framebuf: " + str(fbConf) + "\n"
@@ -538,7 +538,7 @@ def readCommandRequest(cl):
 
   return (cmd, params, data)
 
-def readWifiConfNetworks():
+def readStateWifiConf():
   networks = []
   try:
     with open(STATE_FILE_WIFI_CONF, "r") as fh:
@@ -551,34 +551,34 @@ def readWifiConfNetworks():
   except:
     networks = []
   return networks
-def appendSSID(ssid, password):
+def writeStateWifiConfAppendSSID(ssid, password):
   appendFile(STATE_FILE_WIFI_CONF, ssid + " = " + password + "\n")
-def resetWifiConf():
+def writeStateWifiConfReset():
   writeFile(STATE_FILE_WIFI_CONF, "")
 
-def readLastLCDName():
+def readStateLCDName():
   val = readFileLine(STATE_FILE_LCD_NAME)
   if val != None:
     val = val.strip()
   if val in LCD_CONFS:
     return val
-def writeLastLCDName(lcdName):
+def writeStateLCDName(lcdName):
   writeFile(STATE_FILE_LCD_NAME, lcdName + "\n")
 
-def readLastRotationDegrees():
+def readStateOrientation():
   return readFileInt(STATE_FILE_ORIENTATION)
-def writeLastRotationDegrees(degrees):
+def writeStateOrientation(degrees):
   writeFile(STATE_FILE_ORIENTATION, str(degrees) + "\n")
 
-def readLastFramebufConf():
+def readStateFramebuf():
   val = readFileLine(STATE_FILE_FRAMEBUF)
   if val != None:
     val = val.strip()
   return val
-def writeLastFramebufConf(fbConf):
+def writeStateFramebuf(fbConf):
   writeFile(STATE_FILE_FRAMEBUF, str(fbConf) + "\n")
 
-def readTimeoutFile():
+def readStateTimeout():
   val = readFileLine(STATE_FILE_TIMEOUT)
   if val != None:
     val = val.strip()
@@ -591,18 +591,18 @@ def readTimeoutFile():
       except:
         return (None, None)
   return (None, None)
-def writeTimeoutFile(timeoutMillis, timeoutText):
+def writeStateTimeout(timeoutMillis, timeoutText):
   if timeoutMillis == 0 or timeoutMillis == None or timeoutText == None:
     writeFile(STATE_FILE_TIMEOUT, "")
   else:
     writeFile(STATE_FILE_TIMEOUT, str(timeoutMillis) + "," + timeoutText + "\n")
 
-def readTZFile():
+def readStateTimezone():
   val =  readFileLine(STATE_FILE_TIMEZONE)
   if val != None:
     val = val.strip()
   return val
-def writeTZFile(tzName):
+def writeStateTimezone(tzName):
   if tzName == None:
     try:
       os.remove(STATE_FILE_TIMEZONE)
@@ -639,7 +639,7 @@ def appendFile(file, contents):
     pass
 
 def setupWifi(lcdFont):
-  networks = readWifiConfNetworks()
+  networks = readStateWifiConf()
 
   connected = False
   connectedSSID = None
