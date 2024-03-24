@@ -173,12 +173,12 @@ my $USAGE = "Usage:
     -q | --quiet
       do not print messages sent with curl
 
-    -m TIMEOUT_FRAC_SECONDS
-    --max-time TIMEOUT_FRAC_SECONDS
-    --max-time=TIMEOUT_FRAC_SECONDS
-    --timeout TIMEOUT_FRAC_SECONDS
-    --timeout=TIMEOUT_FRAC_SECONDS
-      pass '--max-time TIMEOUT_FRAC_SECONDS' to all calls to curl
+    -m CURL_MAX_TIME_FRAC_SECONDS
+    --max-time CURL_MAX_TIME_FRAC_SECONDS
+    --max-time=CURL_MAX_TIME_FRAC_SECONDS
+    --timeout CURL_MAX_TIME_FRAC_SECONDS
+    --timeout=CURL_MAX_TIME_FRAC_SECONDS
+      pass '--max-time CURL_MAX_TIME_FRAC_SECONDS' to all calls to curl
     --data=DATA
       for --cmd, pass in DATA as POST payload with curl (using '--data DATA')
 
