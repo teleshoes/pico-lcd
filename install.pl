@@ -26,6 +26,7 @@ my @TZ_ZONENAMES = qw(
 );
 
 sub main(@){
+  system "pkill -9 rshell";
   if(not -f "font5x8.bin"){
     system "python", "src/font-generator.py";
   }
