@@ -32,23 +32,33 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
-  $EXEC
+  $EXEC ARCH
     -build font file if with font-generator if not already built
     -calculate tzdata CSV with zoneinfo-tool
-    -compile src python files except main.py with mpy-cross
+    -compile src python files except main.py with mpy-cross for architecture ARCH
     -copy font, python mpy files, main.py, and state-wifi-conf to /pyboard with rshell
+
+  ARCH
+    one of:
+      pico  | --pico  | armv6m | --armv6m
+        use --march=armv6m for mpy-cross
 ";
 
 sub main(@){
+  my $arch = undef;
   while(@_ > 0){
     my $arg = shift;
     if($arg =~ /^(-h|--help)$/){
       print $USAGE;
       exit 0;
+    }elsif($arg =~ /^(pico|--pico|armv6m|--armv6m)$/){
+      $arch = "armv6m";
     }else{
       die "$USAGE\nERROR: unknown arg $arg\n";
     }
   }
+
+  die "ERROR: missing ARCH (e.g.: pico)\n" if not defined $arch;
 
   run "pkill -9 rshell";
   if(not -f "font5x8.bin"){
@@ -76,7 +86,7 @@ sub main(@){
     my $mpy = $py;
     $mpy =~ s/src\//mpy\//;
     $mpy =~ s/\.py$/.mpy/;
-    run "mpy-cross", "-march=armv6m", $py, "-o", $mpy;
+    run "mpy-cross", "-march=$arch", $py, "-o", $mpy;
     run "touch", $mpy, "-r", $py;
   }
 
