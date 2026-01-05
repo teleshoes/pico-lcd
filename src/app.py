@@ -97,7 +97,7 @@ def main():
       if symName.lower() == "cmd" + cmd['name']:
         cmdFunctionsByName[cmd['name']] = symDict[symName]
         break
-    if not cmdFunctionsByName[cmd['name']]:
+    if cmd['name'] not in cmdFunctionsByName:
       raise RuntimeError("ERROR: no function defined for cmd " + cmd['name'])
 
   while True:
