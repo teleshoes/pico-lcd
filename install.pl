@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use File::Basename qw(dirname);
+use File::Basename qw(basename dirname);
 use Time::HiRes qw(time);
 
 sub nowMillis();
@@ -26,7 +26,30 @@ my @TZ_ZONENAMES = qw(
   America/New_York
 );
 
+my $EXEC = basename $0;
+
+my $USAGE = "Usage:
+  $EXEC -h | --help
+    show this message
+
+  $EXEC
+    -build font file if with font-generator if not already built
+    -calculate tzdata CSV with zoneinfo-tool
+    -compile src python files except main.py with mpy-cross
+    -copy font, python mpy files, main.py, and state-wifi-conf to /pyboard with rshell
+";
+
 sub main(@){
+  while(@_ > 0){
+    my $arg = shift;
+    if($arg =~ /^(-h|--help)$/){
+      print $USAGE;
+      exit 0;
+    }else{
+      die "$USAGE\nERROR: unknown arg $arg\n";
+    }
+  }
+
   run "pkill -9 rshell";
   if(not -f "font5x8.bin"){
     run "python", "src/font-generator.py";
