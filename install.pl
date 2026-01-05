@@ -7,7 +7,7 @@ use Time::HiRes qw(time);
 sub nowMillis();
 sub run(@);
 
-my @files = qw(
+my @FILES = qw(
   font5x8.bin
   state-wifi-conf
   src/main.py
@@ -57,7 +57,7 @@ sub main(@){
     run "touch", $mpy, "-r", $py;
   }
 
-  run "cp", "-ar", @files, "$pyboardTmpDir/";
+  run "cp", "-ar", @FILES, "$pyboardTmpDir/";
 
   run "./rshell", "rsync", "$pyboardTmpDir/", "/pyboard/";
 
