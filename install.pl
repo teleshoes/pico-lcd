@@ -32,7 +32,7 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
-  $EXEC ARCH
+  $EXEC [OPTS] ARCH
     -build font file if with font-generator if not already built
     -calculate tzdata CSV with zoneinfo-tool
     -compile src python files except main.py with mpy-cross for architecture ARCH
@@ -44,9 +44,16 @@ my $USAGE = "Usage:
         use --march=armv6m for mpy-cross
       pico2 | --pico2 | armv7m | --armv7m
         use --march=armv7m for mpy-cross
+
+  OPTS
+    -d | --delete
+      delete all *.py and *.mpy files on /pyboard before installing
 ";
 
 sub main(@){
+  my $opts = {
+    delete => 0,
+  };
   my $arch = undef;
   while(@_ > 0){
     my $arg = shift;
@@ -57,6 +64,8 @@ sub main(@){
       $arch = "armv6m";
     }elsif($arg =~ /^(pico2|--pico2|armv7m|--armv7m)$/){
       $arch = "armv7m";
+    }elsif($arg =~ /^(-d|--delete)$/){
+      $$opts{delete} = 1;
     }else{
       die "$USAGE\nERROR: unknown arg $arg\n";
     }
@@ -83,6 +92,9 @@ sub main(@){
   ;
   run "cp", "-ar", "zoneinfo/", "$pyboardTmpDir/";
 
+  if($$opts{delete}){
+    run "./rshell", "rm /pyboard/*.mpy; rm /pyboard/*.py";
+  }
 
   run "rm", "-rf", "mpy/";
   run "mkdir", "mpy";
