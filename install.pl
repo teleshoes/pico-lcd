@@ -5,6 +5,7 @@ use File::Basename qw(dirname);
 use Time::HiRes qw(time);
 
 sub nowMillis();
+sub run(@);
 
 my @files = qw(
   font5x8.bin
@@ -26,45 +27,50 @@ my @TZ_ZONENAMES = qw(
 );
 
 sub main(@){
-  system "pkill -9 rshell";
+  run "pkill -9 rshell";
   if(not -f "font5x8.bin"){
-    system "python", "src/font-generator.py";
+    run "python", "src/font-generator.py";
   }
   if(not -f "font5x8.bin"){
     die "ERROR: could not generate font binary\n";
   }
 
   my $pyboardTmpDir = "pyboard-tmp-" . nowMillis();
-  system "mkdir", $pyboardTmpDir;
+  run "mkdir", $pyboardTmpDir;
 
   #calculate+install tzdata CSV files
-  system "./zoneinfo-tool",
+  run "./zoneinfo-tool",
     "-c", "$TZ_START_YEAR,$TZ_END_YEAR",
     "--skip-existing",
     @TZ_ZONENAMES,
   ;
-  system "cp", "-ar", "zoneinfo/", "$pyboardTmpDir/";
+  run "cp", "-ar", "zoneinfo/", "$pyboardTmpDir/";
 
 
-  system "rm", "-rf", "mpy/";
-  system "mkdir", "mpy";
+  run "rm", "-rf", "mpy/";
+  run "mkdir", "mpy";
   for my $py(glob "src/*.py"){
     my $mpy = $py;
     $mpy =~ s/src\//mpy\//;
     $mpy =~ s/\.py$/.mpy/;
-    system "mpy-cross", "-march=armv6m", $py, "-o", $mpy;
-    system "touch", $mpy, "-r", $py;
+    run "mpy-cross", "-march=armv6m", $py, "-o", $mpy;
+    run "touch", $mpy, "-r", $py;
   }
 
-  system "cp", "-ar", @files, "$pyboardTmpDir/";
+  run "cp", "-ar", @files, "$pyboardTmpDir/";
 
-  system "./rshell", "rsync", "$pyboardTmpDir/", "/pyboard/";
+  run "./rshell", "rsync", "$pyboardTmpDir/", "/pyboard/";
 
-  system "rm", "-rf", "$pyboardTmpDir/";
+  run "rm", "-rf", "$pyboardTmpDir/";
 }
 
 sub nowMillis(){
   return int(time() * 1000.0 + 0.5);
+}
+
+sub run(@){
+  print "@_\n";
+  system @_;
 }
 
 &main(@ARGV);
