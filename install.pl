@@ -32,18 +32,18 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
-  $EXEC [OPTS] ARCH
+  $EXEC [OPTS] BOARD
     -build font file if with font-generator if not already built
     -calculate tzdata CSV with zoneinfo-tool
-    -compile src python files except main.py with mpy-cross for architecture ARCH
+    -compile src python files except main.py with mpy-cross for board BOARD
     -copy font, python mpy files, main.py, and state-wifi-conf to /pyboard with rshell
 
-  ARCH
+  BOARD
     one of:
-      pico  | --pico  | armv6m | --armv6m
-        use --march=armv6m for mpy-cross
-      pico2 | --pico2 | armv7m | --armv7m
-        use --march=armv7m for mpy-cross
+      pico  | --pico
+        use 'mpy-cross-6.2 -march=armv6m'
+      pico2 | --pico2
+        use 'mpy-cross -march=armv7m'
 
   OPTS
     -d | --delete
@@ -54,16 +54,16 @@ sub main(@){
   my $opts = {
     delete => 0,
   };
-  my $arch = undef;
+  my $board = undef;
   while(@_ > 0){
     my $arg = shift;
     if($arg =~ /^(-h|--help)$/){
       print $USAGE;
       exit 0;
     }elsif($arg =~ /^(pico|--pico|armv6m|--armv6m)$/){
-      $arch = "armv6m";
+      $board = "pico";
     }elsif($arg =~ /^(pico2|--pico2|armv7m|--armv7m)$/){
-      $arch = "armv7m";
+      $board = "pico2";
     }elsif($arg =~ /^(-d|--delete)$/){
       $$opts{delete} = 1;
     }else{
@@ -71,7 +71,7 @@ sub main(@){
     }
   }
 
-  die "ERROR: missing ARCH (e.g.: pico or pico2)\n" if not defined $arch;
+  die "ERROR: missing BOARD (e.g.: pico or pico2)\n" if not defined $board;
 
   run "pkill -9 rshell";
   if(not -f "font5x8.bin"){
@@ -95,6 +95,14 @@ sub main(@){
   if($$opts{delete}){
     run "./rshell", "rm /pyboard/*.mpy; rm /pyboard/*.py";
   }
+  my @mpyCrossCmd;
+  if($board eq "pico"){
+    @mpyCrossCmd = ("mpy-cross-6.2", "-march=armv6m");
+  }elsif($board eq "pico2"){
+    @mpyCrossCmd = ("mpy-cross", "-march=armv7m");
+  }else{
+    die "ERROR: unknown board $board\n";
+  }
 
   run "rm", "-rf", "mpy/";
   run "mkdir", "mpy";
@@ -102,7 +110,7 @@ sub main(@){
     my $mpy = $py;
     $mpy =~ s/src\//mpy\//;
     $mpy =~ s/\.py$/.mpy/;
-    run "mpy-cross", "-march=$arch", $py, "-o", $mpy;
+    run (@mpyCrossCmd, $py, "-o", $mpy);
     run "touch", $mpy, "-r", $py;
   }
 
