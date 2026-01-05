@@ -42,6 +42,8 @@ my $USAGE = "Usage:
     one of:
       pico  | --pico  | armv6m | --armv6m
         use --march=armv6m for mpy-cross
+      pico2 | --pico2 | armv7m | --armv7m
+        use --march=armv7m for mpy-cross
 ";
 
 sub main(@){
@@ -53,12 +55,14 @@ sub main(@){
       exit 0;
     }elsif($arg =~ /^(pico|--pico|armv6m|--armv6m)$/){
       $arch = "armv6m";
+    }elsif($arg =~ /^(pico2|--pico2|armv7m|--armv7m)$/){
+      $arch = "armv7m";
     }else{
       die "$USAGE\nERROR: unknown arg $arg\n";
     }
   }
 
-  die "ERROR: missing ARCH (e.g.: pico)\n" if not defined $arch;
+  die "ERROR: missing ARCH (e.g.: pico or pico2)\n" if not defined $arch;
 
   run "pkill -9 rshell";
   if(not -f "font5x8.bin"){
