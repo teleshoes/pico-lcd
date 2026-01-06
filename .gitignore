@@ -1,3 +1,5 @@
 font5x8.bin
 mpy/
 zoneinfo/
+firmware
+micropython
