@@ -4,18 +4,31 @@ use warnings;
 use File::Basename qw(basename dirname);
 use Time::HiRes qw(time);
 
+sub rshellInstallFiles(@);
 sub nowMillis();
 sub run(@);
+sub tryrun(@);
 
-my @FILES = qw(
-  font5x8.bin
-  state-wifi-conf
+my $RSHELL_EXEC = dirname($0) . "/rshell";
+
+my @PY_SRC_FILES_RAW = qw(
   src/main.py
-  mpy/app.mpy
-  mpy/doc.mpy
-  mpy/lcdFont.mpy
-  mpy/lcd.mpy
-  mpy/rtc.mpy
+);
+my @PY_SRC_FILES_MPY = qw(
+  src/app.py
+  src/doc.py
+  src/lcdFont.py
+  src/lcd.py
+  src/rtc.py
+);
+
+my @PY_SRC_FILES_ALL = (
+  @PY_SRC_FILES_RAW,
+  map {my $mpy=$_; $mpy =~ s/^src/mpy/; $mpy =~ s/\.py$/\.mpy/; $mpy} @PY_SRC_FILES_MPY,
+);
+
+my @STATE_FILES = qw(
+  state-wifi-conf
 );
 
 #DS3231 rtc can only handle 2 centuries anyway
@@ -32,11 +45,30 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
-  $EXEC [OPTS] BOARD
-    -build font file if with font-generator if not already built
-    -calculate tzdata CSV with zoneinfo-tool
-    -compile src python files except main.py with mpy-cross for board BOARD
-    -copy font, python mpy files, main.py, and state-wifi-conf to /pyboard with rshell
+  $EXEC [OPTS]
+  $EXEC [OPTS} conf | --conf
+    same as: $EXEC --font && $EXEC --timezone && $EXEC --state
+
+  $EXEC [OPTS] font | --font
+    -build 5x8 font file with font-generator, if not already built
+    -copy files to /pyboard with `rshell rsync`:
+      font5x8.bin
+
+  $EXEC [OPTS] tz | timezone | zoneinfo | --tz | --timezone | --zoneinfo
+    -calculate tzdata CSV with zoneinfo-tool and put in zoneinfo/ dir for:
+      @TZ_ZONENAMES
+    -copy files to /pyboard with `rshell rsync`:
+      zoneinfo/
+
+  $EXEC [OPTS] state | --state
+    -copy files to /pyboard with rshell:
+      @STATE_FILES
+
+  $EXEC [OPTS] [BOARD] mpy | compile | --mpy | --compile
+    -compile python files with mpy-cross:
+      @PY_SRC_FILES_MPY
+    -copy files to /pyboard with `rshell rsync`:" .
+      join('', map {"      $_\n"} @PY_SRC_FILES_ALL) . "
 
   BOARD
     one of:
@@ -50,16 +82,32 @@ my $USAGE = "Usage:
       delete all *.py and *.mpy files on /pyboard before installing
 ";
 
+my $MODE_FONT = "font";
+my $MODE_TIMEZONE = "timezone";
+my $MODE_STATE = "state";
+my $MODE_MPY = "mpy";
+
 sub main(@){
   my $opts = {
-    delete => 0,
+    delete       => 0,
   };
+  my @modes = ($MODE_FONT, $MODE_TIMEZONE, $MODE_STATE);
   my $board = undef;
   while(@_ > 0){
     my $arg = shift;
     if($arg =~ /^(-h|--help)$/){
       print $USAGE;
       exit 0;
+    }elsif($arg =~ /^(--)?(conf)$/){
+      @modes = ($MODE_FONT, $MODE_TIMEZONE, $MODE_STATE);
+    }elsif($arg =~ /^(--)?(font)$/){
+      @modes = ($MODE_FONT);
+    }elsif($arg =~ /^(--)?(tz|timezone|zoneinfo)$/){
+      @modes = ($MODE_TIMEZONE);
+    }elsif($arg =~ /^(--)?(state)$/){
+      @modes = ($MODE_STATE);
+    }elsif($arg =~ /^(--)?(mpy|compile)$/){
+      @modes = ($MODE_MPY);
     }elsif($arg =~ /^(pico|--pico|armv6m|--armv6m)$/){
       $board = "pico";
     }elsif($arg =~ /^(pico2|--pico2|armv7m|--armv7m)$/){
@@ -71,52 +119,74 @@ sub main(@){
     }
   }
 
-  die "ERROR: missing BOARD (e.g.: pico or pico2)\n" if not defined $board;
-
-  run "pkill -9 rshell";
-  if(not -f "font5x8.bin"){
-    run "python", "src/font-generator.py";
-  }
-  if(not -f "font5x8.bin"){
-    die "ERROR: could not generate font binary\n";
+  if($$opts{delete}){
+    tryrun "pkill -9 rshell";
+    run $RSHELL_EXEC, "rm /pyboard/*.mpy; rm /pyboard/*.py";
   }
 
+  my @files;
+
+  my %okModes = map {$_ => 1} @modes;
+
+  if(defined $okModes{$MODE_FONT}){
+    if(not -f "font5x8.bin"){
+      run "python", "src/font-generator.py";
+    }
+    push @files, "font5x8.bin";
+  }
+
+  if(defined $okModes{$MODE_TIMEZONE}){
+    #calculate+install tzdata CSV files
+    run "./zoneinfo-tool",
+      "-c", "$TZ_START_YEAR,$TZ_END_YEAR",
+      "--skip-existing",
+      @TZ_ZONENAMES,
+    ;
+    push @files, "zoneinfo/";
+  }
+
+  if(defined $okModes{$MODE_STATE}){
+    @files = (@files, @STATE_FILES);
+  }
+
+  if(defined $okModes{$MODE_MPY}){
+    die "ERROR: missing BOARD (e.g.: pico or pico2)\n" if not defined $board;
+
+    run "rm", "-rf", "mpy/";
+    run "mkdir", "mpy";
+    my @mpyCrossCmd;
+    if($board eq "pico"){
+      @mpyCrossCmd = ("mpy-cross-6.2", "-march=armv6m");
+    }elsif($board eq "pico2"){
+      @mpyCrossCmd = ("mpy-cross", "-march=armv7m");
+    }else{
+      die "ERROR: unknown board $board\n";
+    }
+
+    for my $py(@PY_SRC_FILES_MPY){
+      my $mpy = $py;
+      $mpy =~ s/src\//mpy\//;
+      $mpy =~ s/\.py$/.mpy/;
+      run (@mpyCrossCmd, $py, "-o", $mpy);
+      run "touch", $mpy, "-r", $py;
+    }
+
+    @files = (@files, @PY_SRC_FILES_ALL);
+  }
+
+  rshellInstallFiles(@files);
+}
+
+sub rshellInstallFiles(@){
+  my (@files) = @_;
   my $pyboardTmpDir = "pyboard-tmp-" . nowMillis();
   run "mkdir", $pyboardTmpDir;
-
-  #calculate+install tzdata CSV files
-  run "./zoneinfo-tool",
-    "-c", "$TZ_START_YEAR,$TZ_END_YEAR",
-    "--skip-existing",
-    @TZ_ZONENAMES,
-  ;
-  run "cp", "-ar", "zoneinfo/", "$pyboardTmpDir/";
-
-  if($$opts{delete}){
-    run "./rshell", "rm /pyboard/*.mpy; rm /pyboard/*.py";
-  }
-  my @mpyCrossCmd;
-  if($board eq "pico"){
-    @mpyCrossCmd = ("mpy-cross-6.2", "-march=armv6m");
-  }elsif($board eq "pico2"){
-    @mpyCrossCmd = ("mpy-cross", "-march=armv7m");
-  }else{
-    die "ERROR: unknown board $board\n";
+  for my $file(@files){
+    run "cp", "-ar", $file, "$pyboardTmpDir/";
   }
 
-  run "rm", "-rf", "mpy/";
-  run "mkdir", "mpy";
-  for my $py(glob "src/*.py"){
-    my $mpy = $py;
-    $mpy =~ s/src\//mpy\//;
-    $mpy =~ s/\.py$/.mpy/;
-    run (@mpyCrossCmd, $py, "-o", $mpy);
-    run "touch", $mpy, "-r", $py;
-  }
-
-  run "cp", "-ar", @FILES, "$pyboardTmpDir/";
-
-  run "./rshell", "rsync", "$pyboardTmpDir/", "/pyboard/";
+  tryrun "pkill -9 rshell";
+  run $RSHELL_EXEC, "rsync", "$pyboardTmpDir/", "/pyboard/";
 
   run "rm", "-rf", "$pyboardTmpDir/";
 }
@@ -126,6 +196,12 @@ sub nowMillis(){
 }
 
 sub run(@){
+  tryrun(@_);
+  if($? != 0){
+    die "ERROR: '@_' failed\n$!\n";
+  }
+}
+sub tryrun(@){
   print "@_\n";
   system @_;
 }
