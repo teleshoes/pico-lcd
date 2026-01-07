@@ -121,7 +121,7 @@ sub main(@){
 
   if($$opts{delete}){
     tryrun "pkill -9 rshell";
-    run $RSHELL_EXEC, "rm /pyboard/*.mpy; rm /pyboard/*.py";
+    tryrun $RSHELL_EXEC, "rm -f /pyboard/*.mpy; rm /pyboard/*.py";
   }
 
   my @files;
