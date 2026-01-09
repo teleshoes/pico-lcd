@@ -31,7 +31,7 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
-  $EXEC -m | --mpycross | --mpy-cross | mpy-cross
+  $EXEC -m | --mpy-cross | --mpycross | mpy-cross | mpycross
     -build mpy-cross from latest micropython
       -install to /usr/local/bin/mpy-cross
 
@@ -39,7 +39,7 @@ my $USAGE = "Usage:
     -build mpy-cross-6.2 from latest commit before micropython 6.3
       -install to /usr/local/bin/mpy-cross-6.2
 
-  $EXEC -b | uf2 | firmware | build | --uf2 | --firmware | --build
+  $EXEC -b | --uf2 | --firmware | --build | uf2 | firmware | build
     -build micropython RPI_PICO_W firmware
       from $GIT_URL_MICROPYTHON
     -copy built image to $DIR_FIRMWARE_IMG
