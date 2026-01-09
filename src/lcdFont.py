@@ -144,6 +144,17 @@ class LcdFont:
       return float(valStr)
     except:
       return defaultVal
+  def maybeReadCoord(self, valStr, defaultVal):
+    valArr = valStr.split("x")
+    if len(valArr) == 2:
+      x = self.maybeReadInt(valArr[0], None)
+      y = self.maybeReadInt(valArr[1], None)
+      if x != None and y != None:
+        return (x,y)
+      else:
+        return defaultVal
+    else:
+      return defaultVal
 
   def formatTime(self, formatSpec, epoch):
     val = ""
@@ -221,6 +232,11 @@ class LcdFont:
     #        e.g.:   !color=white! A !color=blue! B !color=prev! C
     #                  is the same as:
     #                !color=white! A !color=blue! B !color=white! C
+    #    !shift=<W>x<H>!
+    #       move the left position of the cursor W pixels to the right (negative for left)
+    #       move the top position of the cursor H pixels down (negative for up)
+    #       e.g.: !shift=0x-20!    move the cursor up 20 pixels
+    #
     #    !rtc=FORMAT!
     #        use time from DS3231 rtc clock (if supported) and format with FORMAT string
     #        NOTE: all !rtc=FORMAT! entries in markup share a single epoch time,
@@ -292,6 +308,10 @@ class LcdFont:
         elif cmd == "hline" or cmd == "hl" or cmd == "hr":
           # '!hr!' => hline
           self.cursorHline()
+        elif cmd == "shift":
+          (x, y) = self.maybeReadCoord(val, (0,0))
+          self.cursor['x'] += x
+          self.cursor['y'] += y
         elif cmd == "rtc":
           if rtcEpoch == None:
             print("WARNING: external rtc epoch not available, using system rtc\n")
