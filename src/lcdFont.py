@@ -76,6 +76,20 @@ class LcdFont:
   def cursorDrawRect(self, w, h):
     self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), True)
     self.cursor['x'] += w
+  def cursorDrawBar(self, w, h, pct, fillColor, emptyColor):
+    x = self.cursor['x']
+    y = self.cursor['y']
+    (emptyX, emptyY, emptyW, emptyH) = (x,y,w,h)
+    (fillX, fillY, fillW, fillH) = (x,y,w,h)
+    if w > h:
+      fillW = int(fillW * pct / 100.0)
+    else:
+      fillH = int(fillH * pct / 100.0)
+      fillY += h-fillH
+
+    self.lcd.rect(emptyX, emptyY, emptyW, emptyH, self.getOptColor(emptyColor), True)
+    self.lcd.rect(fillX, fillY, fillW, fillH, self.getOptColor(fillColor), True)
+    self.cursor['x'] += w
   def cursorNewLine(self):
     self.cursor['x'] = self.cursor['startX']
     self.cursor['y'] += int(self.cursor['size'] * (self.fontHeight + self.cursor['vspace']))
@@ -154,6 +168,20 @@ class LcdFont:
       y = self.maybeReadInt(valArr[1], None)
       if x != None and y != None:
         return (x,y)
+      else:
+        return defaultVal
+    else:
+      return defaultVal
+  def maybeReadBar(self, valStr, defaultVal):
+    valArr = valStr.split(",")
+    if len(valArr) == 5:
+      x = self.maybeReadInt(valArr[0], None)
+      y = self.maybeReadInt(valArr[1], None)
+      pct = self.maybeReadInt(valArr[2], None)
+      fillColor = self.maybeReadColor(valArr[3], None)
+      emptyColor = self.maybeReadColor(valArr[4], None)
+      if x != None and y != None and pct != None and fillColor != None and emptyColor != None:
+        return (x,y,pct,fillColor,emptyColor)
       else:
         return defaultVal
     else:
@@ -241,6 +269,45 @@ class LcdFont:
     #       move the cursor to the right exactly <W> px (no HSPACE)
     #         e.g.: !rect=10x20!    draw a vertical rectangle at the cursor
     #
+    #    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
+    #       draw two rectangles, to make a progress/status bar
+    #         W           = the full outer width of the bar in pixels
+    #         H           = the full outer height of the bar in pixels
+    #         PCT         = an *integer* percentage of the fill state of the bar
+    #         FILL_COLOR  = the color of the filled-in part of the bar
+    #         EMPTY_COLOR = the color of the outer rectangle of the bar
+    #       -draw empty rectangle
+    #           -draw one rectangle, without moving the cursor, as in:
+    #             !color=<EMPTY_COLOR>!!rect=<W>x<H>!
+    #           -move the cursor back and restore previous color, as in:
+    #             !shift=-<W>x0!!color=prev!
+    #       -calculate filled-in rectangle
+    #         -if <W> is bigger than <H> (horizontal bar):
+    #            -calculate <FILL_W> as floor(<W>*<PCT>/100.0)
+    #            -calculate <FILL_H> as just <H>
+    #            -calculate <FILL_SHIFT_Y> as 0
+    #         -otherwise (vertical bar):
+    #            -calculate <FILL_W> as just <W>
+    #            -calculate <FILL_H> as floor(<H>*<PCT>/100.0)
+    #            -calculate <FILL_SHIFT_Y> as <H> - <FILL_H>
+    #       -draw filled-in rectangle
+    #          -move the cursor down for vertical bars (filled-in on bottom), as in:
+    #            !shift=0x<FILL_SHIFT_Y>!
+    #          -draw filled-in rectangle on top of empty rectangle as in:
+    #            !color=<FILL_COLOR>!!rect=<FILL_W>x<FILL_H>!
+    #           -move the cursor back and restore previous color, as in:
+    #             !shift=-<W>x-<FILL_SHIFT_Y>!!color=prev!
+    #       -move the cursor to the right of the outer empty rect, as in:
+    #          !shift=<X>x0!
+    #       e.g.: !bar=20,100,65,green,red!   vertical 20x100 green-on-red bar 65% full
+    #                                          same as:
+    #                                             !color=red!!rect=20x100!
+    #                                             !shift=-20x0!!color=prev!
+    #                                             !shift=0x35!
+    #                                             !color=green!!rect=20x65!
+    #                                             !shift=-20x-35!!color=prev!
+    #                                             !shift=20x0!
+    #
     #    !shift=<W>x<H>!
     #       move the left position of the cursor W pixels to the right (negative for left)
     #       move the top position of the cursor H pixels down (negative for up)
@@ -324,6 +391,9 @@ class LcdFont:
           (x, y) = self.maybeReadCoord(val, (0,0))
           self.cursor['x'] += x
           self.cursor['y'] += y
+        elif cmd == "bar":
+          (w, h, pct, fillColor, emptyColor) = self.maybeReadBar(val, (0,0,0,None,None))
+          self.cursorDrawBar(w, h, pct, fillColor, emptyColor)
         elif cmd == "rtc":
           if rtcEpoch == None:
             print("WARNING: external rtc epoch not available, using system rtc\n")
