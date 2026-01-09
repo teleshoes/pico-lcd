@@ -238,9 +238,9 @@ class LCD():
       return self.green
     elif colorName == "blue":
       return self.blue
-    elif colorName == "cyan":
+    elif colorName == "cyan" or colorName == "aqua":
       return self.cyan
-    elif colorName == "magenta":
+    elif colorName == "magenta" or colorName == "purple":
       return self.magenta
     elif colorName == "yellow":
       return self.yellow
