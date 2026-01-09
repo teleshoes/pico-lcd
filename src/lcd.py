@@ -182,27 +182,27 @@ class LCD():
     if not self.is_framebuf_enabled():
       #RGB565
       self.set_lcd_RGB565()
-      self.red   = st7789.RED
-      self.green = st7789.GREEN
-      self.blue  = st7789.BLUE
-      self.white = st7789.WHITE
-      self.black = st7789.BLACK
+      self.red     = st7789.RED
+      self.green   = st7789.GREEN
+      self.blue    = st7789.BLUE
+      self.white   = st7789.WHITE
+      self.black   = st7789.BLACK
     elif self.framebufColorProfile == framebuf.RGB565:
       #RGB565 (byte order swapped st7789 vs framebuf)
       self.set_lcd_RGB565()
-      self.red   = self.swap_hi_lo_byte_order(st7789.RED)
-      self.green = self.swap_hi_lo_byte_order(st7789.GREEN)
-      self.blue  = self.swap_hi_lo_byte_order(st7789.BLUE)
-      self.white = self.swap_hi_lo_byte_order(st7789.WHITE)
-      self.black = self.swap_hi_lo_byte_order(st7789.BLACK)
+      self.red     = self.swap_hi_lo_byte_order(st7789.RED)
+      self.green   = self.swap_hi_lo_byte_order(st7789.GREEN)
+      self.blue    = self.swap_hi_lo_byte_order(st7789.BLUE)
+      self.white   = self.swap_hi_lo_byte_order(st7789.WHITE)
+      self.black   = self.swap_hi_lo_byte_order(st7789.BLACK)
     elif self.framebufColorProfile == framebuf.RGB444:
       #RGB444
       self.set_lcd_RGB444()
-      self.red   = 0b111100000000
-      self.green = 0b000011110000
-      self.blue  = 0b000000001111
-      self.white = 0b111111111111
-      self.black = 0b000000000000
+      self.red     = 0b111100000000
+      self.green   = 0b000011110000
+      self.blue    = 0b000000001111
+      self.white   = 0b111111111111
+      self.black   = 0b000000000000
 
   def bits_per_px(self):
     if not self.is_framebuf_enabled():
