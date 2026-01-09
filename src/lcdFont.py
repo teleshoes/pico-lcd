@@ -190,20 +190,29 @@ class LcdFont:
 
   def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtcEpoch=0):
     #  markup syntax is:
-    #    !CMD=VAL!
-    #      CMD=COLOR  set the color to COLOR
-    #      CMD=SIZE   set the pixels-per-dot to SIZE
-    #                   for 5x8 font, font size in px is: 8*SIZE
-    #      CMD=X      set the left position of cursor to X as absolute px on LCD
-    #      CMD=Y      set the top position of cursor to Y as absolute px on LCD
-    #      CMD=HSPACE leave floor(HSPACE*SIZE) dots between each character
-    #                   any non-negative number, 1.0=default, 0=no space, 2.0=wide
-    #                   for 5x8 font, total width of a char in px is: SIZE*(5+HSPACE)
-    #      CMD=VSPACE leave floor(VSPACE*SIZE) dots between lines
-    #                   any non-negative number, 1.0=default, 0=no space, 2.0=wide
-    #                   for 5x8 font, total height of a line in px is: SIZE*(8+VSPACE)
-    #    !CMD=prev!
-    #        if VAL is 'prev', restore the value of CMD before the last change
+    #    !CURSOR_CMD=VAL!
+    #      CURSOR_CMD = color|size|x|y|hspace|vspace
+    #        !color=<COLOR>!
+    #          set the color to COLOR
+    #        !size=<SIZE>!
+    #          set the pixels-per-dot to SIZE
+    #          for 5x8 font, font size in px is: 8*SIZE
+    #        !x=<X>!
+    #          set the left position of cursor to X as absolute px on LCD
+    #        !y=<Y>!
+    #          set the top position of cursor to Y as absolute px on LCD
+    #        !hspace=<HSPACE>!
+    #          leave floor(HSPACE*SIZE) dots between each character
+    #            any non-negative number, 1.0=default, 0=no space, 2.0=wide
+    #            for 5x8 font, total width of a char in px is: SIZE*(5+HSPACE)
+    #        !vspace=<VSPACE>!
+    #          leave floor(VSPACE*SIZE) dots between lines
+    #            any non-negative number, 1.0=default, 0=no space, 2.0=wide
+    #            for 5x8 font, total height of a line in px is: SIZE*(8+VSPACE)
+    #
+    #    !CURSOR_CMD=prev!
+    #      CURSOR_CMD = color|size|x|y|hspace|vspace
+    #        if VAL is 'prev', restore the value of CURSOR_CMD before the last change
     #        e.g.:   !color=white! A !color=blue! B !color=prev! C
     #                  is the same as:
     #                !color=white! A !color=blue! B !color=white! C
