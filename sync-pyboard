@@ -73,7 +73,7 @@ my $USAGE = "Usage:
   BOARD
     one of:
       pico  | --pico
-        use 'mpy-cross-6.2 -march=armv6m'
+        use 'mpy-cross -march=armv6m'
       pico2 | --pico2
         use 'mpy-cross -march=armv7m'
 
@@ -162,7 +162,7 @@ sub main(@){
     run "mkdir", "mpy";
     my @mpyCrossCmd;
     if($board eq "pico"){
-      @mpyCrossCmd = ("mpy-cross-6.2", "-march=armv6m");
+      @mpyCrossCmd = ("mpy-cross", "-march=armv6m");
     }elsif($board eq "pico2"){
       @mpyCrossCmd = ("mpy-cross", "-march=armv7m");
     }else{
