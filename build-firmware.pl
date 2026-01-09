@@ -32,10 +32,12 @@ my $USAGE = "Usage:
     show this message
 
   $EXEC -m | --mpycross | --mpy-cross | mpy-cross
-    -build mpy-cross-6.2 from latest commit before micropython 6.3
-      -install to /usr/local/bin/mpy-cross-6.2
     -build mpy-cross from latest micropython
       -install to /usr/local/bin/mpy-cross
+
+  $EXEC --mpy-cross-6.2 | --mpycross-6.2 | mpy-cross-6.2 | mpycross-6.2
+    -build mpy-cross-6.2 from latest commit before micropython 6.3
+      -install to /usr/local/bin/mpy-cross-6.2
 
   $EXEC -b | uf2 | firmware | build | --uf2 | --firmware | --build
     -build micropython RPI_PICO_W firmware
@@ -45,6 +47,7 @@ my $USAGE = "Usage:
 ";
 
 my $MODE_INSTALL_MPY_CROSS = "install-mpy-cross";
+my $MODE_INSTALL_MPY_CROSS_6_2 = "install-mpy-cross-6.2";
 my $MODE_BUILD_FIRMWARE = "build-firmware";
 
 sub main(@) {
@@ -56,6 +59,8 @@ sub main(@) {
       exit 0;
     }elsif($arg =~ /^(-m|((--)?(mpy-cross|mpycross)))$/){
       $mode = $MODE_INSTALL_MPY_CROSS;
+    }elsif($arg =~ /^(((--)?(mpy-cross-6\.2|mpycross-6\.2)))$/){
+      $mode = $MODE_INSTALL_MPY_CROSS_6_2;
     }elsif($arg =~ /^(-b|((--)?(uf2|firmware|build)))$/){
       $mode = $MODE_BUILD_FIRMWARE;
     }else{
@@ -64,9 +69,10 @@ sub main(@) {
   }
 
   if($mode eq $MODE_INSTALL_MPY_CROSS){
+    installMpyCross("mpy-cross", $MPY_COMMIT_LATEST, ["-j", 1]);
+  }elsif($mode eq $MODE_INSTALL_MPY_CROSS_6_2){
     #old GCC necessary for micropython 6.2
     installMpyCross("mpy-cross-6.2", $MPY_COMMIT_6_2, ["-j", 1, "CC=gcc-14"]);
-    installMpyCross("mpy-cross", $MPY_COMMIT_LATEST, ["-j", 1]);
   }elsif($mode eq $MODE_BUILD_FIRMWARE){
     buildFirmware();
   }else{
