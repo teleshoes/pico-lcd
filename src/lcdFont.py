@@ -73,6 +73,9 @@ class LcdFont:
     self.drawChar(charStr,
       self.cursor['x'], self.cursor['y'], self.cursor['size'], self.cursor['color'])
     self.cursor['x'] += int(self.cursor['size'] * (self.fontWidth + self.cursor['hspace']))
+  def cursorDrawRect(self, w, h):
+    self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), True)
+    self.cursor['x'] += w
   def cursorNewLine(self):
     self.cursor['x'] = self.cursor['startX']
     self.cursor['y'] += int(self.cursor['size'] * (self.fontHeight + self.cursor['vspace']))
@@ -232,6 +235,12 @@ class LcdFont:
     #        e.g.:   !color=white! A !color=blue! B !color=prev! C
     #                  is the same as:
     #                !color=white! A !color=blue! B !color=white! C
+    #
+    #    !rect=<W>x<H>!
+    #       draw a rectangle from cursor at top-left to (W,H) at bottom-right
+    #       move the cursor to the right exactly <W> px (no HSPACE)
+    #         e.g.: !rect=10x20!    draw a vertical rectangle at the cursor
+    #
     #    !shift=<W>x<H>!
     #       move the left position of the cursor W pixels to the right (negative for left)
     #       move the top position of the cursor H pixels down (negative for up)
@@ -308,6 +317,9 @@ class LcdFont:
         elif cmd == "hline" or cmd == "hl" or cmd == "hr":
           # '!hr!' => hline
           self.cursorHline()
+        elif cmd == "rect":
+          (w, h) = self.maybeReadCoord(val, (0,0))
+          self.cursorDrawRect(w, h)
         elif cmd == "shift":
           (x, y) = self.maybeReadCoord(val, (0,0))
           self.cursor['x'] += x
