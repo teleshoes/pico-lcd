@@ -51,6 +51,13 @@ class LcdFont:
     self.fontHandle.seek(asciiIndex * self.bytesPerChar + 2)
     return ustruct.unpack('B'*self.bytesPerChar, self.fontHandle.read(self.bytesPerChar))
 
+  def getCursorColor(self):
+    return self.getOptColor(self.cursor['color'])
+  def getOptColor(self, color):
+    if color == None:
+      color = self.lcd.get_color_by_name(self.defaultColorName)
+    return color
+
   def cursorSet(self, startX, startY, x, y, size, color, hspace, vspace):
     self.cursor = {
       "startX": startX,
@@ -70,9 +77,7 @@ class LcdFont:
     self.cursor['x'] = self.cursor['startX']
     self.cursor['y'] += int(self.cursor['size'] * (self.fontHeight + self.cursor['vspace']))
   def cursorHline(self):
-    color = self.cursor['color']
-    if color == None:
-      color = self.lcd.get_color_by_name(self.defaultColorName)
+    color = self.getCursorColor()
     (winW, winH) = self.lcd.get_target_window_size()
     self.lcd.hline(self.cursor['startX'], self.cursor['y'], winW, color)
     self.cursor['x'] = self.cursor['startX']
