@@ -42,18 +42,13 @@ my $USAGE = "Usage:
       from $GIT_URL_MICROPYTHON
     -copy built image to $DIR_FIRMWARE_IMG
     -create/replace symlink $DIR_FIRMWARE_IMG/latest.uf2
-
-  $EXEC
-  $EXEC all | --all
-    same as: $EXEC -m && $EXEC -b
 ";
 
 my $MODE_INSTALL_MPY_CROSS = "install-mpy-cross";
 my $MODE_BUILD_FIRMWARE = "build-firmware";
-my $MODE_ALL = "all";
 
 sub main(@) {
-  my $mode = $MODE_ALL;
+  my $mode = undef;
   while(@_ > 0){
     my $arg = shift @_;
     if($arg =~ /^(-h|--help)$/){
@@ -68,13 +63,14 @@ sub main(@) {
     }
   }
 
-  if($mode eq $MODE_ALL or $mode eq $MODE_INSTALL_MPY_CROSS){
+  if($mode eq $MODE_INSTALL_MPY_CROSS){
     #old GCC necessary for micropython 6.2
     installMpyCross("mpy-cross-6.2", $MPY_COMMIT_6_2, ["-j", 1, "CC=gcc-14"]);
     installMpyCross("mpy-cross", $MPY_COMMIT_LATEST, ["-j", 1]);
-  }
-  if($mode eq $MODE_ALL or $mode eq $MODE_BUILD_FIRMWARE){
+  }elsif($mode eq $MODE_BUILD_FIRMWARE){
     buildFirmware();
+  }else{
+    die "ERROR: missing command\n";
   }
 }
 
