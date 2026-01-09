@@ -185,6 +185,9 @@ class LCD():
       self.red     = st7789.RED
       self.green   = st7789.GREEN
       self.blue    = st7789.BLUE
+      self.cyan    = st7789.CYAN
+      self.magenta = st7789.MAGENTA
+      self.yellow  = st7789.YELLOW
       self.white   = st7789.WHITE
       self.black   = st7789.BLACK
     elif self.framebufColorProfile == framebuf.RGB565:
@@ -193,6 +196,9 @@ class LCD():
       self.red     = self.swap_hi_lo_byte_order(st7789.RED)
       self.green   = self.swap_hi_lo_byte_order(st7789.GREEN)
       self.blue    = self.swap_hi_lo_byte_order(st7789.BLUE)
+      self.cyan    = self.swap_hi_lo_byte_order(st7789.CYAN)
+      self.magenta = self.swap_hi_lo_byte_order(st7789.MAGENTA)
+      self.yellow  = self.swap_hi_lo_byte_order(st7789.YELLOW)
       self.white   = self.swap_hi_lo_byte_order(st7789.WHITE)
       self.black   = self.swap_hi_lo_byte_order(st7789.BLACK)
     elif self.framebufColorProfile == framebuf.RGB444:
@@ -201,6 +207,9 @@ class LCD():
       self.red     = 0b111100000000
       self.green   = 0b000011110000
       self.blue    = 0b000000001111
+      self.cyan    = 0b000011111111
+      self.magenta = 0b111100001111
+      self.yellow  = 0b111111110000
       self.white   = 0b111111111111
       self.black   = 0b000000000000
 
@@ -229,6 +238,12 @@ class LCD():
       return self.green
     elif colorName == "blue":
       return self.blue
+    elif colorName == "cyan":
+      return self.cyan
+    elif colorName == "magenta":
+      return self.magenta
+    elif colorName == "yellow":
+      return self.yellow
     elif colorName == "white":
       return self.white
     elif colorName == "black":
