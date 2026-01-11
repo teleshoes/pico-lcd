@@ -592,6 +592,11 @@ sub main(@){
         @params = (@params, "clear=false");
       }
 
+      #send info=true on the last message
+      if($i == $#messages){
+        @params = (@params, "info=true");
+      }
+
       #do not show() until last message
       if($i < $#messages){
         @params = (@params, "show=false");
