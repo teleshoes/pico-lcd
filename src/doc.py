@@ -191,6 +191,7 @@ CMD_TEXT = {
   "params": {
     "clear":    "[OPTIONAL] fill LCD window with black (default=True)",
     "show":     "[OPTIONAL] write framebuf to LCD if enabled (default=True)",
+    "info":     "[OPTIONAL] if present, add output as in 'info' command (default=False)",
     "framebuf": "[OPTIONAL] if present, same as 'framebuf' command (default=None)",
     "orient":   "[OPTIONAL] if present, same as 'orient' command (default=None)",
   },

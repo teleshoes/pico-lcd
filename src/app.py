@@ -294,6 +294,7 @@ def cmdText(controller, params, data):
   isShow = maybeGetParamBool(params, "show", True)
   fbConfStr = maybeGetParamStr(params, "framebuf", None)
   orient = maybeGetParamStr(params, "orient", None)
+  info = maybeGetParamBool(params, "info", False)
   markup = data.decode("utf8")
 
   fbConf = FramebufConf.parseFramebufConfStr(
@@ -308,6 +309,9 @@ def cmdText(controller, params, data):
     out += setOrientation(controller['lcd'], orient)
   if fbConf != None:
     out += setFramebuf(controller['lcd'], fbConf)
+
+  if info:
+    out += cmdInfo(controller, None, None)
 
   rtcEpoch = None
   #only fetch RTC epoch and timezone if markup looks like it might want it
