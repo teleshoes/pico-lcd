@@ -83,7 +83,8 @@ def main():
 
   controller['rtc'] = RTC_DS3231()
   try:
-    controller['rtc'].getTimeEpoch()
+    controller['rtc'].setOffsetTZDataCsvFile(getTZDataCsvFile(readStateTimezone()))
+    controller['rtc'].getTimeEpochPlusTZOffset()
   except OSError as e:
     if e.errno == 5:
       #I/O error in I2C, probably no DS3231 device
@@ -120,13 +121,8 @@ def main():
         print("SOCKET TIMEOUT (" + str(controller['timeoutMillis']) + "ms)\n")
         if controller['timeoutText'] == None:
           controller['timeoutText'] = "TIMEOUT"
-        rtcEpoch = None
-        #only fetch RTC epoch and timezone if markup looks like it might want it
-        if controller['rtc'] != None and "!rtc" in controller['timeoutText']:
-          rtcEpoch = controller['rtc'].getTimeEpoch()
-          rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
         controller['lcd'].fill(controller['lcd'].black)
-        controller['lcdFont'].drawMarkup(controller['timeoutText'], rtcEpoch=rtcEpoch)
+        controller['lcdFont'].drawMarkup(controller['timeoutText'], rtc=controller['rtc'])
         controller['lcd'].show()
         continue
 
@@ -223,6 +219,8 @@ def cmdTimezone(controller, params, data):
   tzName = maybeGetParamStr(params, "name", None)
   writeStateTimezone(tzName)
   print("set timezone for rtc = " + str(tzName))
+  if controller['rtc'] != None:
+    controller['rtc'].setOffsetTZDataCsvFile(getTZDataCsvFile(readStateTimezone()))
   return None
 
 def cmdRTC(controller, params, data):
@@ -315,15 +313,9 @@ def cmdText(controller, params, data):
   if info:
     out += cmdInfo(controller, None, None)
 
-  rtcEpoch = None
-  #only fetch RTC epoch and timezone if markup looks like it might want it
-  if controller['rtc'] != None and "!rtc" in markup:
-    rtcEpoch = controller['rtc'].getTimeEpoch()
-    rtcEpoch = adjustRTCEpochWithTZOffset(rtcEpoch)
-
   if isClear:
     controller['lcd'].fill(controller['lcd'].black)
-  controller['lcdFont'].drawMarkup(markup, rtcEpoch=rtcEpoch)
+  controller['lcdFont'].drawMarkup(markup, rtc=controller['rtc'])
   if isShow:
     controller['lcd'].show()
 
@@ -331,29 +323,6 @@ def cmdText(controller, params, data):
 
 #####
 #####
-
-def adjustRTCEpochWithTZOffset(rtcEpoch):
-  tzName = readStateTimezone()
-  if rtcEpoch != None and tzName != None:
-    foundOffset = None
-    tzCsvFile = "zoneinfo" + "/" + tzName + ".csv"
-    try:
-      with open(tzCsvFile, "r") as fh:
-        for line in fh:
-          cols = line.split(',')
-          if len(cols) == 2:
-            (offsetStartEpochStr, offsetSecondsStr) = cols
-            offsetStartEpoch = int(offsetStartEpochStr)
-            offsetSeconds = int(offsetSecondsStr)
-            if offsetStartEpoch >= rtcEpoch:
-              foundOffset = offsetSeconds
-              break
-    except:
-      print("WARNING: failed to set offset from timezone\n")
-      foundOffset = None
-    if foundOffset != None:
-      rtcEpoch += foundOffset
-  return rtcEpoch
 
 def createLCD(lcdName):
   lcdConf = LCD_CONFS[lcdName]
@@ -487,6 +456,12 @@ def maybeGetParamInt(params, paramName, defaultValue=None):
     except:
       print("WARNING: could not parse int param " + paramName + "=" + val + "\n")
       return defaultValue
+
+def getTZDataCsvFile(tzName):
+  if tzName == None:
+    return None
+  else:
+    return "zoneinfo" + "/" + tzName + ".csv"
 
 def readCommandRequest(cl):
   cl.settimeout(0.25)

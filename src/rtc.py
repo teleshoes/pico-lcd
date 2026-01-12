@@ -160,6 +160,27 @@ class RTC_DS3231:
   def getTimeISO(self):
     return self.convertTimeObjToISO(self.convertBytesToTimeObj(self.readTimeBytes()))
 
+  def setOffsetTZDataCsvFile(self, tzdataCsvFile):
+    self.tzdataCsvFile = tzdataCsvFile
+
+  def getTimeEpochPlusTZOffset(self):
+    rtcEpoch = self.getTimeEpoch()
+    if self.tzdataCsvFile != None:
+      try:
+        with open(self.tzdataCsvFile, "r") as fh:
+          for line in fh:
+            cols = line.split(',')
+            if len(cols) == 2:
+              (offsetStartEpochStr, offsetSecondsStr) = cols
+              offsetStartEpoch = int(offsetStartEpochStr)
+              offsetSeconds = int(offsetSecondsStr)
+              if offsetStartEpoch >= rtcEpoch:
+                rtcEpoch += offsetSeconds
+                break
+      except Exception as e:
+        print("WARNING: failed to read tzdata from " + self.tzdataCsvFile + "\n" + str(e) + "\n")
+    return rtcEpoch
+
 #if __name__ == '__main__':
 #  rtc = RTC_DS3231()
 #  #rtc.setTimeEpoch(0)

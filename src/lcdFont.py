@@ -235,7 +235,7 @@ class LcdFont:
         val += ch
     return val
 
-  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtcEpoch=0):
+  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtc=None):
     #  markup syntax is:
     #    !CURSOR_CMD=VAL!
     #      CURSOR_CMD = color|size|x|y|hspace|vspace
@@ -349,6 +349,9 @@ class LcdFont:
     self.cursorSet(x, y, x, y, size, color, hspace, vspace)
     prevVals = {}
 
+    #calculate once, but only if !rtc! command present
+    rtcEpoch = None
+
     i=0
     while i < len(markup):
       ch = markup[i]
@@ -396,8 +399,11 @@ class LcdFont:
           self.cursorDrawBar(w, h, pct, fillColor, emptyColor)
         elif cmd == "rtc":
           if rtcEpoch == None:
-            print("WARNING: external rtc epoch not available, using system rtc\n")
-            rtcEpoch = time.time()
+            if rtc == None:
+              print("WARNING: external rtc epoch not available, using system rtc\n")
+              rtcEpoch = time.time()
+            else:
+              rtcEpoch = rtc.getTimeEpochPlusTZOffset()
           self.cursorDrawText(self.formatTime(val, rtcEpoch))
         elif cmd in self.cursor and len(val) > 0:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
@@ -422,7 +428,7 @@ class LcdFont:
         self.cursorDrawChar(ch)
         i += 1
 
-  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtcEpoch=0):
+  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtc=None):
     self.lcd.fill(0)
-    self.drawMarkup(markup, x, y, size, color, hspace, vspace, rtcEpoch)
+    self.drawMarkup(markup, x, y, size, color, hspace, vspace, rtc)
     self.lcd.show()
