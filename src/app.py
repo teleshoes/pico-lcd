@@ -88,6 +88,8 @@ def main():
     if e.errno == 5:
       #I/O error in I2C, probably no DS3231 device
       controller['rtc'] = None
+    else:
+      print("WARNING: rtc error " + str(e))
 
 
   cmdFunctionsByName = {}
