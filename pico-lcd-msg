@@ -170,6 +170,10 @@ my $USAGE = "Usage:
               the framebuf, if any, that is actually successfully allocated is returned
               if 'framebuf: off' is returned instead of a framebuf, allocation likely failed
 
+  $EXEC [OPTS] bootloader | --bootloader | bootsel | --bootsel
+    enter bootloader (bootsel mass storage mode)
+      -same as: $EXEC [OPTS] --cmd bootloader
+
 
   $EXEC [OPTS] full | --full
     -same as: $EXEC [OPTS] framebuf full
@@ -416,6 +420,9 @@ sub main(@){
       }elsif($mode eq $MODE_TEXT){
         push @textParams, "framebuf=$1";
       }
+    }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $mode){
+      $cmd = "bootloader";
+      $mode = $MODE_CMD;
     }elsif($arg =~ /^(full|left|right|top|bottom|square)$/ and not defined $mode){
       my $framebufConfName = $1;
       $cmd = "framebuf";
