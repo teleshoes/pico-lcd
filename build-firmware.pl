@@ -51,7 +51,7 @@ my $MODE_INSTALL_MPY_CROSS_6_2 = "install-mpy-cross-6.2";
 my $MODE_BUILD_FIRMWARE = "build-firmware";
 
 sub main(@) {
-  my $mode = undef;
+  my $mode = "";
   while(@_ > 0){
     my $arg = shift @_;
     if($arg =~ /^(-h|--help)$/){
@@ -76,7 +76,7 @@ sub main(@) {
   }elsif($mode eq $MODE_BUILD_FIRMWARE){
     buildFirmware();
   }else{
-    die "ERROR: missing command\n";
+    die "ERROR: missing command (e.g.: -b | -m)\n";
   }
 }
 
