@@ -622,12 +622,14 @@ def setupWifi(controller):
     except Exception as e:
       print(str(e))
 
-    controller['lcdFont'].markup(""
+    markupTemplate = (""
       + "!size=4!!color=green!" + "WAITING\n"
       + "!size=4!!color=green!" + "FOR WIFI\n"
       + "!size=4!!color=white!" + "--------\n"
-      + "!size=2!!color=blue!"  + ssid
+      + "!size=2!!color=blue!"  + "!var=ssid!"
     )
+    controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+      {'ssid':ssid}))
 
     max_wait = 10
     while max_wait > 0:
@@ -649,22 +651,27 @@ def setupWifi(controller):
     print('connected')
     ip = wlan.ifconfig()[0]
     print('ip=' + ip)
-    controller['lcdFont'].markup(""
+    markupTemplate = (""
       + "!size=4!!color=green!"             + "CONNECTED\n"
       + "!size=3!!color=blue!"              + "\nlistening on:\n"
-      + "!size=3!!color=green!!hspace=0.7!" + ip + "\n"
+      + "!size=3!!color=green!!hspace=0.7!" + "!var=ip!\n"
     )
+    controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+      {'ip':ip}))
 
 def setupAccessPoint(controller):
   ssid = "pico-lcd"
   password = "123456789"
 
-  controller['lcdFont'].markup(""
+  markupTemplate = (""
     + "!size=4!!color=green!" + "TURNING ON\n"
     + "!size=4!!color=green!" + "WIFI AP\n"
     + "!size=4!!color=white!" + "--------\n"
-    + "!size=2!!color=blue!"  + ssid
+    + "!size=2!!color=blue!"  + "!var=ssid!"
   )
+  controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+    {'ssid':ssid}))
+
   wlan = network.WLAN(network.AP_IF)
   wlan.config(essid=ssid, password=password)
   wlan.active(True)
@@ -686,16 +693,25 @@ def setupAccessPoint(controller):
 
   ip = wlan.ifconfig()[0]
 
-  controller['lcdFont'].markup(""
+  markupTemplate = (""
     + "!size=2!!color=green!"             + "SSID:\n"
-    + "!size=2!!color=white!"             + ssid + "\n"
+    + "!size=2!!color=white!"             + "!var=ssid!\n"
     + "!size=2!!color=green!"             + "PASSWORD:\n"
-    + "!size=2!!color=white!"             + password + "\n"
+    + "!size=2!!color=white!"             + "!var=password!\n"
     + "!size=2!!color=blue!"              + "IP:\n"
-    + "!size=2!!color=green!!hspace=0.7!" + ip + "\n"
+    + "!size=2!!color=green!!hspace=0.7!" + "!var=ip!\n"
     + "!size=1!!color=white!"             + "e.g.:\n"
-    + "!size=1!!color=white!"             + "curl 'http://" + ip + "/ssid?\nssid=MY_NETWORK&password=P4SSW0RD'\n"
+    + "!size=1!!color=white!"             + "curl 'http://!var=ip!/ssid?\nssid=MY_NETWORK&password=P4SSW0RD'\n"
   )
+
+  controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+    {'ssid':ssid, 'password':password, 'ip':ip}))
+
+def replaceMarkupTemplate(markupTemplate, keyVals):
+  markup = markupTemplate
+  for key in keyVals.keys():
+    markup = markup.replace('!var=' + key + '!', keyVals[key])
+  return markup
 
 def maybeGetRTC():
   rtc = RTC_DS3231()
