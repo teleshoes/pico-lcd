@@ -112,9 +112,7 @@ def main():
         print("SOCKET TIMEOUT (" + str(controller['timeoutMillis']) + "ms)\n")
         if controller['timeoutText'] == None:
           controller['timeoutText'] = "TIMEOUT"
-        controller['lcd'].fill(controller['lcd'].black)
-        controller['lcdFont'].drawMarkup(controller['timeoutText'], rtc=controller['rtc'])
-        controller['lcd'].show()
+        controller['lcdFont'].markup(controller['timeoutText'], rtc=controller['rtc'])
         continue
 
       (cmdName, params, data) = readCommandRequest(cl)
