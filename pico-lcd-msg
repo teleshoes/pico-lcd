@@ -93,6 +93,15 @@ my $USAGE = "Usage:
     if TIMEOUT_MILLIS or TIMEOUT_TEXT is omitted, the timeout is removed,
       and the socket blocks forever
 
+  $EXEC [OPTS] timezone [TZDATA_ZONE_NAME]
+    write \"TZDATA_ZONENAME\" to state-timezone file
+      used for DS3231 real-time-clock in !rtc! markup
+      requires calculating and installing tzdata CSV in advance
+    if TZDATA_ZONE_NAME is omitted, delete state-timezone file
+
+  $EXEC [OPTS] rtc RTC_EPOCH
+    set the DS3231 RTC epoch to RTC_EPOCH
+
   $EXEC [OPTS] buttons | --buttons
     fetch button press counts and print them
       -same as: $EXEC [OPTS] --cmd buttons
@@ -353,6 +362,12 @@ sub main(@){
     }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $mode){
       $cmd = "timeout";
       $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--timezone|timezone)$/ and not defined $mode){
+      $cmd = "timezone";
+      $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--rtc|rtc)$/ and not defined $mode){
+      $cmd = "rtc";
+      $mode = $MODE_CMD;
     }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $mode){
       $cmd = "fill";
       $mode = $MODE_CMD;
@@ -447,6 +462,10 @@ sub main(@){
       push @cmdParams, "timeoutMillis=$arg";
     }elsif((defined $cmd and $cmd eq "timeout") and @cmdParams == 1 and not defined $cmdData){
       $cmdData = $arg;
+    }elsif((defined $cmd and $cmd eq "timezone") and @cmdParams == 0){
+      push @cmdParams, "name=$arg";
+    }elsif((defined $cmd and $cmd eq "rtc") and @cmdParams == 0){
+      push @cmdParams, "epoch=$arg";
     }else{
       die "ERROR: unknown arg $arg\n";
     }
