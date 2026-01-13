@@ -682,11 +682,10 @@ def setupWifi(controller):
     controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
       {'ssid':ssid}))
 
-    max_wait = 10
-    while max_wait > 0:
+    timeout = time.time() + 10
+    while time.time() < timeout:
       if wlan.status() < 0 or wlan.status() >= 3:
         break
-      max_wait -= 1
       print('waiting for connection...')
       time.sleep(1)
 
@@ -716,11 +715,10 @@ def setupAccessPoint(controller):
   wlan.config(essid=ssid, password=password)
   wlan.active(True)
 
-  max_wait = 30
-  while max_wait > 0:
+  timeout = time.time() + 30
+  while time.time() < timeout:
     if wlan.active:
       break
-    max_wait -= 1
     print('waiting for connection...')
     time.sleep(1)
 
