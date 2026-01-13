@@ -73,7 +73,7 @@ CMD_RESETWIFI = {
 CMD_TEMPLATE = {
   "name":   "template",
   "params": {
-    "templateName": "one of: wifi-waiting, wifi-connected, ap-waiting, ap-active"
+    "templateName": "one of: timeout, wifi-waiting, wifi-connected, ap-waiting, ap-active"
   },
   "body":   "message markup, blank for default",
   "desc":   """
@@ -90,8 +90,8 @@ CMD_TIMEOUT = {
   "params": {
     "timeoutS": "[OPTIONAL] timeout in seconds, missing means no timeout",
   },
-  "body":   "message markup to show on timeout, missing means no timeout",
-  "desc":   "set a timeout on network. when reached, display the indicated markup",
+  "body":   None,
+  "desc":   "set a timeout on network. when reached, display the timeout template (see template)",
 }
 CMD_TIMEZONE = {
   "name":   "timezone",

@@ -51,6 +51,9 @@ STATE_FILE_TIMEZONE = "state-timezone"
 PREFIX_STATE_FILE_TEMPLATE = "state-template-"
 
 DEFAULT_MARKUP_TEMPLATES = {
+  'timeout': (""
+    + "TIMEOUT"
+  ),
   'wifi-waiting': (""
     + "!size=4!!color=green!" + "WAITING!n!"
     + "!size=4!!color=green!" + "FOR WIFI!n!"
@@ -89,6 +92,7 @@ def buttonPressedActions(btnName, controller):
 def main():
   controller = {
     'lcdName': None, 'lcd': None, 'lcdFont': None,
+    'timeoutMarkup': None,
     'rtc': None,
     'socket': None,
     'buttons': None,
@@ -112,9 +116,7 @@ def main():
 
   setupWifi(controller)
 
-  (prevTimeoutMillis, prevTimeoutText) = readStateTimeout()
-  controller['timeoutMillis'] = prevTimeoutMillis
-  controller['timeoutText'] = prevTimeoutText
+  controller['timeoutMillis'] = readStateTimeout()
 
   cmdFunctionsByName = {}
   symDict = globals()
@@ -142,9 +144,10 @@ def main():
         print('client connected from', addr)
       except:
         print("SOCKET TIMEOUT (" + str(controller['timeoutMillis']) + "ms)\n")
-        if controller['timeoutText'] == None:
-          controller['timeoutText'] = "TIMEOUT"
-        controller['lcdFont'].markup(controller['timeoutText'])
+        if controller['timeoutMarkup'] == None:
+          controller['timeoutMarkup'] = replaceMarkupTemplate('timeout',
+            {})
+        controller['lcdFont'].markup(controller['timeoutMarkup'])
         continue
 
       (cmdName, params, data) = readCommandRequest(cl)
@@ -198,7 +201,7 @@ def cmdInfo(controller, params, data):
   out += "lcdconf: %s\n" % controller['lcdName']
   out += "framebuf-boot: %s\n" % fbConfBootState
   out += "timeout-millis: %s\n" % controller['timeoutMillis']
-  out += "timeout-text: %s\n" % controller['timeoutText']
+  out += "timeout-template: %s\n" % str(readStateTemplate('timeout'))
   out += "timezone: %s\n" % tz
   out += "firmware: %s\n" % os.uname().version
   out += "board: %s\n" % os.uname().machine
@@ -224,6 +227,7 @@ def cmdResetWifi(controller, params, data):
   return out
 
 def cmdTemplate(controller, params, data):
+  controller['timeoutMarkup'] = None
   templateName = maybeGetParamStr(params, "templateName", None)
   templateMarkup = data.decode("utf8")
   out = ""
@@ -235,15 +239,12 @@ def cmdTemplate(controller, params, data):
 
 def cmdTimeout(controller, params, data):
   timeoutMillis = maybeGetParamInt(params, "timeoutMillis", None)
-  timeoutText = data.decode("utf8")
-  print("timeout: " + str(timeoutMillis) + "ms = " + str(timeoutText))
-  writeStateTimeout(timeoutMillis, timeoutText)
+  print("timeout: " + str(timeoutMillis))
+  writeStateTimeout(timeoutMillis)
   if timeoutMillis == None or timeoutMillis == 0:
     controller['timeoutMillis'] = None
-    controller['timeoutText'] = None
   else:
     controller['timeoutMillis'] = timeoutMillis
-    controller['timeoutText'] = timeoutText
   return None
 
 def cmdTimezone(controller, params, data):
@@ -602,22 +603,16 @@ def writeStateTemplate(templateName, templateMarkup):
 
 def readStateTimeout():
   val = readFileLine(STATE_FILE_TIMEOUT)
-  if val != None:
+  try:
     val = val.strip()
-    segments = val.split(",")
-    if len(segments) == 2:
-      try:
-        timeoutMillis = int(segments[0])
-        timeoutText = segments[1]
-        return (timeoutMillis, timeoutText)
-      except:
-        return (None, None)
-  return (None, None)
-def writeStateTimeout(timeoutMillis, timeoutText):
-  if timeoutMillis == 0 or timeoutMillis == None or timeoutText == None:
+    return int(val)
+  except:
+    return None
+def writeStateTimeout(timeoutMillis):
+  if timeoutMillis == 0 or timeoutMillis == None:
     writeFile(STATE_FILE_TIMEOUT, "")
   else:
-    writeFile(STATE_FILE_TIMEOUT, str(timeoutMillis) + "," + timeoutText + "\n")
+    writeFile(STATE_FILE_TIMEOUT, str(timeoutMillis) + "\n")
 
 def readStateTimezone():
   val =  readFileLine(STATE_FILE_TIMEZONE)
