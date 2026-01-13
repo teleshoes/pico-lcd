@@ -94,7 +94,8 @@ sub ensureMicropythonRepo(){
   }
 
   run @GIT_CMD, "checkout", "master";
-  run @GIT_CMD, "pull";
+  run @GIT_CMD, "fetch";
+  run @GIT_CMD, "reset", "origin/master", "--hard";
   run @GIT_CMD, "submodule", "init";
   run @GIT_CMD, "submodule", "update";
 }
