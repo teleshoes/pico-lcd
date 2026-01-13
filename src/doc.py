@@ -70,6 +70,21 @@ CMD_RESETWIFI = {
   "body":   None,
   "desc":   "forget all wifi networks (does not disconnect current)",
 }
+CMD_TEMPLATE = {
+  "name":   "template",
+  "params": {
+    "templateName": "one of: wifi-waiting, wifi-connected, ap-waiting, ap-active"
+  },
+  "body":   "message markup, blank for default",
+  "desc":   """
+    set the markup template for status messages
+    allows variable substitution with the syntax: !var=VARIABLE_NAME!
+    VARIABLE_NAME
+      ssid     = the external AP ssid to connect to, or the internal AP ssid
+      password = the hardcoded WPA key for the internal AP (never the configured WPA)
+      ip       = the IP address on the local network, or the internal AP IP address
+  """,
+}
 CMD_TIMEOUT = {
   "name":   "timeout",
   "params": {

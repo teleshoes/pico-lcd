@@ -223,6 +223,16 @@ def cmdResetWifi(controller, params, data):
   out = "WARNING: all wifi networks removed for next boot\n"
   return out
 
+def cmdTemplate(controller, params, data):
+  templateName = maybeGetParamStr(params, "templateName", None)
+  templateMarkup = data.decode("utf8")
+  out = ""
+  if templateName != None:
+    writeStateTemplate(templateName, templateMarkup)
+  out += "template[" + templateName + "] = " + readStateTemplate(templateName)
+  out += "\n"
+  return out
+
 def cmdTimeout(controller, params, data):
   timeoutMillis = maybeGetParamInt(params, "timeoutMillis", None)
   timeoutText = data.decode("utf8")
@@ -583,7 +593,7 @@ def readStateTemplate(templateName):
     template = readFileLine(stateFile)
   except:
     template = None
-  if template == None:
+  if template == None or template == "":
     template = DEFAULT_MARKUP_TEMPLATES[templateName]
   return template
 def writeStateTemplate(templateName, templateMarkup):
