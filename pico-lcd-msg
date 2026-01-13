@@ -172,7 +172,8 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] bootloader | --bootloader | bootsel | --bootsel
     enter bootloader (bootsel mass storage mode)
-      -same as: $EXEC [OPTS] --cmd bootloader
+    also sets curl --max-time to 3s, as it will hang forever otherwise
+      -same as: $EXEC [OPTS] --cmd bootloader -m 3
 
 
   $EXEC [OPTS] full | --full
@@ -423,6 +424,7 @@ sub main(@){
     }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $mode){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
+      $curlMaxTime = 3;
     }elsif($arg =~ /^(full|left|right|top|bottom|square)$/ and not defined $mode){
       my $framebufConfName = $1;
       $cmd = "framebuf";
