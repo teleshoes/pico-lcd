@@ -77,12 +77,17 @@ my $USAGE = "Usage:
     REMOVE all configured wifi network SSIDs for next boot/connect
       -same as: $EXEC [OPTS] --cmd resetwifi
 
-  $EXEC [OPTS] timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
-  $EXEC [OPTS] --timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
-    write \"TIMEOUT_MILLIS,TIMEOUT_TEXT\" to state-timeout file
+  $EXEC [OPTS] template TEMPLATE_NAME [TEMPLATE_MARKUP]
+    write \"TEMPLATE_MARKUP\" to state-template-TEMPLATE_NAME file
+      TEMPLATE_NAME: timeout | wifi-waiting | wifi-connected | ap-waiting | ap-active
+    if TEMPLATE_MARKUP is omitted, the default markup for that template is used
+
+  $EXEC [OPTS] timeout [TIMEOUT_MILLIS]
+  $EXEC [OPTS] --timeout [TIMEOUT_MILLIS]
+    write \"TIMEOUT_MILLIS\" to state-timeout file
       after TIMEOUT_MILLIS milliseconds of no network commands,
-      clear LCD, set LCD text to TIMEOUT_TEXT, and show LCD
-    if TIMEOUT_MILLIS or TIMEOUT_TEXT is omitted, the timeout is removed,
+      clear LCD, set LCD text to 'timeout' template, and show LCD
+    if TIMEOUT_MILLIS is omitted, the timeout is removed,
       and the socket blocks forever
 
   $EXEC [OPTS] timezone [TZDATA_ZONE_NAME]
@@ -350,6 +355,9 @@ sub main(@){
     }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $mode){
       $cmd = "resetwifi";
       $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--template|template)$/ and not defined $mode){
+      $cmd = "template";
+      $mode = $MODE_CMD;
     }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $mode){
       $cmd = "timeout";
       $mode = $MODE_CMD;
@@ -458,10 +466,12 @@ sub main(@){
       $text .= " " if $text ne "";
       $text .= $arg;
       $mode = $MODE_TEXT;
+    }elsif((defined $cmd and $cmd eq "template") and @cmdParams == 0){
+      push @cmdParams, "templateName=$arg";
+    }elsif((defined $cmd and $cmd eq "template") and @cmdParams == 1 and not defined $cmdData){
+      $cmdData = $arg;
     }elsif((defined $cmd and $cmd eq "timeout") and @cmdParams == 0){
       push @cmdParams, "timeoutMillis=$arg";
-    }elsif((defined $cmd and $cmd eq "timeout") and @cmdParams == 1 and not defined $cmdData){
-      $cmdData = $arg;
     }elsif((defined $cmd and $cmd eq "timezone") and @cmdParams == 0){
       push @cmdParams, "name=$arg";
     }elsif((defined $cmd and $cmd eq "rtc") and @cmdParams == 0){
