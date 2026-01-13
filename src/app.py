@@ -689,7 +689,7 @@ def setupWifi(controller):
       print('waiting for connection...')
       controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
         {'ssid':ssid}))
-      time.sleep(1)
+      time.sleep(0.5)
 
     if wlan.status() == 3:
       connected = True
@@ -724,7 +724,7 @@ def setupAccessPoint(controller):
     print('waiting for connection...')
     controller['lcdFont'].markup(replaceMarkupTemplate('ap-waiting',
       {'ssid':ssid}))
-    time.sleep(1)
+    time.sleep(0.5)
 
   if not wlan.active:
     controller['lcdFont'].markup("!size=7!!color=red!" + "FAILED\nWIFI")
