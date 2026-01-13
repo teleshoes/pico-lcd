@@ -7,9 +7,10 @@ import time
 import ustruct
 
 class LcdFont:
-  def __init__(self, fontFileName, lcd):
+  def __init__(self, fontFileName, lcd, rtc=None):
     self.fontFileName = fontFileName
     self.lcd = lcd
+    self.rtc = rtc
     self.defaultColorName = 'white'
     self.fontHandle = None
     self.fontWidth = None
@@ -39,6 +40,9 @@ class LcdFont:
 
   def setLCD(self, lcd):
     self.lcd = lcd
+
+  def setRTC(self, rtc):
+    self.rtc = rtc
 
   def getCharGridSize(self, size):
     (winW, winH) = self.lcd.get_target_window_size()
@@ -235,7 +239,7 @@ class LcdFont:
         val += ch
     return val
 
-  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtc=None):
+  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     #  markup syntax is:
     #    !CURSOR_CMD=VAL!
     #      CURSOR_CMD = color|size|x|y|hspace|vspace
@@ -399,11 +403,11 @@ class LcdFont:
           self.cursorDrawBar(w, h, pct, fillColor, emptyColor)
         elif cmd == "rtc":
           if rtcEpoch == None:
-            if rtc == None:
+            if self.rtc == None:
               print("WARNING: external rtc epoch not available, using system rtc\n")
               rtcEpoch = time.time()
             else:
-              rtcEpoch = rtc.getTimeEpochPlusTZOffset()
+              rtcEpoch = self.rtc.getTimeEpochPlusTZOffset()
           self.cursorDrawText(self.formatTime(val, rtcEpoch))
         elif cmd in self.cursor and len(val) > 0:
           # '!CMD=VAL!' => manipulate cursor without drawing anything
@@ -428,7 +432,7 @@ class LcdFont:
         self.cursorDrawChar(ch)
         i += 1
 
-  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtc=None):
+  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(self.lcd.black)
-    self.drawMarkup(markup, x, y, size, color, hspace, vspace, rtc)
+    self.drawMarkup(markup, x, y, size, color, hspace, vspace)
     self.lcd.show()

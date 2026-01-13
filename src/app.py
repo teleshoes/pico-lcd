@@ -73,7 +73,7 @@ def main():
 
   controller['rtc'] = maybeGetRTC()
 
-  controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'])
+  controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'], controller['rtc'])
   controller['lcdFont'].setup()
 
   controller['socket'] = getSocket()
@@ -112,7 +112,7 @@ def main():
         print("SOCKET TIMEOUT (" + str(controller['timeoutMillis']) + "ms)\n")
         if controller['timeoutText'] == None:
           controller['timeoutText'] = "TIMEOUT"
-        controller['lcdFont'].markup(controller['timeoutText'], rtc=controller['rtc'])
+        controller['lcdFont'].markup(controller['timeoutText'])
         continue
 
       (cmdName, params, data) = readCommandRequest(cl)
@@ -304,7 +304,7 @@ def cmdText(controller, params, data):
 
   if isClear:
     controller['lcd'].fill(controller['lcd'].black)
-  controller['lcdFont'].drawMarkup(markup, rtc=controller['rtc'])
+  controller['lcdFont'].drawMarkup(markup)
   if isShow:
     controller['lcd'].show()
 
