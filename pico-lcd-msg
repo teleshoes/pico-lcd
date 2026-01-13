@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use File::Basename qw(basename);
 
+sub runCurlCmd($$$$$);
 sub parseConfig($);
 
 my $EXEC = basename $0;
@@ -509,14 +510,7 @@ sub main(@){
   @curlOpts = (@curlOpts, "--max-time", $curlMaxTime) if defined $curlMaxTime;
 
   if($mode eq $MODE_CMD){
-    my $paramsFmt = "";
-    if(@cmdParams > 0){
-      $paramsFmt = "?" . join "&", @cmdParams;
-    }
-
-    my @curlCmd = ("curl", @curlOpts, "http://$ipAddr/$cmd$paramsFmt");
-    @curlCmd = (@curlCmd, "--data", $cmdData) if defined $cmdData;
-    system @curlCmd;
+    runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData);
   }elsif($mode eq $MODE_TEXT){
     my $charsTotal = length $text;
 
@@ -642,14 +636,23 @@ sub main(@){
         @params = (@params, "show=true");
       }
 
-      my $paramsFmt = "?" . join "&", @params;
-      system "curl", @curlOpts,
-        "http://$ipAddr/text$paramsFmt",
-        "--data", "$msg";
+      runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg);
     }
   }else{
     die "ERROR: unknown mode $mode\n";
   }
+}
+
+sub runCurlCmd($$$$$){
+  my ($curlOpts, $ipAddr, $cmd, $cmdParams, $cmdData) = @_;
+  my $paramsFmt = "";
+  if(@$cmdParams > 0){
+    $paramsFmt = "?" . join "&", @$cmdParams;
+  }
+
+  my @curlCmd = ("curl", @$curlOpts, "http://$ipAddr/$cmd$paramsFmt");
+  @curlCmd = (@curlCmd, "--data", $cmdData) if defined $cmdData;
+  system @curlCmd;
 }
 
 sub parseConfig($){
