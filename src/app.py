@@ -48,6 +48,38 @@ STATE_FILE_ORIENTATION = "state-orientation"
 STATE_FILE_FRAMEBUF = "state-framebuf"
 STATE_FILE_TIMEOUT = "state-timeout"
 STATE_FILE_TIMEZONE = "state-timezone"
+PREFIX_STATE_FILE_TEMPLATE = "state-template-"
+
+DEFAULT_MARKUP_TEMPLATES = {
+  'wifi-waiting': (""
+    + "!size=4!!color=green!" + "WAITING!n!"
+    + "!size=4!!color=green!" + "FOR WIFI!n!"
+    + "!size=4!!color=white!" + "--------!n!"
+    + "!size=2!!color=blue!"  + "!var=ssid!"
+  ),
+  'wifi-connected': (""
+    + "!size=4!!color=green!"             + "CONNECTED!n!"
+    + "!size=3!!color=blue!"              + "!n!listening on:!n!"
+    + "!size=3!!color=green!!hspace=0.7!" + "!var=ip!!n!"
+  ),
+  'ap-waiting': (""
+    + "!size=4!!color=green!" + "TURNING ON!n!"
+    + "!size=4!!color=green!" + "WIFI AP!n!"
+    + "!size=4!!color=white!" + "--------!n!"
+    + "!size=2!!color=blue!"  + "!var=ssid!"
+  ),
+  'ap-active': (""
+    + "!size=2!!color=green!"             + "SSID:!n!"
+    + "!size=2!!color=white!"             + "!var=ssid!!n!"
+    + "!size=2!!color=green!"             + "PASSWORD:!n!"
+    + "!size=2!!color=white!"             + "!var=password!!n!"
+    + "!size=2!!color=blue!"              + "IP:!n!"
+    + "!size=2!!color=green!!hspace=0.7!" + "!var=ip!!n!"
+    + "!size=1!!color=white!"             + "e.g.:!n!"
+    + "!size=1!!color=white!"             + "curl 'http://!var=ip!/ssid?!n!"
+                                          + "ssid=MY_NETWORK&password=P4SSW0RD'!n!"
+  ),
+}
 
 def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
@@ -544,6 +576,20 @@ def readStateFramebuf():
 def writeStateFramebuf(fbConf):
   writeFile(STATE_FILE_FRAMEBUF, str(fbConf) + "\n")
 
+def readStateTemplate(templateName):
+  stateFile = PREFIX_STATE_FILE_TEMPLATE + templateName
+  template = None
+  try:
+    template = readFileLine(stateFile)
+  except:
+    template = None
+  if template == None:
+    template = DEFAULT_MARKUP_TEMPLATES[templateName]
+  return template
+def writeStateTemplate(templateName, templateMarkup):
+  stateFile = PREFIX_STATE_FILE_TEMPLATE + templateName
+  writeFile(stateFile, templateMarkup)
+
 def readStateTimeout():
   val = readFileLine(STATE_FILE_TIMEOUT)
   if val != None:
@@ -622,13 +668,7 @@ def setupWifi(controller):
     except Exception as e:
       print(str(e))
 
-    markupTemplate = (""
-      + "!size=4!!color=green!" + "WAITING!n!"
-      + "!size=4!!color=green!" + "FOR WIFI!n!"
-      + "!size=4!!color=white!" + "--------!n!"
-      + "!size=2!!color=blue!"  + "!var=ssid!"
-    )
-    controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+    controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
       {'ssid':ssid}))
 
     max_wait = 10
@@ -651,25 +691,14 @@ def setupWifi(controller):
     print('connected')
     ip = wlan.ifconfig()[0]
     print('ip=' + ip)
-    markupTemplate = (""
-      + "!size=4!!color=green!"             + "CONNECTED!n!"
-      + "!size=3!!color=blue!"              + "!n!listening on:!n!"
-      + "!size=3!!color=green!!hspace=0.7!" + "!var=ip!!n!"
-    )
-    controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+    controller['lcdFont'].markup(replaceMarkupTemplate('wifi-connected',
       {'ip':ip}))
 
 def setupAccessPoint(controller):
   ssid = "pico-lcd"
   password = "123456789"
 
-  markupTemplate = (""
-    + "!size=4!!color=green!" + "TURNING ON!n!"
-    + "!size=4!!color=green!" + "WIFI AP!n!"
-    + "!size=4!!color=white!" + "--------!n!"
-    + "!size=2!!color=blue!"  + "!var=ssid!"
-  )
-  controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+  controller['lcdFont'].markup(replaceMarkupTemplate('ap-waiting',
     {'ssid':ssid}))
 
   wlan = network.WLAN(network.AP_IF)
@@ -693,22 +722,11 @@ def setupAccessPoint(controller):
 
   ip = wlan.ifconfig()[0]
 
-  markupTemplate = (""
-    + "!size=2!!color=green!"             + "SSID:!n!"
-    + "!size=2!!color=white!"             + "!var=ssid!!n!"
-    + "!size=2!!color=green!"             + "PASSWORD:!n!"
-    + "!size=2!!color=white!"             + "!var=password!!n!"
-    + "!size=2!!color=blue!"              + "IP:!n!"
-    + "!size=2!!color=green!!hspace=0.7!" + "!var=ip!!n!"
-    + "!size=1!!color=white!"             + "e.g.:!n!"
-    + "!size=1!!color=white!"             + "curl 'http://!var=ip!/ssid?!n!ssid=MY_NETWORK&password=P4SSW0RD'!n!"
-  )
-
-  controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
+  controller['lcdFont'].markup(replaceMarkupTemplate('ap-active',
     {'ssid':ssid, 'password':password, 'ip':ip}))
 
-def replaceMarkupTemplate(markupTemplate, keyVals):
-  markup = markupTemplate
+def replaceMarkupTemplate(templateName, keyVals):
+  markup = readStateTemplate(templateName)
   for key in keyVals.keys():
     markup = markup.replace('!var=' + key + '!', keyVals[key])
   return markup
