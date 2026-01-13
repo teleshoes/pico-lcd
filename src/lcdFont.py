@@ -429,6 +429,6 @@ class LcdFont:
         i += 1
 
   def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0, rtc=None):
-    self.lcd.fill(0)
+    self.lcd.fill(self.lcd.black)
     self.drawMarkup(markup, x, y, size, color, hspace, vspace, rtc)
     self.lcd.show()
