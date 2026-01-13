@@ -26,6 +26,13 @@ my $DEFAULT_LCD_HEIGHT = 240;
 my $FONT_BASE_HEIGHT = 8;
 my $FONT_BASE_WIDTH = 5;
 
+my $CLOCK_MARKUP = ""
+  . "!size=4!!hr!!n!"
+  . "!color=green!!size=8!!rtc=%H:%M!!n!"
+  . "!color=white!!hr!!size=4!!n!"
+  . " !rtc=%H:%M:%S!"
+;
+
 my $TEMPLATE_SETS = {
   "default" => {
     "timeout"        => "",
@@ -34,6 +41,29 @@ my $TEMPLATE_SETS = {
     "ap-waiting"     => "",
     "ap-active"      => "",
   },
+  "clock" => {
+    "timeout" => ""
+      . "!size=4!!rtc=%Y-%m-%d!!n!"
+      . $CLOCK_MARKUP,
+    "wifi-waiting" => ""
+      . "!size=2!WAITING WIFI   !rtc=%Y-%m-%d!!n!"
+      . "!var=ssid!!n!"
+      . $CLOCK_MARKUP,
+    "wifi-connected" => ""
+      . "!size=2!CONNECTED      !rtc=%Y-%m-%d!!n!"
+      . "!var=ip!!n!"
+      . $CLOCK_MARKUP,
+    "ap-waiting" => ""
+      . "!size=2!AP WAITING     !rtc=%Y-%m-%d!!n!"
+      . "!var=ssid!!n!"
+      . $CLOCK_MARKUP,
+    "ap-active" => ""
+      . "!size=2!ssid=!var=ssid!  !rtc=%Y-%m-%d!!n!"
+      . "pw=!var=password!   !var=ip!!n!"
+      . $CLOCK_MARKUP,
+  },
+};
+
 my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
