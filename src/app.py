@@ -623,9 +623,9 @@ def setupWifi(controller):
       print(str(e))
 
     markupTemplate = (""
-      + "!size=4!!color=green!" + "WAITING\n"
-      + "!size=4!!color=green!" + "FOR WIFI\n"
-      + "!size=4!!color=white!" + "--------\n"
+      + "!size=4!!color=green!" + "WAITING!n!"
+      + "!size=4!!color=green!" + "FOR WIFI!n!"
+      + "!size=4!!color=white!" + "--------!n!"
       + "!size=2!!color=blue!"  + "!var=ssid!"
     )
     controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
@@ -652,9 +652,9 @@ def setupWifi(controller):
     ip = wlan.ifconfig()[0]
     print('ip=' + ip)
     markupTemplate = (""
-      + "!size=4!!color=green!"             + "CONNECTED\n"
-      + "!size=3!!color=blue!"              + "\nlistening on:\n"
-      + "!size=3!!color=green!!hspace=0.7!" + "!var=ip!\n"
+      + "!size=4!!color=green!"             + "CONNECTED!n!"
+      + "!size=3!!color=blue!"              + "!n!listening on:!n!"
+      + "!size=3!!color=green!!hspace=0.7!" + "!var=ip!!n!"
     )
     controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
       {'ip':ip}))
@@ -664,9 +664,9 @@ def setupAccessPoint(controller):
   password = "123456789"
 
   markupTemplate = (""
-    + "!size=4!!color=green!" + "TURNING ON\n"
-    + "!size=4!!color=green!" + "WIFI AP\n"
-    + "!size=4!!color=white!" + "--------\n"
+    + "!size=4!!color=green!" + "TURNING ON!n!"
+    + "!size=4!!color=green!" + "WIFI AP!n!"
+    + "!size=4!!color=white!" + "--------!n!"
     + "!size=2!!color=blue!"  + "!var=ssid!"
   )
   controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
@@ -694,14 +694,14 @@ def setupAccessPoint(controller):
   ip = wlan.ifconfig()[0]
 
   markupTemplate = (""
-    + "!size=2!!color=green!"             + "SSID:\n"
-    + "!size=2!!color=white!"             + "!var=ssid!\n"
-    + "!size=2!!color=green!"             + "PASSWORD:\n"
-    + "!size=2!!color=white!"             + "!var=password!\n"
-    + "!size=2!!color=blue!"              + "IP:\n"
-    + "!size=2!!color=green!!hspace=0.7!" + "!var=ip!\n"
-    + "!size=1!!color=white!"             + "e.g.:\n"
-    + "!size=1!!color=white!"             + "curl 'http://!var=ip!/ssid?\nssid=MY_NETWORK&password=P4SSW0RD'\n"
+    + "!size=2!!color=green!"             + "SSID:!n!"
+    + "!size=2!!color=white!"             + "!var=ssid!!n!"
+    + "!size=2!!color=green!"             + "PASSWORD:!n!"
+    + "!size=2!!color=white!"             + "!var=password!!n!"
+    + "!size=2!!color=blue!"              + "IP:!n!"
+    + "!size=2!!color=green!!hspace=0.7!" + "!var=ip!!n!"
+    + "!size=1!!color=white!"             + "e.g.:!n!"
+    + "!size=1!!color=white!"             + "curl 'http://!var=ip!/ssid?!n!ssid=MY_NETWORK&password=P4SSW0RD'!n!"
   )
 
   controller['lcdFont'].markup(replaceMarkupTemplate(markupTemplate,
