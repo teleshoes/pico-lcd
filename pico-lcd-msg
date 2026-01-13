@@ -26,6 +26,14 @@ my $DEFAULT_LCD_HEIGHT = 240;
 my $FONT_BASE_HEIGHT = 8;
 my $FONT_BASE_WIDTH = 5;
 
+my $TEMPLATE_SETS = {
+  "default" => {
+    "timeout"        => "",
+    "wifi-waiting"   => "",
+    "wifi-connected" => "",
+    "ap-waiting"     => "",
+    "ap-active"      => "",
+  },
 my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
@@ -52,6 +60,10 @@ my $USAGE = "Usage:
         -if TEXT is not empty, append a space character
         -append ARG to TEXT
     -same as: $EXEC --text=TEXT
+
+  $EXEC [OPTS] --template-set TEMPLATE_SET_NAME
+    apply pre-configured set of markup templates
+    TEMPLATE_SET_NAME: " . join(" | ", sort keys %$TEMPLATE_SETS) . "
 
   $EXEC [OPTS] cmd   CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
   $EXEC [OPTS] --cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
@@ -283,6 +295,7 @@ my $USAGE = "Usage:
 
 my $MODE_TEXT = "text";
 my $MODE_CMD = "cmd";
+my $MODE_TEMPLATE_SET = "template-set";
 
 sub main(@){
   my $mode = undef;
@@ -298,6 +311,8 @@ sub main(@){
   my $lcdWidthPx = undef;
   my $lcdHeightPx = undef;
   my ($color, $size, $hspace, $vspace, $x, $y);
+
+  my $templateSet = undef;
 
   my $cmd = undef;
   my @cmdParams;
@@ -332,6 +347,12 @@ sub main(@){
     }elsif($arg =~ /^--text=(.+)$/ and not defined $mode){
       $text = $1;
       $mode = $MODE_TEXT;
+    }elsif($arg =~ /^(--template-set|template-set)$/ and @_ > 0 and not defined $mode){
+      $templateSet = shift @_;
+      if(not defined $$TEMPLATE_SETS{$templateSet}){
+        die "ERROR: unknown template set $templateSet\n";
+      }
+      $mode = $MODE_TEMPLATE_SET;
     }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $mode){
       $cmd = shift @_;
       $mode = $MODE_CMD;
@@ -637,6 +658,12 @@ sub main(@){
       }
 
       runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg);
+    }
+  }elsif($mode eq $MODE_TEMPLATE_SET){
+    my $set = $$TEMPLATE_SETS{$templateSet};
+    for my $templateName(sort keys %$set){
+      my $markup = $$set{$templateName};
+      runCurlCmd(\@curlOpts, $ipAddr, "template", ["templateName=$templateName"], $markup);
     }
   }else{
     die "ERROR: unknown mode $mode\n";
