@@ -57,6 +57,7 @@ def buttonPressedActions(btnName, controller):
 def main():
   controller = {
     'lcdName': None, 'lcd': None, 'lcdFont': None,
+    'rtc': None,
     'socket': None,
     'buttons': None,
   }
@@ -81,17 +82,7 @@ def main():
   controller['timeoutMillis'] = prevTimeoutMillis
   controller['timeoutText'] = prevTimeoutText
 
-  controller['rtc'] = RTC_DS3231()
-  try:
-    controller['rtc'].setOffsetTZDataCsvFile(getTZDataCsvFile(readStateTimezone()))
-    controller['rtc'].getTimeEpochPlusTZOffset()
-  except OSError as e:
-    if e.errno == 5:
-      #I/O error in I2C, probably no DS3231 device
-      controller['rtc'] = None
-    else:
-      print("WARNING: rtc error " + str(e))
-
+  controller['rtc'] = maybeGetRTC()
 
   cmdFunctionsByName = {}
   symDict = globals()
@@ -712,6 +703,18 @@ def setupAccessPoint(controller):
     + "!size=1!!color=white!"             + "curl 'http://" + ip + "/ssid?\nssid=MY_NETWORK&password=P4SSW0RD'\n"
   )
 
+def maybeGetRTC():
+  rtc = RTC_DS3231()
+  try:
+    rtc.setOffsetTZDataCsvFile(getTZDataCsvFile(readStateTimezone()))
+    rtc.getTimeEpochPlusTZOffset()
+  except OSError as e:
+    if e.errno == 5:
+      #I/O error in I2C, probably no DS3231 device
+      rtc = None
+    else:
+      print("WARNING: rtc error " + str(e))
+  return rtc
 
 def getSocket():
   addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
