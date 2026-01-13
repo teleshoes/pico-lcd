@@ -321,6 +321,12 @@ def cmdFramebuf(controller, params, data):
   print("framebuf=" + str(fbConf))
   return setFramebuf(controller['lcd'], fbConf)
 
+def cmdBootloader(controller, params, data):
+  print("ENTERING BOOTLOADER")
+  machine.bootloader()
+  print("WARNING: bootloader mode failed")
+  return None
+
 def cmdText(controller, params, data):
   isClear = maybeGetParamBool(params, "clear", True)
   isShow = maybeGetParamBool(params, "show", True)

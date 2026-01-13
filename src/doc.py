@@ -201,6 +201,12 @@ CMD_FRAMEBUF = {
     <HALF_LCD_H>: 120 for lcd_2_0 or 120 for lcd_1_3
   """
 }
+CMD_BOOTLOADER = {
+  "name":   "bootloader",
+  "params": {},
+  "body":   None,
+  "desc":   "immediately enter BOOTSEL mass storage mode by running machine.bootloader()",
+}
 CMD_TEXT = {
   "name":   "text",
   "params": {
