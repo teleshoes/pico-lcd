@@ -302,11 +302,7 @@ def cmdText(controller, params, data):
   if info:
     out += cmdInfo(controller, None, None)
 
-  if isClear:
-    controller['lcd'].fill(controller['lcd'].black)
-  controller['lcdFont'].drawMarkup(markup)
-  if isShow:
-    controller['lcd'].show()
+  controller['lcdFont'].markup(markup, isClear=isClear, isShow=isShow)
 
   return out
 
