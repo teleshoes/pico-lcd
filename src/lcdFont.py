@@ -239,6 +239,15 @@ class LcdFont:
         val += ch
     return val
 
+  def markup(self, markup, isClear=True, isShow=True,
+    x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0
+  ):
+    if isClear:
+      self.lcd.fill(self.lcd.black)
+    self.drawMarkup(markup, x, y, size, color, hspace, vspace)
+    if isShow:
+      self.lcd.show()
+
   def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     #  markup syntax is:
     #    !CURSOR_CMD=VAL!
@@ -431,8 +440,3 @@ class LcdFont:
       else:
         self.cursorDrawChar(ch)
         i += 1
-
-  def markup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
-    self.lcd.fill(self.lcd.black)
-    self.drawMarkup(markup, x, y, size, color, hspace, vspace)
-    self.lcd.show()
