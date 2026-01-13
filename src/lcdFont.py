@@ -248,7 +248,7 @@ class LcdFont:
     if isShow:
       self.lcd.show()
 
-  def drawMarkup(self, markup, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
+  def drawMarkup(self, markup, x, y, size, color, hspace, vspace):
     #  markup syntax is:
     #    !CURSOR_CMD=VAL!
     #      CURSOR_CMD = color|size|x|y|hspace|vspace
