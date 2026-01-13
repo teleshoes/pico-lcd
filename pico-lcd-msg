@@ -77,14 +77,6 @@ my $USAGE = "Usage:
     REMOVE all configured wifi network SSIDs for next boot/connect
       -same as: $EXEC [OPTS] --cmd resetwifi
 
-  $EXEC [OPTS] clear | --clear
-    clear the entire LCD memory
-      -same as: $EXEC [OPTS] --cmd clear
-
-  $EXEC [OPTS] show | --show
-    show the framebuffer, if any
-      -same as: $EXEC [OPTS] --cmd show
-
   $EXEC [OPTS] timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
   $EXEC [OPTS] --timeout [TIMEOUT_MILLIS TIMEOUT_TEXT]
     write \"TIMEOUT_MILLIS,TIMEOUT_TEXT\" to state-timeout file
@@ -101,6 +93,14 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] rtc RTC_EPOCH
     set the DS3231 RTC epoch to RTC_EPOCH
+
+  $EXEC [OPTS] clear | --clear
+    clear the entire LCD memory
+      -same as: $EXEC [OPTS] --cmd clear
+
+  $EXEC [OPTS] show | --show
+    show the framebuffer, if any
+      -same as: $EXEC [OPTS] --cmd show
 
   $EXEC [OPTS] buttons | --buttons
     fetch button press counts and print them
@@ -350,15 +350,6 @@ sub main(@){
     }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $mode){
       $cmd = "resetwifi";
       $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
-      $cmd = "clear";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--show|show)$/ and not defined $mode){
-      $cmd = "show";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
-      $cmd = "buttons";
-      $mode = $MODE_CMD;
     }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $mode){
       $cmd = "timeout";
       $mode = $MODE_CMD;
@@ -367,6 +358,15 @@ sub main(@){
       $mode = $MODE_CMD;
     }elsif($arg =~ /^(--rtc|rtc)$/ and not defined $mode){
       $cmd = "rtc";
+      $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
+      $cmd = "clear";
+      $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--show|show)$/ and not defined $mode){
+      $cmd = "show";
+      $mode = $MODE_CMD;
+    }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
+      $cmd = "buttons";
       $mode = $MODE_CMD;
     }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $mode){
       $cmd = "fill";
