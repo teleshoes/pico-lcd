@@ -71,6 +71,8 @@ def main():
   controller['buttons'] = createButtons(controller['lcdName'])
   addButtonHandlers(controller['buttons'], controller)
 
+  controller['rtc'] = maybeGetRTC()
+
   controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'])
   controller['lcdFont'].setup()
 
@@ -81,8 +83,6 @@ def main():
   (prevTimeoutMillis, prevTimeoutText) = readStateTimeout()
   controller['timeoutMillis'] = prevTimeoutMillis
   controller['timeoutText'] = prevTimeoutText
-
-  controller['rtc'] = maybeGetRTC()
 
   cmdFunctionsByName = {}
   symDict = globals()
