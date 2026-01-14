@@ -58,11 +58,11 @@ CMD_CONNECT = {
 CMD_SSID = {
   "name":   "ssid",
   "params": {
-    "ssid":      "[REQUIRED] ssid",
+    "ssid":     "[REQUIRED] ssid",
     "password": "[REQUIRED] password",
   },
   "body":   None,
-  "desc":   "add a wifi network",
+  "desc":   "append a wifi network to the list of networks to try at boot",
 }
 CMD_RESETWIFI = {
   "name":   "resetwifi",
