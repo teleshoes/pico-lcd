@@ -694,7 +694,7 @@ def setupWifi(controller):
     timeout = time.time() + 10
     while time.time() < timeout:
       status = wlan.status()
-      print('waiting for connection...')
+      print('waiting for connection (ssid=' + ssid + ', status=' + str(status) + ')...')
       controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
         {'ssid':ssid}))
 
