@@ -670,6 +670,21 @@ def setupWifi(controller):
   wlan = network.WLAN(network.STA_IF)
   wlan.active(True)
 
+  NW_STAT_WRONG_PASSWORD =  -3
+  NW_STAT_NO_AP_FOUND =     -2
+  NW_STAT_CONNECT_FAIL =    -1
+  NW_STAT_IDLE =             0
+  NW_STAT_CONNECTING =       1
+  NW_STAT_GOT_IP =           3
+
+  ARR_NW_STAT_IDLE = [NW_STAT_IDLE]
+  ARR_NW_STAT_SUCCESS = [NW_STAT_GOT_IP]
+  ARR_NW_STAT_FAILURE = [
+    NW_STAT_WRONG_PASSWORD,
+    NW_STAT_NO_AP_FOUND,
+    NW_STAT_CONNECT_FAIL,
+  ]
+
   for ssidPassword in networks:
     ssid = ssidPassword[0]
     password = ssidPassword[1]
@@ -684,14 +699,15 @@ def setupWifi(controller):
 
     timeout = time.time() + 10
     while time.time() < timeout:
-      if wlan.status() < 0 or wlan.status() >= 3:
+      status = wlan.status()
+      if status in ARR_NW_STAT_FAILURE or status in ARR_NW_STAT_SUCCESS:
         break
       print('waiting for connection...')
       controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
         {'ssid':ssid}))
       time.sleep(0.5)
 
-    if wlan.status() == 3:
+    if wlan.status() in ARR_NW_STAT_SUCCESS:
       connected = True
       connectedSSID = ssid
       break
