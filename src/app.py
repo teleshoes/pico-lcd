@@ -691,10 +691,6 @@ def setupWifi(controller):
     ssid = ssidPassword[0]
     password = ssidPassword[1]
 
-    try:
-      wlan.connect(ssid, password)
-    except Exception as e:
-      print(str(e))
 
     controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
       {'ssid':ssid}))
@@ -702,11 +698,17 @@ def setupWifi(controller):
     timeout = time.time() + 10
     while time.time() < timeout:
       status = wlan.status()
-      if status in ARR_NW_STAT_FAILURE or status in ARR_NW_STAT_SUCCESS:
-        break
       print('waiting for connection...')
       controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
         {'ssid':ssid}))
+
+      if status in ARR_NW_STAT_IDLE:
+        try:
+          wlan.connect(ssid, password)
+        except Exception as e:
+          print(str(e))
+      elif status in ARR_NW_STAT_FAILURE or status in ARR_NW_STAT_SUCCESS:
+        break
       time.sleep(0.5)
 
     if wlan.status() in ARR_NW_STAT_SUCCESS:
