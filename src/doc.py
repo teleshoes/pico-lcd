@@ -60,6 +60,7 @@ CMD_SSID = {
   "params": {
     "ssid":     "[REQUIRED] ssid",
     "password": "[REQUIRED] password",
+    "timeout":  "[OPTIONAL] max time to wait to connect before trying next",
   },
   "body":   None,
   "desc":   "append a wifi network to the list of networks to try at boot",

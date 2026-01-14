@@ -42,6 +42,8 @@ LCD_CONFS = {
 
 DEFAULT_LCD_NAME = doc.LCD_NAME_2_0
 
+DEFAULT_WIFI_TIMEOUT_S = 10
+
 STATE_FILE_WIFI_CONF = "state-wifi-conf"
 STATE_FILE_LCD_NAME = "state-lcd-name"
 STATE_FILE_ORIENTATION = "state-orientation"
@@ -214,12 +216,14 @@ def cmdConnect(controller, params, data):
 def cmdSSID(controller, params, data):
   ssid = maybeGetParamStr(params, "ssid", None)
   password = maybeGetParamStr(params, "password", None)
+  timeout = maybeGetParamInt(params, "timeout", None)
   if ssid != None and password != None:
-    writeStateWifiConfAppendSSID(ssid, password)
+    writeStateWifiConfAppendSSID(ssid, password, timeout)
     out = (""
       + "added wifi network:\n"
       + "  ssid=" + ssid + "\n"
       + "  password=" + password + "\n"
+      + "  timeout=" + str(timeout) + "\n"
     )
   else:
     out = "ERROR: missing ssid or password\n"
@@ -568,24 +572,45 @@ def readStateWifiConf():
   except:
     networks = []
   return networks
-def writeStateWifiConfAppendSSID(ssid, password):
-  appendFile(STATE_FILE_WIFI_CONF, ssid + " = " + password + "\n")
+def writeStateWifiConfAppendSSID(ssid, password, timeout):
+  if timeout != None:
+    appendFile(STATE_FILE_WIFI_CONF, str(timeout) + "," + ssid + " = " + password + "\n")
+  else:
+    appendFile(STATE_FILE_WIFI_CONF, ssid + " = " + password + "\n")
 def writeStateWifiConfReset():
   writeFile(STATE_FILE_WIFI_CONF, "")
 
 def parseNetworkEntry(entry):
   nw = None
   try:
+    idxComma = entry.find(",")
     idxEq = entry.find("=")
+
+    timeoutStr = None
     ssid = None
     password = None
-    if idxEq >= 0:
+    if idxComma >= 0 and idxComma < idxEq:
+      #  TIMEOUT,SSID=PASSWORD
+      timeoutStr = entry[:idxComma].strip()
+      ssid = entry[idxComma+1:idxEq].strip()
+      password = entry[idxEq+1:].strip()
+    elif idxComma < 0 and idxEq >= 0:
       #  SSID=PASSWORD
+      timeoutStr = None
       ssid = entry[0:idxEq].strip()
       password = entry[idxEq+1:].strip()
 
-    if ssid != None and password != None:
-      nw = [ssid, password]
+    timeout = None
+    try:
+      if timeoutStr == None:
+        timeout = DEFAULT_WIFI_TIMEOUT_S
+      else:
+        timeout = int(timeoutStr)
+    except:
+      timeout = DEFAULT_WIFI_TIMEOUT_S
+
+    if timeout != None and ssid != None and password != None:
+      nw = [timeout, ssid, password]
     else:
       print("WARNING: malformed wifi entry\n" + str(entry))
   except Exception as e:
@@ -710,9 +735,9 @@ def setupWifi(controller):
   ]
 
   for nw in networks:
-    (ssid, password) = nw
+    (timeout, ssid, password) = nw
 
-    endEpoch = time.time() + 10
+    endEpoch = time.time() + timeout
     while time.time() < endEpoch:
       status = wlan.status()
       print('waiting for connection (ssid=' + ssid + ', status=' + str(status) + ')...')
