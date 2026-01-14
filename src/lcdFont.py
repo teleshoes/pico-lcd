@@ -166,7 +166,8 @@ class LcdFont:
     except:
       return defaultVal
   def maybeReadCoord(self, valStr, defaultVal):
-    valArr = valStr.split("x")
+    valStr = valStr.replace("x", ",", 1) #<X>x<Y> => <X>,<Y>
+    valArr = valStr.split(",")
     if len(valArr) == 2:
       x = self.maybeReadInt(valArr[0], None)
       y = self.maybeReadInt(valArr[1], None)
@@ -177,6 +178,9 @@ class LcdFont:
     else:
       return defaultVal
   def maybeReadBar(self, valStr, defaultVal):
+    if valStr.find("x") < valStr.find(","):
+      #replace the first 'x', if it is before first ','
+      valStr = valStr.replace("x", ",", 1) #<X>x<Y> => <X>,<Y>
     valArr = valStr.split(",")
     if len(valArr) == 5:
       x = self.maybeReadInt(valArr[0], None)
@@ -278,10 +282,12 @@ class LcdFont:
     #                !color=white! A !color=blue! B !color=white! C
     #
     #    !rect=<W>x<H>!
+    #    !rect=<W>,<H>!
     #       draw a rectangle from cursor at top-left to (W,H) at bottom-right
     #       move the cursor to the right exactly <W> px (no HSPACE)
     #         e.g.: !rect=10x20!    draw a vertical rectangle at the cursor
     #
+    #    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
     #    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
     #       draw two rectangles, to make a progress/status bar
     #         W           = the full outer width of the bar in pixels
@@ -322,6 +328,7 @@ class LcdFont:
     #                                             !shift=20x0!
     #
     #    !shift=<W>x<H>!
+    #    !shift=<W>,<H>!
     #       move the left position of the cursor W pixels to the right (negative for left)
     #       move the top position of the cursor H pixels down (negative for up)
     #       e.g.: !shift=0x-20!    move the cursor up 20 pixels
