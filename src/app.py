@@ -216,7 +216,11 @@ def cmdSSID(controller, params, data):
   password = maybeGetParamStr(params, "password", None)
   if ssid != None and password != None:
     writeStateWifiConfAppendSSID(ssid, password)
-    out = "added wifi network:\n ssid=" + ssid +"\n password=" + password + "\n"
+    out = (""
+      + "added wifi network:\n"
+      + "  ssid=" + ssid + "\n"
+      + "  password=" + password + "\n"
+    )
   else:
     out = "ERROR: missing ssid or password\n"
   return out
