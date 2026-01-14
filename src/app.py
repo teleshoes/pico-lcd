@@ -709,12 +709,11 @@ def setupWifi(controller):
     NW_STAT_CONNECT_FAIL,
   ]
 
-  for ssidPassword in networks:
-    ssid = ssidPassword[0]
-    password = ssidPassword[1]
+  for nw in networks:
+    (ssid, password) = nw
 
-    timeout = time.time() + 10
-    while time.time() < timeout:
+    endEpoch = time.time() + 10
+    while time.time() < endEpoch:
       status = wlan.status()
       print('waiting for connection (ssid=' + ssid + ', status=' + str(status) + ')...')
       controller['lcdFont'].markup(replaceMarkupTemplate('wifi-waiting',
