@@ -112,9 +112,13 @@ my $USAGE = "Usage:
     re-connect to wifi or setup access point
       -same as: $EXEC [OPTS] --cmd connect
 
-  $EXEC [OPTS] ssid | --ssid SSID PASSWORD
-    append a network 'SSID = PASSWORD' for next boot/connect
-      -same as: $EXEC [OPTS] --ssid ssid=SSID password=PASSWORD
+  $EXEC [OPTS] ssid | --ssid SSID PASSWORD [TIMEOUT]
+    append a network for next boot/connect
+      formatted:
+        'TIMEOUT,SSID = PASSWORD'
+        or
+        'SSID = PASSWORD'
+    -same as: $EXEC [OPTS] --ssid ssid=SSID password=PASSWORD timeout=TIMEOUT
 
   $EXEC [OPTS] resetwifi | --resetwifi
     REMOVE all configured wifi network SSIDs for next boot/connect
@@ -409,6 +413,9 @@ sub main(@){
       $mode = $MODE_CMD;
       push @cmdParams, "ssid=" . shift @_;
       push @cmdParams, "password=" . shift @_;
+      if(@_ > 0){
+        push @cmdParams, "timeout=" . shift @_;
+      }
     }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $mode){
       $cmd = "resetwifi";
       $mode = $MODE_CMD;
