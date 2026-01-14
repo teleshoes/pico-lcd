@@ -562,11 +562,9 @@ def readStateWifiConf():
   try:
     with open(STATE_FILE_WIFI_CONF, "r") as fh:
       for line in fh:
-        idx = line.find("=")
-        if idx > 0:
-          ssid = line[:idx].strip()
-          password = line[idx+1:].strip()
-          networks.append([ssid, password])
+        nw = parseNetworkEntry(line)
+        if nw != None:
+          networks.append(nw)
   except:
     networks = []
   return networks
@@ -574,6 +572,26 @@ def writeStateWifiConfAppendSSID(ssid, password):
   appendFile(STATE_FILE_WIFI_CONF, ssid + " = " + password + "\n")
 def writeStateWifiConfReset():
   writeFile(STATE_FILE_WIFI_CONF, "")
+
+def parseNetworkEntry(entry):
+  nw = None
+  try:
+    idxEq = entry.find("=")
+    ssid = None
+    password = None
+    if idxEq >= 0:
+      #  SSID=PASSWORD
+      ssid = entry[0:idxEq].strip()
+      password = entry[idxEq+1:].strip()
+
+    if ssid != None and password != None:
+      nw = [ssid, password]
+    else:
+      print("WARNING: malformed wifi entry\n" + str(entry))
+  except Exception as e:
+    print("WARNING: failed to parse wifi entry\n" + str(entry) + "\n" + str(e))
+    nw = None
+  return nw
 
 def readStateLCDName():
   val = readFileLine(STATE_FILE_LCD_NAME)
