@@ -675,11 +675,13 @@ def setupWifi(controller):
   NW_STAT_CONNECT_FAIL =    -1
   NW_STAT_IDLE =             0
   NW_STAT_CONNECTING =       1
+  NW_STAT_NO_IP =            2 #missing from network module but happens
   NW_STAT_GOT_IP =           3
 
   ARR_NW_STAT_IDLE = [NW_STAT_IDLE]
   ARR_NW_STAT_SUCCESS = [NW_STAT_GOT_IP]
   ARR_NW_STAT_FAILURE = [
+    NW_STAT_NO_IP,
     NW_STAT_WRONG_PASSWORD,
     NW_STAT_NO_AP_FOUND,
     NW_STAT_CONNECT_FAIL,
