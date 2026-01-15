@@ -6,19 +6,15 @@ import gc
 import os
 import time
 
-BL = 13
-DC = 8
-RST = 12
-MOSI = 11
-SCK = 10
-CS = 9
+#pins = {'BL':13, 'DC':8, 'RST':15, 'MOSI':11, 'SCK':10, 'CS':9}
 
 MADCTL_ML  = 0 #0:refresh-top-to-bottom  1:refresh-bottom-to-top
 MADCTL_MH  = 0 #0:refresh-left-to-right  1:refresh-right-to-left
 MADCTL_RGB = 0 #0:RGB                    1:BGR
 
 class LCD():
-  def __init__(self, landscapeWidth, landscapeHeight, rotationLayouts):
+  def __init__(self, pins, landscapeWidth, landscapeHeight, rotationLayouts):
+    self.pins = pins
     self.lcdLandscapeWidth = landscapeWidth
     self.lcdLandscapeHeight = landscapeHeight
 
@@ -43,12 +39,12 @@ class LCD():
         self.lcdLandscapeWidth, self.lcdLandscapeHeight, rotationLayout))
 
     self.spi = machine.SPI(1, 100000_000, polarity=0, phase=0,
-      sck=machine.Pin(SCK), mosi=machine.Pin(MOSI), miso=None)
+      sck=machine.Pin(self.pins['SCK']), mosi=machine.Pin(self.pins['MOSI']), miso=None)
 
-    self.dc = machine.Pin(DC, machine.Pin.OUT)
-    self.cs = machine.Pin(CS, machine.Pin.OUT)
-    self.backlight = machine.Pin(BL, machine.Pin.OUT)
-    self.reset = machine.Pin(RST, machine.Pin.OUT)
+    self.dc = machine.Pin(self.pins['DC'], machine.Pin.OUT)
+    self.cs = machine.Pin(self.pins['CS'], machine.Pin.OUT)
+    self.backlight = machine.Pin(self.pins['BL'], machine.Pin.OUT)
+    self.reset = machine.Pin(self.pins['RST'], machine.Pin.OUT)
 
     self.tft = st7789.ST7789(
       self.spi, self.lcdLandscapeHeight, self.lcdLandscapeWidth,

@@ -16,6 +16,7 @@ from lcdFont import LcdFont
 
 LCD_CONFS = {
   doc.LCD_NAME_1_3: {
+    "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9},
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
                 'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
     "landscapeWidth":  240,
@@ -28,6 +29,7 @@ LCD_CONFS = {
     ],
   },
   doc.LCD_NAME_2_0: {
+    "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9},
     "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
     "landscapeWidth":  320,
     "landscapeHeight": 240,
@@ -369,6 +371,7 @@ def cmdText(controller, params, data):
 def createLCD(lcdName):
   lcdConf = LCD_CONFS[lcdName]
   lcd = LCD(
+    lcdConf['lcdPins'],
     lcdConf['landscapeWidth'],
     lcdConf['landscapeHeight'],
     lcdConf['rotationLayouts'])
