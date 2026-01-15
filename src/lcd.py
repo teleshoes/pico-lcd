@@ -47,7 +47,7 @@ class LCD():
 
     self.dc = machine.Pin(DC, machine.Pin.OUT)
     self.cs = machine.Pin(CS, machine.Pin.OUT)
-    self.backlight = machine.Pin(CS, machine.Pin.OUT)
+    self.backlight = machine.Pin(BL, machine.Pin.OUT)
     self.reset = machine.Pin(RST, machine.Pin.OUT)
 
     self.tft = st7789.ST7789(
