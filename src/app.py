@@ -40,6 +40,18 @@ LCD_CONFS = {
       {'DEG':270, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
     ],
   },
+  doc.LCD_NAME_2_8: {
+    "lcdPins": {'BL':13, 'DC':8, 'RST':15, 'MOSI':11, 'SCK':10, 'CS':9},
+    "buttons": {'TS':17},
+    "landscapeWidth":  320,
+    "landscapeHeight": 240,
+    "rotationLayouts": [
+      {'DEG':  0, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':0, 'MX':1, 'MV':1},
+      {'DEG': 90, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':0, 'MX':0, 'MV':0},
+      {'DEG':180, 'LANDSCAPE': True,  'X':  0, 'Y':  0, 'MY':1, 'MX':0, 'MV':1},
+      {'DEG':270, 'LANDSCAPE': False, 'X':  0, 'Y':  0, 'MY':1, 'MX':1, 'MV':0},
+    ],
+  },
 }
 
 DEFAULT_LCD_NAME = doc.LCD_NAME_2_0
