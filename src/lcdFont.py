@@ -22,11 +22,15 @@ class LcdFont:
 
   def setup(self):
     if not self.ready:
-      self.fontHandle = open(self.fontFileName, 'rb')
-      self.fontWidth, self.fontHeight = ustruct.unpack('BB', self.fontHandle.read(2))
-      self.bitsPerChar = self.fontWidth * self.fontHeight
-      self.bytesPerChar = int(self.bitsPerChar/8 + 0.5)
-      self.ready = True
+      try:
+        self.fontHandle = open(self.fontFileName, 'rb')
+        self.fontWidth, self.fontHeight = ustruct.unpack('BB', self.fontHandle.read(2))
+        self.bitsPerChar = self.fontWidth * self.fontHeight
+        self.bytesPerChar = int(self.bitsPerChar/8 + 0.5)
+        self.ready = True
+      except OSError as e:
+        print("ERROR LOADING FONT: " + str(self.fontFileName))
+        self.ready = False
 
   def close(self):
     if self.ready:
