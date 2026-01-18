@@ -17,30 +17,30 @@ class LcdFont:
     self.fontHeight = None
     self.bitsPerChar = None
     self.bytesPerChar = None
-    self.ready = False
+    self.fontReady = False
     self.cursor = None
 
   def setup(self):
-    if not self.ready:
+    if not self.fontReady:
       try:
         self.fontHandle = open(self.fontFileName, 'rb')
         self.fontWidth, self.fontHeight = ustruct.unpack('BB', self.fontHandle.read(2))
         self.bitsPerChar = self.fontWidth * self.fontHeight
         self.bytesPerChar = int(self.bitsPerChar/8 + 0.5)
-        self.ready = True
+        self.fontReady = True
       except OSError as e:
         print("ERROR LOADING FONT: " + str(self.fontFileName))
-        self.ready = False
+        self.fontReady = False
 
   def close(self):
-    if self.ready:
+    if self.fontReady:
       self.fontHandle.close()
       self.fontHandle = None
       self.fontWidth = None
       self.fontHeight = None
       self.bitsPerChar = None
       self.bytesPerChar = None
-      self.ready = False
+      self.fontReady = False
 
   def setLCD(self, lcd):
     self.lcd = lcd
@@ -370,7 +370,7 @@ class LcdFont:
     #        looks similar to the following HTML:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
 
-    if not self.ready:
+    if not self.fontReady:
       print("ERROR: no font loaded")
       return
 
