@@ -130,7 +130,10 @@ def main():
 
   controller['socket'] = getSocket()
 
-  setupWifi(controller)
+  try:
+    setupWifi(controller)
+  except Exception as e:
+    print("ERROR: wlan setup failed\n" + str(e))
 
   controller['timeoutMillis'] = readStateTimeout()
 
