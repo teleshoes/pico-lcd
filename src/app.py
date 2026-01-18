@@ -735,6 +735,8 @@ def setupWifi(controller):
   wlan = network.WLAN(network.STA_IF)
   wlan.active(True)
 
+  print("MAC: " + wlan.config('mac').hex(":").upper())
+
   NW_STAT_WRONG_PASSWORD =  -3
   NW_STAT_NO_AP_FOUND =     -2
   NW_STAT_CONNECT_FAIL =    -1
