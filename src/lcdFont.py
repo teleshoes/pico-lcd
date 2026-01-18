@@ -370,6 +370,10 @@ class LcdFont:
     #        looks similar to the following HTML:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
 
+    if not self.ready:
+      print("ERROR: no font loaded")
+      return
+
     self.cursorSet(x, y, x, y, size, color, hspace, vspace)
     prevVals = {}
 
