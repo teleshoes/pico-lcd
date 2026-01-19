@@ -112,6 +112,7 @@ def main():
     'rtc': None,
     'socket': None,
     'buttons': None,
+    'wlanInfo': {'mac': None, 'ssid': None, 'ip': None},
   }
 
   lcdName = readStateLCDName()
@@ -218,6 +219,11 @@ def cmdInfo(controller, params, data):
   out += "buttons: %s\n" % (
     formatButtonCount(controller['buttons']))
   out += "lcdconf: %s\n" % controller['lcdName']
+  out += "wlan: mac=%s, ssid=%s, ip=%s\n" % (
+            controller['wlanInfo']['mac'],
+            controller['wlanInfo']['ssid'],
+            controller['wlanInfo']['ip'],
+          )
   out += "framebuf-boot: %s\n" % fbConfBootState
   out += "timeout-millis: %s\n" % controller['timeoutMillis']
   out += "timeout-template: %s\n" % str(readStateTemplate('timeout'))
@@ -735,7 +741,8 @@ def setupWifi(controller):
   wlan = network.WLAN(network.STA_IF)
   wlan.active(True)
 
-  print("MAC: " + wlan.config('mac').hex(":").upper())
+  mac = wlan.config('mac').hex(":").upper()
+  print("MAC: " + mac)
 
   NW_STAT_WRONG_PASSWORD =  -3
   NW_STAT_NO_AP_FOUND =     -2
@@ -788,6 +795,9 @@ def setupWifi(controller):
     print('connected')
     ip = wlan.ifconfig()[0]
     print('ip=' + ip)
+
+    controller['wlanInfo'] = {'mac': mac, 'ssid': connectedSSID, 'ip': ip}
+
     controller['lcdFont'].markup(replaceMarkupTemplate('wifi-connected',
       {'ip':ip}))
 
@@ -819,6 +829,9 @@ def setupAccessPoint(controller):
   print(wlan.ifconfig())
 
   ip = wlan.ifconfig()[0]
+
+  mac = wlan.config('mac').hex(":").upper()
+  controller['wlanInfo'] = {'mac': mac, 'ssid': ssid, 'ip': ip}
 
   controller['lcdFont'].markup(replaceMarkupTemplate('ap-active',
     {'ssid':ssid, 'password':password, 'ip':ip}))
