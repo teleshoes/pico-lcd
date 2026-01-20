@@ -224,6 +224,13 @@ my $USAGE = "Usage:
     -same as:
       $EXEC [OPTS] --cmd upload filename=DEST_FILENAME --upload-file=FILE
 
+  $EXEC [OPTS] delete   FILENAME
+  $EXEC [OPTS] --delete FILENAME
+  $EXEC [OPTS] --delete=FILENAME
+    delete remote file FILENAME
+    -same as:
+      $EXEC [OPTS] --cmd delete filename=FILENAME
+
   $EXEC [OPTS] bootloader | --bootloader | bootsel | --bootsel
     enter bootloader (bootsel mass storage mode)
     also sets curl --max-time to 3s, as it will hang forever otherwise
@@ -513,6 +520,14 @@ sub main(@){
         $destFilename = shift @_;
       }
       push @cmdParams, "filename=$destFilename";
+    }elsif($arg =~ /^(--delete|delete)$/ and @_ > 0 and not defined $mode){
+      $cmd = "delete";
+      $mode = $MODE_CMD;
+      push @cmdParams, "filename=" . shift @_;
+    }elsif($arg =~ /^--delete=(.+)$/ and not defined $mode){
+      $cmd = "delete";
+      $mode = $MODE_CMD;
+      push @cmdParams, "filename=" . $1;
     }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $mode){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
