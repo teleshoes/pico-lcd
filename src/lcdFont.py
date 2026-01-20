@@ -294,8 +294,13 @@ class LcdFont:
     #    !png=FILENAME!
     #      draw the PNG image, already present in the filesystem, at FILENAME
     #      cursor position is the top-left corner of the image
-    #      (memory allocation may fail if framebuf is enabled)
-    #      NOTE: does not move the cursor, use !shift=Wx0! to do so
+    #      NOTE:
+    #        framebuf does not support PNG, so disable framebuf before using !png!
+    #        if framebuf is enabled, PNG is drawn directly,
+    #          'on top' of previous framebuf,
+    #          and the rest of the markup is not shown
+    #      NOTE:
+    #        does not move the cursor, use !shift=Wx0! to do so
     #
     #    !rect=<W>x<H>!
     #    !rect=<W>,<H>!
