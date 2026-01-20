@@ -1,2 +1,2 @@
 #!/bin/sh
-cp pico-lcd-msg /usr/local/bin/
+sudo cp pico-lcd-msg /usr/local/bin/
