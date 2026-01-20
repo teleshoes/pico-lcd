@@ -574,15 +574,17 @@ def readCommandRequest(cl):
       print("WARNING: max timeout reading from socket exceeded")
       break
 
+  lastReadMs = time.ticks_ms()
   data = b""
   while len(data) < contentLen:
     try:
       chunk = cl.recv(1024)
     except:
       chunk = None
-    if chunk != None:
+    if chunk != None and len(chunk) > 0:
+      lastReadMs = time.ticks_ms()
       data += chunk
-    if time.ticks_diff(time.ticks_ms(), start_ms) > 5000:
+    if time.ticks_diff(time.ticks_ms(), lastReadMs) > 5000:
       print("WARNING: max timeout reading from socket exceeded")
       break
 
