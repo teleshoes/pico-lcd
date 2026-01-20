@@ -28,6 +28,7 @@ class LCD():
     self.buffer = None
     self.framebuf = None
     self.fbConf = FramebufConf(enabled=False)
+    self.isFramebufReady = False
 
     self.colorProfile = None
     self.isColorProfileBigEndian = True
@@ -171,14 +172,20 @@ class LCD():
   def init_framebuf(self):
     if self.buffer != None:
       (rotFBW, rotFBH) = self.get_framebuf_rotated_size()
+      self.isFramebufReady = False
       self.framebuf = framebuf.FrameBuffer(
         self.buffer, rotFBW, rotFBH, self.framebufColorProfile)
 
-      self.set_window_to_rotated_framebuf()
+      self.ensure_framebuf_window()
     else:
       self.framebuf = None
 
     self.init_colors()
+
+  def ensure_framebuf_window(self):
+    if self.is_framebuf_enabled() and not self.isFramebufReady:
+      self.set_window_to_rotated_framebuf()
+      self.isFramebufReady = True
 
   def init_colors(self):
     if not self.is_framebuf_enabled():
