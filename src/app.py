@@ -542,7 +542,7 @@ def readCommandRequest(cl):
   cmd = None
   params = {}
   while line != b'\r\n':
-    if line.startswith("POST /") or line.startswith("GET /"):
+    if line.startswith("POST /") or line.startswith("GET /") or line.startswith("PUT /"):
       segments = line.decode("utf8").split(" ")
       urlStr = segments[1]
       urlStr = urlStr[1:] #remove /
