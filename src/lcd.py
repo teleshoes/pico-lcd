@@ -271,6 +271,20 @@ class LCD():
     else:
       return None
 
+  def get_color_hex_rgb(self, hex_rgb):
+    try:
+      hex_rgb = hex_rgb.replace("#", "")
+      if len(hex_rgb) != 6:
+        print("WARNING: failed to parse color " + str(hex_rgb))
+        return None
+      r = int(hex_rgb[0:2], 16)
+      g = int(hex_rgb[2:4], 16)
+      b = int(hex_rgb[4:6], 16)
+      return self.get_color(r, g, b)
+    except Exception as e:
+      print("WARNING: failed to parse color " + str(hex_rgb) + "\n" + str(e))
+      return None
+
   def get_rotation_degrees(self):
     return self.curRotationLayout['DEG']
 

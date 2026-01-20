@@ -156,6 +156,8 @@ class LcdFont:
   def maybeReadColor(self, valStr, defaultVal):
     color = self.lcd.get_color_by_name(valStr)
     if color == None:
+      color = self.lcd.get_color_hex_rgb(valStr)
+    if color == None:
       color = defaultVal
     return color
   def maybeReadInt(self, valStr, defaultVal):
@@ -260,7 +262,10 @@ class LcdFont:
     #    !CURSOR_CMD=VAL!
     #      CURSOR_CMD = color|size|x|y|hspace|vspace
     #        !color=<COLOR>!
-    #          set the color to COLOR
+    #          set the cursor color to COLOR
+    #          COLOR = either a NAMED_COLOR or a HEX_COLOR
+    #          NAMED_COLOR = one of white black red green blue cyan magenta yellow aqua purple
+    #          HEX_COLOR   = rgb hex color formatted '#RRGGBB' e.g.: '#C0C0C0'
     #        !size=<SIZE>!
     #          set the pixels-per-dot to SIZE
     #          for 5x8 font, font size in px is: 8*SIZE
