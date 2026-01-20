@@ -411,6 +411,7 @@ class LCD():
     self.tft.png(filename, x, y)
     if self.colorProfile == COLOR_PROFILE_RGB444:
       self.set_lcd_RGB444()
+    self.isFramebufReady = False
 
   def rect(self, x, y, w, h, color, fill=True):
     if not self.is_framebuf_enabled():
