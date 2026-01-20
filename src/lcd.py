@@ -12,6 +12,9 @@ MADCTL_ML  = 0 #0:refresh-top-to-bottom  1:refresh-bottom-to-top
 MADCTL_MH  = 0 #0:refresh-left-to-right  1:refresh-right-to-left
 MADCTL_RGB = 0 #0:RGB                    1:BGR
 
+COLOR_PROFILE_RGB565 = "RGB565"
+COLOR_PROFILE_RGB444 = "RGB444"
+
 class LCD():
   def __init__(self, pins, landscapeWidth, landscapeHeight, rotationLayouts):
     self.pins = pins
@@ -25,6 +28,9 @@ class LCD():
     self.buffer = None
     self.framebuf = None
     self.fbConf = FramebufConf(enabled=False)
+
+    self.colorProfile = None
+    self.isColorProfileBigEndian = True
 
     try:
       #used only in framebuf, st7789 is RGB565 only
@@ -176,38 +182,56 @@ class LCD():
 
   def init_colors(self):
     if not self.is_framebuf_enabled():
-      #RGB565
+      #RGB565, big-endian in st7789
+      self.colorProfile = COLOR_PROFILE_RGB565
+      self.isColorProfileBigEndian = True
       self.set_lcd_RGB565()
-      self.red     = st7789.RED
-      self.green   = st7789.GREEN
-      self.blue    = st7789.BLUE
-      self.cyan    = st7789.CYAN
-      self.magenta = st7789.MAGENTA
-      self.yellow  = st7789.YELLOW
-      self.white   = st7789.WHITE
-      self.black   = st7789.BLACK
     elif self.framebufColorProfile == framebuf.RGB565:
-      #RGB565 (byte order swapped st7789 vs framebuf)
+      #RGB565, little-endian in framebuf
+      self.colorProfile = COLOR_PROFILE_RGB565
+      self.isColorProfileBigEndian = False
       self.set_lcd_RGB565()
-      self.red     = self.swap_hi_lo_byte_order(st7789.RED)
-      self.green   = self.swap_hi_lo_byte_order(st7789.GREEN)
-      self.blue    = self.swap_hi_lo_byte_order(st7789.BLUE)
-      self.cyan    = self.swap_hi_lo_byte_order(st7789.CYAN)
-      self.magenta = self.swap_hi_lo_byte_order(st7789.MAGENTA)
-      self.yellow  = self.swap_hi_lo_byte_order(st7789.YELLOW)
-      self.white   = self.swap_hi_lo_byte_order(st7789.WHITE)
-      self.black   = self.swap_hi_lo_byte_order(st7789.BLACK)
     elif self.framebufColorProfile == framebuf.RGB444:
-      #RGB444
+      #RGB444 for framebuf
+      self.colorProfile = COLOR_PROFILE_RGB444
+      self.isColorProfileBigEndian = True
       self.set_lcd_RGB444()
-      self.red     = 0b111100000000
-      self.green   = 0b000011110000
-      self.blue    = 0b000000001111
-      self.cyan    = 0b000011111111
-      self.magenta = 0b111100001111
-      self.yellow  = 0b111111110000
-      self.white   = 0b111111111111
-      self.black   = 0b000000000000
+
+    self.red     = self.get_color(0xFF, 0x00, 0x00)
+    self.green   = self.get_color(0x00, 0xFF, 0x00)
+    self.blue    = self.get_color(0x00, 0x00, 0xFF)
+    self.cyan    = self.get_color(0x00, 0xFF, 0xFF)
+    self.magenta = self.get_color(0xFF, 0x00, 0xFF)
+    self.yellow  = self.get_color(0xFF, 0xFF, 0x00)
+    self.white   = self.get_color(0xFF, 0xFF, 0xFF)
+    self.black   = self.get_color(0x00, 0x00, 0x00)
+
+  def get_color(self, r, g, b):
+    color = None
+    if self.colorProfile == COLOR_PROFILE_RGB565:
+      r5 = int(0b11111  * r/255 + 0.5)
+      g6 = int(0b111111 * g/255 + 0.5)
+      b5 = int(0b11111  * b/255 + 0.5)
+      color = (r5<<11) + (g6<<5) + (b5<<0)
+    elif self.colorProfile == COLOR_PROFILE_RGB444:
+      r4 = int(0b1111 * r/255 + 0.5)
+      g4 = int(0b1111 * g/255 + 0.5)
+      b4 = int(0b1111 * b/255 + 0.5)
+      color = (r4<<8) + (g4<<4) + (b4<<0)
+    else:
+      color = 0
+      print("WARNING: no color profile available")
+
+    if not self.isColorProfileBigEndian:
+      #RGB565 byte order is swapped in framebuf vs st7789
+      color = self.swap_hi_lo_byte_order(color)
+
+    return color
+
+  def swap_hi_lo_byte_order(self, h):
+    bHi = h >> 8
+    bLo = h & 0xff
+    return (bLo << 8) | (bHi & 0xff)
 
   def bits_per_px(self):
     if not self.is_framebuf_enabled():
@@ -246,11 +270,6 @@ class LCD():
       return self.black
     else:
       return None
-
-  def swap_hi_lo_byte_order(self, h):
-    bHi = h >> 8
-    bLo = h & 0xff
-    return (bLo << 8) | (bHi & 0xff)
 
   def get_rotation_degrees(self):
     return self.curRotationLayout['DEG']
