@@ -217,6 +217,13 @@ my $USAGE = "Usage:
               the framebuf, if any, that is actually successfully allocated is returned
               if 'framebuf: off' is returned instead of a framebuf, allocation likely failed
 
+  $EXEC [OPTS] upload   FILE [DEST_FILENAME]
+  $EXEC [OPTS] --upload FILE [DEST_FILENAME]
+  $EXEC [OPTS] --upload=FILE [DEST_FILENAME]
+    upload file FILE to DEST_FILENAME (DEST_FILENAME defaults to FILE if omitted)
+    -same as:
+      $EXEC [OPTS] --cmd upload filename=DEST_FILENAME --upload-file=FILE
+
   $EXEC [OPTS] bootloader | --bootloader | bootsel | --bootsel
     enter bootloader (bootsel mass storage mode)
     also sets curl --max-time to 3s, as it will hang forever otherwise
@@ -488,6 +495,24 @@ sub main(@){
       }elsif($mode eq $MODE_TEXT){
         push @textParams, "framebuf=$1";
       }
+    }elsif($arg =~ /^(--upload|upload)$/ and @_ > 0 and not defined $mode){
+      $cmd = "upload";
+      $mode = $MODE_CMD;
+      $cmdFile = shift @_;
+      my $destFilename = $cmdFile;
+      if(@_ > 0){
+        $destFilename = shift @_;
+      }
+      push @cmdParams, "filename=$destFilename";
+    }elsif($arg =~ /^--upload=(.+)$/ and not defined $mode){
+      $cmd = "upload";
+      $mode = $MODE_CMD;
+      $cmdFile = $1;
+      my $destFilename = $cmdFile;
+      if(@_ > 0){
+        $destFilename = shift @_;
+      }
+      push @cmdParams, "filename=$destFilename";
     }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $mode){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
