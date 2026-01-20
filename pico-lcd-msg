@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use File::Basename qw(basename);
 
-sub runCurlCmd($$$$$);
+sub runCurlCmd($$$$$$);
 sub parseConfig($);
 
 my $EXEC = basename $0;
@@ -244,8 +244,12 @@ my $USAGE = "Usage:
     --max-time CURL_MAX_TIME_FRAC_SECONDS
     --max-time=CURL_MAX_TIME_FRAC_SECONDS
       pass '--max-time CURL_MAX_TIME_FRAC_SECONDS' to all calls to curl
+
     --data=DATA
       for --cmd, pass in DATA as POST payload with curl (using '--data DATA')
+    --upload-file=FILENAME
+      for --cmd, pass in FILENAME contents as PUT payload with curl
+      (using '--upload-file' FILENAME)
 
     --ip=IP_ADDRESS
       use IP_ADDRESS in calls to curl
@@ -351,6 +355,7 @@ sub main(@){
   my $cmd = undef;
   my @cmdParams;
   my $cmdData = undef;
+  my $cmdFile = undef;
 
   while(@_ > 0){
     my $arg = shift @_;
@@ -402,6 +407,9 @@ sub main(@){
     }elsif($arg =~ /^--data=(.+)$/){
       $cmdData = $1;
       die "ERROR: --data must follow --cmd\n" if $mode ne $MODE_CMD;
+    }elsif($arg =~ /^--upload-file=(.+)$/){
+      $cmdFile = $1;
+      die "ERROR: --upload-file must follow --cmd\n" if $mode ne $MODE_CMD;
     }elsif($arg =~ /^(--info|info)$/ and not defined $mode){
       $cmd = "info";
       $mode = $MODE_CMD;
@@ -568,7 +576,7 @@ sub main(@){
   @curlOpts = (@curlOpts, "--max-time", $curlMaxTime) if defined $curlMaxTime;
 
   if($mode eq $MODE_CMD){
-    runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData);
+    runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
   }elsif($mode eq $MODE_TEXT){
     my $charsTotal = length $text;
 
@@ -694,21 +702,21 @@ sub main(@){
         @params = (@params, "show=true");
       }
 
-      runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg);
+      runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg, undef);
     }
   }elsif($mode eq $MODE_TEMPLATE_SET){
     my $set = $$TEMPLATE_SETS{$templateSet};
     for my $templateName(sort keys %$set){
       my $markup = $$set{$templateName};
-      runCurlCmd(\@curlOpts, $ipAddr, "template", ["templateName=$templateName"], $markup);
+      runCurlCmd(\@curlOpts, $ipAddr, "template", ["templateName=$templateName"], $markup, undef);
     }
   }else{
     die "ERROR: unknown mode $mode\n";
   }
 }
 
-sub runCurlCmd($$$$$){
-  my ($curlOpts, $ipAddr, $cmd, $cmdParams, $cmdData) = @_;
+sub runCurlCmd($$$$$$){
+  my ($curlOpts, $ipAddr, $cmd, $cmdParams, $cmdData, $cmdFile) = @_;
   my $paramsFmt = "";
   if(@$cmdParams > 0){
     $paramsFmt = "?" . join "&", @$cmdParams;
@@ -716,6 +724,7 @@ sub runCurlCmd($$$$$){
 
   my @curlCmd = ("curl", @$curlOpts, "http://$ipAddr/$cmd$paramsFmt");
   @curlCmd = (@curlCmd, "--data", $cmdData) if defined $cmdData;
+  @curlCmd = (@curlCmd, "--upload-file", $cmdFile) if defined $cmdFile;
   system @curlCmd;
 }
 
