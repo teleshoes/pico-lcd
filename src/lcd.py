@@ -398,6 +398,9 @@ class LCD():
     else:
       self.framebuf.fill(color)
 
+  def png(self, filename, x, y):
+    self.tft.png(filename, x, y)
+
   def rect(self, x, y, w, h, color, fill=True):
     if not self.is_framebuf_enabled():
       if fill:

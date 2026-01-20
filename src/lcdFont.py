@@ -81,6 +81,8 @@ class LcdFont:
     self.drawChar(charStr,
       self.cursor['x'], self.cursor['y'], self.cursor['size'], self.cursor['color'])
     self.cursor['x'] += int(self.cursor['size'] * (self.fontWidth + self.cursor['hspace']))
+  def cursorDrawPNG(self, filename):
+    self.lcd.png(filename, self.cursor['x'], self.cursor['y'])
   def cursorDrawRect(self, w, h):
     self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), True)
     self.cursor['x'] += w
@@ -289,6 +291,12 @@ class LcdFont:
     #                  is the same as:
     #                !color=white! A !color=blue! B !color=white! C
     #
+    #    !png=FILENAME!
+    #      draw the PNG image, already present in the filesystem, at FILENAME
+    #      cursor position is the top-left corner of the image
+    #      (memory allocation may fail if framebuf is enabled)
+    #      NOTE: does not move the cursor, use !shift=Wx0! to do so
+    #
     #    !rect=<W>x<H>!
     #    !rect=<W>,<H>!
     #       draw a rectangle from cursor at top-left to (W,H) at bottom-right
@@ -419,6 +427,8 @@ class LcdFont:
         elif cmd == "hline" or cmd == "hl" or cmd == "hr":
           # '!hr!' => hline
           self.cursorHline()
+        elif cmd == "png":
+          self.cursorDrawPNG(val)
         elif cmd == "rect":
           (w, h) = self.maybeReadCoord(val, (0,0))
           self.cursorDrawRect(w, h)
