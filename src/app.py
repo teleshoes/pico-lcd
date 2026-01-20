@@ -490,8 +490,11 @@ def setFramebuf(lcd, fbConf):
   # write the ATTEMPTED framebuf to last framebuf
   writeStateFramebuf(fbConf)
   # get the actual framebuf conf of the LCD (might have failed due to OOM)
-  fbConf = lcd.get_framebuf_conf()
-  return "framebuf: " + str(fbConf) + "\n"
+  actualFbConf = lcd.get_framebuf_conf()
+  msg = "framebuf: " + str(actualFbConf) + "\n"
+  if fbConf != actualFbConf:
+    msg += "  (framebuf allocation failed, will be set on next boot to %s)\n" % fbConf
+  return msg
 
 
 def maybeGetParamStr(params, paramName, defaultValue=None):
