@@ -203,6 +203,16 @@ CMD_FRAMEBUF = {
     <HALF_LCD_H>: 120 for lcd_2_0 or 120 for lcd_1_3
   """
 }
+CMD_UPLOAD = {
+  "name":   "upload",
+  "params": {
+    "name": "[REQUIRED] filename",
+  },
+  "body":   "file contents",
+  "desc":   """
+    write body to file 'filename'
+  """,
+}
 CMD_BOOTLOADER = {
   "name":   "bootloader",
   "params": {},

@@ -352,6 +352,24 @@ def cmdFramebuf(controller, params, socketReader):
   print("framebuf=" + str(fbConf))
   return setFramebuf(controller['lcd'], fbConf)
 
+def cmdUpload(controller, params, socketReader):
+  filename = maybeGetParamStr(params, "filename", None)
+  out = ""
+  try:
+    byteCount = 0
+    with open(filename, "w") as fh:
+      while socketReader.isReady():
+        data = socketReader.readDataChunk()
+        if data != None:
+          dataLen = len(data)
+          byteCount += dataLen
+          print("wrote %d bytes" % dataLen)
+          fh.write(data)
+    out = "wrote %d bytes to file %s\n" % (byteCount, filename)
+  except Exception as e:
+    print("WARNING: upload failed\n" + str(e))
+  return out
+
 def cmdBootloader(controller, params, data):
   print("ENTERING BOOTLOADER")
   machine.bootloader()
