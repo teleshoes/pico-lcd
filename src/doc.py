@@ -213,6 +213,16 @@ CMD_UPLOAD = {
     write body to file 'filename'
   """,
 }
+CMD_DELETE = {
+  "name":   "delete",
+  "params": {
+    "name": "[REQUIRED] filename",
+  },
+  "body":   "file contents",
+  "desc":   """
+    delete file 'filename'
+  """,
+}
 CMD_BOOTLOADER = {
   "name":   "bootloader",
   "params": {},

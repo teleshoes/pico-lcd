@@ -370,6 +370,16 @@ def cmdUpload(controller, params, socketReader):
     print("WARNING: upload failed\n" + str(e))
   return out
 
+def cmdDelete(controller, params, socketReader):
+  filename = maybeGetParamStr(params, "filename", None)
+  out = ""
+  try:
+    os.remove(filename)
+    out += "deleted file %s\n" % filename
+  except Exception as e:
+    print("WARNING: delete file failed\n" + str(e))
+  return out
+
 def cmdBootloader(controller, params, data):
   print("ENTERING BOOTLOADER")
   machine.bootloader()
