@@ -594,7 +594,8 @@ class SocketReader:
   def readDataChunk(self):
     try:
       chunk = self.socket.recv(1024)
-    except:
+    except Exception as e:
+      print("WARNING: error reading from socket\n" + str(e))
       chunk = None
     if chunk != None and len(chunk) > 0:
       self.lastReadMs = time.ticks_ms()
