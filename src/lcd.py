@@ -399,7 +399,11 @@ class LCD():
       self.framebuf.fill(color)
 
   def png(self, filename, x, y):
+    if self.colorProfile == COLOR_PROFILE_RGB444:
+      self.set_lcd_RGB565()
     self.tft.png(filename, x, y)
+    if self.colorProfile == COLOR_PROFILE_RGB444:
+      self.set_lcd_RGB444()
 
   def rect(self, x, y, w, h, color, fill=True):
     if not self.is_framebuf_enabled():
