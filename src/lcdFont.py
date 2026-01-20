@@ -123,8 +123,7 @@ class LcdFont:
     byteIndex = 0
     bitIndex = 0
     byte = fontCharBytes[byteIndex]
-    if color == None:
-      color = self.lcd.get_color_by_name(self.defaultColorName)
+    color = self.getOptColor(color)
     for chX in range(self.fontWidth):
       for chY in range(self.fontHeight):
         if bitIndex >= 8:
