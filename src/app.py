@@ -170,12 +170,12 @@ def main():
         controller['lcdFont'].markup(controller['timeoutMarkup'])
         continue
 
-      (cmdName, params, data) = readCommandRequest(cl)
+      (cmdName, params, socketReader) = readCommandRequest(cl)
 
       if cmdName in cmdFunctionsByName:
         print('cmd: ' + cmdName)
         cmdFunction = cmdFunctionsByName[cmdName]
-        out = cmdFunction(controller, params, data)
+        out = cmdFunction(controller, params, socketReader)
       else:
         raise(Exception("ERROR: could not parse cmdName in payload"))
 
@@ -232,11 +232,11 @@ def cmdInfo(controller, params, data):
   out += "board: %s\n" % os.uname().machine
   return out
 
-def cmdConnect(controller, params, data):
+def cmdConnect(controller, params, socketReader):
   setupWifi(controller)
   return None
 
-def cmdSSID(controller, params, data):
+def cmdSSID(controller, params, socketReader):
   ssid = maybeGetParamStr(params, "ssid", None)
   password = maybeGetParamStr(params, "password", None)
   timeout = maybeGetParamInt(params, "timeout", None)
@@ -252,15 +252,15 @@ def cmdSSID(controller, params, data):
     out = "ERROR: missing ssid or password\n"
   return out
 
-def cmdResetWifi(controller, params, data):
+def cmdResetWifi(controller, params, socketReader):
   writeStateWifiConfReset()
   out = "WARNING: all wifi networks removed for next boot\n"
   return out
 
-def cmdTemplate(controller, params, data):
+def cmdTemplate(controller, params, socketReader):
   controller['timeoutMarkup'] = None
   templateName = maybeGetParamStr(params, "templateName", None)
-  templateMarkup = data.decode("utf8")
+  templateMarkup = socketReader.readDataStr()
   out = ""
   if templateName != None:
     writeStateTemplate(templateName, templateMarkup)
@@ -268,7 +268,7 @@ def cmdTemplate(controller, params, data):
   out += "\n"
   return out
 
-def cmdTimeout(controller, params, data):
+def cmdTimeout(controller, params, socketReader):
   timeoutMillis = maybeGetParamInt(params, "timeoutMillis", None)
   print("timeout: " + str(timeoutMillis))
   writeStateTimeout(timeoutMillis)
@@ -278,7 +278,7 @@ def cmdTimeout(controller, params, data):
     controller['timeoutMillis'] = timeoutMillis
   return None
 
-def cmdTimezone(controller, params, data):
+def cmdTimezone(controller, params, socketReader):
   tzName = maybeGetParamStr(params, "name", None)
   writeStateTimezone(tzName)
   print("set timezone for rtc = " + str(tzName))
@@ -286,7 +286,7 @@ def cmdTimezone(controller, params, data):
     controller['rtc'].setOffsetTZDataCsvFile(getTZDataCsvFile(readStateTimezone()))
   return None
 
-def cmdRTC(controller, params, data):
+def cmdRTC(controller, params, socketReader):
   #epoch param must be in seconds since midnight 1970-01-01 UTC
   epoch = maybeGetParamInt(params, "epoch", None)
   out = ""
@@ -299,18 +299,18 @@ def cmdRTC(controller, params, data):
   out += "RTC ISO=" + str(controller['rtc'].getTimeISO()) + "\n"
   return out
 
-def cmdClear(controller, params, data):
+def cmdClear(controller, params, socketReader):
   controller['lcd'].fill_mem_blank()
   return None
 
-def cmdShow(controller, params, data):
+def cmdShow(controller, params, socketReader):
   controller['lcd'].show()
   return None
 
-def cmdButtons(controller, params, data):
+def cmdButtons(controller, params, socketReader):
   return formatButtonCount(controller['buttons']) + "\n"
 
-def cmdFill(controller, params, data):
+def cmdFill(controller, params, socketReader):
   colorName = maybeGetParamStr(params, "color", None)
   color = controller['lcd'].get_color_by_name(colorName)
   out = ""
@@ -321,7 +321,7 @@ def cmdFill(controller, params, data):
     controller['lcd'].show()
   return out
 
-def cmdLCD(controller, params, data):
+def cmdLCD(controller, params, socketReader):
   name = maybeGetParamStr(params, "name", None)
   if name in LCD_CONFS:
     removeButtonHandlers(controller['buttons'])
@@ -337,13 +337,13 @@ def cmdLCD(controller, params, data):
     raise ValueError("ERROR: missing LCD param 'name'\n")
   return None
 
-def cmdOrient(controller, params, data):
+def cmdOrient(controller, params, socketReader):
   orient = maybeGetParamStr(params, "orient", None)
   print("orient=" + orient)
 
   return setOrientation(controller['lcd'], orient)
 
-def cmdFramebuf(controller, params, data):
+def cmdFramebuf(controller, params, socketReader):
   fbConfStr = maybeGetParamStr(params, "framebuf", None)
   fbConf = FramebufConf.parseFramebufConfStr(
     fbConfStr,
@@ -358,13 +358,13 @@ def cmdBootloader(controller, params, data):
   print("WARNING: bootloader mode failed")
   return None
 
-def cmdText(controller, params, data):
+def cmdText(controller, params, socketReader):
   isClear = maybeGetParamBool(params, "clear", True)
   isShow = maybeGetParamBool(params, "show", True)
   fbConfStr = maybeGetParamStr(params, "framebuf", None)
   orient = maybeGetParamStr(params, "orient", None)
   info = maybeGetParamBool(params, "info", False)
-  markup = data.decode("utf8")
+  markup = socketReader.readDataStr()
 
   fbConf = FramebufConf.parseFramebufConfStr(
     fbConfStr,
@@ -574,21 +574,42 @@ def readCommandRequest(cl):
       print("WARNING: max timeout reading from socket exceeded")
       break
 
-  lastReadMs = time.ticks_ms()
-  data = b""
-  while len(data) < contentLen:
+  socketReader = SocketReader(cl, contentLen)
+
+  return (cmd, params, socketReader)
+
+class SocketReader:
+  def __init__(self, socket, contentLen):
+    self.socket = socket
+    self.contentLen = contentLen
+    self.lastReadMs = time.ticks_ms()
+    self.bytesRead = 0
+  def readDataStr(self):
+    data = b""
+    while self.isReady():
+      chunk = self.readDataChunk()
+      if chunk != None:
+        data += chunk
+    return data.decode("utf8")
+  def readDataChunk(self):
     try:
-      chunk = cl.recv(1024)
+      chunk = self.socket.recv(1024)
     except:
       chunk = None
     if chunk != None and len(chunk) > 0:
-      lastReadMs = time.ticks_ms()
-      data += chunk
-    if time.ticks_diff(time.ticks_ms(), lastReadMs) > 5000:
-      print("WARNING: max timeout reading from socket exceeded")
-      break
-
-  return (cmd, params, data)
+      self.lastReadMs = time.ticks_ms()
+      self.bytesRead += len(chunk)
+    return chunk
+  def isReady(self):
+    return self.hasData() and not self.isTimeout()
+  def isTimeout(self):
+    if time.ticks_diff(time.ticks_ms(), self.lastReadMs) > 5000:
+      print("WARNING: exceeded timeout (5s) reading from socket")
+      return True
+    else:
+      return False
+  def hasData(self):
+    return self.bytesRead < self.contentLen
 
 def readStateWifiConf():
   networks = []
