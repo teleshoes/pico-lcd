@@ -526,6 +526,9 @@ def buttonPressedHandler(pin, btnName, controller):
       elif x>=160 and y>=120:
         buttonPressedHandler(None, 'BR', controller)
 
+  #in case button handling takes a very long time, like drawing PNGs
+  controller['buttons']['lastPress'][btnName] = time.ticks_ms()
+
 
 def removeButtonHandlers(buttons):
   if buttons != None:
