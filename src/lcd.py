@@ -407,10 +407,11 @@ class LCD():
 
   def png(self, filename, x, y):
     if self.is_framebuf_enabled():
-      print("WARNING: PNG not supported by framebuf"
-        + " (drawing on top of framebuf,"
-        + " and disabling show until window reset)"
-      )
+      #framebuf does not support PNG, so draw it directly
+      # this moves the window, so need to reset it on next show
+      (rotFBX, rotFBY) = self.get_framebuf_rotated_offset()
+      x += rotFBX
+      y += rotFBY
       self.isWindowSetToFramebuf = False
 
     #st7789 supports RGB565 only
@@ -422,6 +423,7 @@ class LCD():
     except Exception as e:
       print("WARNING: png render failed\n" + str(e))
 
+    #restore color profile
     if self.colorProfile == COLOR_PROFILE_RGB444:
       self.set_lcd_RGB444()
 
