@@ -451,7 +451,7 @@ def createLCD(lcdName):
   return lcd
 
 def createButtons(lcdName):
-  buttons = {'pins': {}, 'lastPress': {}, 'count': {}, 'btnType': {}}
+  buttons = {'pins': {}, 'lastPress': {}, 'count': {}, 'btnType': {}, 'touchData': {}}
 
   lcdConf = LCD_CONFS[lcdName]
 
@@ -461,14 +461,21 @@ def createButtons(lcdName):
     buttons['count'][btnName] = 0
     buttons['pins'][btnName] = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
     buttons['btnType'][btnName] = 'BUTTON'
+    buttons['touchData'][btnName] = None
 
   if lcdConf['touchIRQ'] != None:
+    board = getBoard()
+    touchData = None
+    if board in lcdConf['touchData']:
+      touchData = lcdConf['touchData'][board]
+
     btnName = 'TOUCH' + str(lcdConf['touchIRQ'])
     gpioPin = lcdConf['touchIRQ']
     buttons['lastPress'][btnName] = None
     buttons['count'][btnName] = 0
     buttons['pins'][btnName] = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
     buttons['btnType'][btnName] = 'TOUCH_IRQ'
+    buttons['touchData'][btnName] = touchData
 
   return buttons
 
@@ -496,7 +503,9 @@ def buttonPressedHandler(pin, btnName, controller):
     controller['buttons']['count'][btnName] += 1
     buttonPressedActions(btnName, controller)
   elif btnType == 'TOUCH_IRQ':
-    print("TAPPED: %s" % (btnName))
+    touchData = controller['buttons']['touchData'][btnName]
+    (x, y) = controller['lcd'].get_touch_coord(touchData)
+    print("TAPPED: %s  at (%d,%d)" % (btnName, x, y))
 
 
 def removeButtonHandlers(buttons):
