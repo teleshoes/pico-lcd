@@ -253,11 +253,14 @@ class LcdFont:
   def show(self):
     self.lcd.show()
 
+  def clear(self):
+    self.lcd.fill(self.lcd.black)
+
   def markup(self, markup, isClear=True, isShow=True,
     x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0
   ):
     if isClear:
-      self.lcd.fill(self.lcd.black)
+      self.clear()
     self.drawMarkup(markup, x, y, size, color, hspace, vspace)
     if isShow:
       self.show()
