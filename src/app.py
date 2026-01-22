@@ -304,7 +304,7 @@ def cmdClear(controller, params, socketReader):
   return None
 
 def cmdShow(controller, params, socketReader):
-  controller['lcd'].show()
+  controller['lcdFont'].show()
   return None
 
 def cmdButtons(controller, params, socketReader):
