@@ -266,6 +266,13 @@ class LcdFont:
 
   def clear(self):
     self.lcd.fill(self.lcd.black)
+    self.clearPNG()
+
+  def clearFullLCD(self):
+    self.lcd.fill_mem_blank()
+    self.clearPNG()
+
+  def clearPNG(self):
     self.pngInfosToShow = []
 
   def markup(self, markup, isClear=True, isShow=True,

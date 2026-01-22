@@ -300,7 +300,7 @@ def cmdRTC(controller, params, socketReader):
   return out
 
 def cmdClear(controller, params, socketReader):
-  controller['lcd'].fill_mem_blank()
+  controller['lcdFont'].clearFullLCD()
   return None
 
 def cmdShow(controller, params, socketReader):
