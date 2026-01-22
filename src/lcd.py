@@ -602,6 +602,9 @@ class LCD():
     xRaw /= samples
     yRaw /= samples
 
+    xPico1Data = [4095, 3892, 384]
+    yPico1Data = [0,    304, 3744]
+
     xPico2Data = [8191, 7984, 4492]
     yPico2Data = [4096, 4422, 7808]
 
