@@ -416,7 +416,12 @@ class LCD():
     #st7789 supports RGB565 only
     if self.colorProfile == COLOR_PROFILE_RGB444:
       self.set_lcd_RGB565()
-    self.tft.png(filename, x, y)
+
+    try:
+      self.tft.png(filename, x, y)
+    except Exception as e:
+      print("WARNING: png render failed\n" + str(e))
+
     if self.colorProfile == COLOR_PROFILE_RGB444:
       self.set_lcd_RGB444()
 
