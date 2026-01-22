@@ -22,6 +22,7 @@ LCD_CONFS = {
     "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':None, 'MISO':None},
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
                 'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
+    "touchIRQ": None,
     "touchData": None,
     "landscapeWidth":  240,
     "landscapeHeight": 240,
@@ -35,6 +36,7 @@ LCD_CONFS = {
   doc.LCD_NAME_2_0: {
     "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':None, 'MISO':None},
     "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
+    "touchIRQ": None,
     "touchData": None,
     "landscapeWidth":  320,
     "landscapeHeight": 240,
@@ -47,7 +49,8 @@ LCD_CONFS = {
   },
   doc.LCD_NAME_2_8: {
     "lcdPins": {'BL':13, 'DC':8, 'RST':15, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':16, 'MISO':12},
-    "buttons": {'TS':17},
+    "buttons": {},
+    "touchIRQ": 17,
     "touchData": { BOARD_RP2040: {'OFF':(4095,   0), 'L':3892, 'R': 384, 'T':  304, 'B':3744},
                    BOARD_RP2350: {'OFF':(8191,4096), 'L':7984, 'R':4492, 'T': 4422, 'B':7808},
     },
@@ -448,14 +451,24 @@ def createLCD(lcdName):
   return lcd
 
 def createButtons(lcdName):
-  buttons = {'pins': {}, 'lastPress': {}, 'count': {}}
+  buttons = {'pins': {}, 'lastPress': {}, 'count': {}, 'btnType': {}}
 
   lcdConf = LCD_CONFS[lcdName]
+
   for btnName in lcdConf['buttons']:
     gpioPin = lcdConf['buttons'][btnName]
     buttons['lastPress'][btnName] = None
     buttons['count'][btnName] = 0
     buttons['pins'][btnName] = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
+    buttons['btnType'][btnName] = 'BUTTON'
+
+  if lcdConf['touchIRQ'] != None:
+    btnName = 'TOUCH' + str(lcdConf['touchIRQ'])
+    gpioPin = lcdConf['touchIRQ']
+    buttons['lastPress'][btnName] = None
+    buttons['count'][btnName] = 0
+    buttons['pins'][btnName] = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
+    buttons['btnType'][btnName] = 'TOUCH_IRQ'
 
   return buttons
 
@@ -477,10 +490,14 @@ def buttonPressedHandler(pin, btnName, controller):
       return
   controller['buttons']['lastPress'][btnName] = nowTicks
 
-  print("PRESSED: " + btnName + " " + str(pin))
-  controller['buttons']['count'][btnName] += 1
+  btnType = controller['buttons']['btnType'][btnName]
+  if btnType == 'BUTTON':
+    print("PRESSED: " + btnName + " " + str(pin))
+    controller['buttons']['count'][btnName] += 1
+    buttonPressedActions(btnName, controller)
+  elif btnType == 'TOUCH_IRQ':
+    print("TAPPED: %s" % (btnName))
 
-  buttonPressedActions(btnName, controller)
 
 def removeButtonHandlers(buttons):
   if buttons != None:
