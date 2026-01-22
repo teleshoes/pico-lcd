@@ -326,7 +326,6 @@ class LCD():
           self.transposeBufferRowColCount()
 
     self.init_framebuf()
-    self.show()
 
   # transpose row count and column count, blanking the cut-off region
   #   e.g.:
