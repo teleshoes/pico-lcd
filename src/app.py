@@ -16,7 +16,7 @@ from lcdFont import LcdFont
 
 LCD_CONFS = {
   doc.LCD_NAME_1_3: {
-    "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9},
+    "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':None, 'MISO':None},
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
                 'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
     "landscapeWidth":  240,
@@ -29,7 +29,7 @@ LCD_CONFS = {
     ],
   },
   doc.LCD_NAME_2_0: {
-    "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9},
+    "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':None, 'MISO':None},
     "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
     "landscapeWidth":  320,
     "landscapeHeight": 240,
@@ -41,7 +41,7 @@ LCD_CONFS = {
     ],
   },
   doc.LCD_NAME_2_8: {
-    "lcdPins": {'BL':13, 'DC':8, 'RST':15, 'MOSI':11, 'SCK':10, 'CS':9},
+    "lcdPins": {'BL':13, 'DC':8, 'RST':15, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':16, 'MISO':12},
     "buttons": {'TS':17},
     "landscapeWidth":  320,
     "landscapeHeight": 240,

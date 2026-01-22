@@ -45,8 +45,16 @@ class LCD():
       tftRotationTuples.append(self.convert_rotation_layout_to_tft_tuple(
         self.lcdLandscapeWidth, self.lcdLandscapeHeight, rotationLayout))
 
-    self.spi = machine.SPI(1, 100000_000, polarity=0, phase=0,
-      sck=machine.Pin(self.pins['SCK']), mosi=machine.Pin(self.pins['MOSI']), miso=None)
+    misoPin = None
+    if self.pins['MISO'] != None:
+      misoPin = machine.Pin(self.pins['MISO'])
+
+    self.spi = machine.SPI(1, 100_000_000, polarity=0, phase=0,
+      sck=machine.Pin(self.pins['SCK']), mosi=machine.Pin(self.pins['MOSI']), miso=misoPin)
+
+    self.tpcs = None
+    if self.pins['TPCS'] != None:
+      self.tpcs = machine.Pin(self.pins['TPCS'], machine.Pin.OUT)
 
     self.dc = machine.Pin(self.pins['DC'], machine.Pin.OUT)
     self.cs = machine.Pin(self.pins['CS'], machine.Pin.OUT)
