@@ -112,7 +112,7 @@ DEFAULT_MARKUP_TEMPLATES = {
 }
 
 def buttonPressedActions(btnName, controller):
-  if btnName == "B2" or btnName == "A":
+  if btnName == "B2" or btnName == "A" or btnName == "BL":
     controller['lcd'].set_rotation_next()
     writeStateOrientation(controller['lcd'].get_rotation_degrees())
     controller['lcdFont'].show()
