@@ -295,12 +295,34 @@ class LcdFont:
     #      draw the PNG image, already present in the filesystem, at FILENAME
     #      cursor position is the top-left corner of the image
     #      NOTE:
-    #        framebuf does not support PNG, so disable framebuf before using !png!
-    #        if framebuf is enabled, PNG is drawn directly,
-    #          'on top' of previous framebuf,
-    #          and the rest of the markup is not shown
-    #      NOTE:
-    #        does not move the cursor, use !shift=Wx0! to do so
+    #        A) file must already be on the filesystem, uploaded beforehand with upload command
+    #        B) does not move the cursor, use !shift=Wx0! to do so
+    #        C) framebuf does not support PNG
+    #           if framebuf is enabled,
+    #             PNG is drawn directly, relative to the LCD, ignoring the framebuf offset,
+    #               'on top' of the previous content,
+    #               and the framebuf for that call is *not* rendered
+    #           this means all non-PNG markup is ignored
+    #           THEREFORE, either:
+    #             1) disable framebuf before using !png!, and everything works
+    #             or
+    #             2) draw all non-PNG markup first,
+    #                and then draw PNG markup in a second separate call
+    #                (multiple PNGs at once is fine)
+    #             e.g.: draw one 16x16 icon twice, with a label,
+    #                       and then another 16x16 icon with another label beneath it
+    #                     formatted like this:
+    #                       Ax2:[a][a]
+    #                       Bx1:[b]
+    #                     use two drawMarkup() calls,
+    #                       one to draw the labels first,
+    #                       and one just for the three PNGs
+    #
+    #                   drawMarkup(): !size=2!!color=red!  Ax2:!n!  Bx1:
+    #                   drawMarkup(): !shift=70x0!!png=icon_a_16x16.png!
+    #                                 !shift=16x0!!png=icon_a_16x16.png!
+    #                                 !size=2!!n!
+    #                                 !shift=70x0!!png=icon_b_16x16.png!
     #
     #    !rect=<W>x<H>!
     #    !rect=<W>,<H>!
