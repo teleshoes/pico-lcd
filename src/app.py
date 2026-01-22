@@ -115,6 +115,7 @@ def buttonPressedActions(btnName, controller):
   if btnName == "B2" or btnName == "A":
     controller['lcd'].set_rotation_next()
     writeStateOrientation(controller['lcd'].get_rotation_degrees())
+    controller['lcdFont'].show()
 
 def main():
   controller = {
