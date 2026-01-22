@@ -411,17 +411,14 @@ class LCD():
         + " (drawing on top of framebuf,"
         + " and disabling show until window reset)"
       )
-
-      #st7789 supports RGB565 only
-      if self.colorProfile == COLOR_PROFILE_RGB444:
-        self.set_lcd_RGB565()
-      self.tft.png(filename, x, y)
-      if self.colorProfile == COLOR_PROFILE_RGB444:
-        self.set_lcd_RGB444()
-
       self.isWindowSetToFramebuf = False
-    else:
-      self.tft.png(filename, x, y)
+
+    #st7789 supports RGB565 only
+    if self.colorProfile == COLOR_PROFILE_RGB444:
+      self.set_lcd_RGB565()
+    self.tft.png(filename, x, y)
+    if self.colorProfile == COLOR_PROFILE_RGB444:
+      self.set_lcd_RGB444()
 
   def rect(self, x, y, w, h, color, fill=True):
     if not self.is_framebuf_enabled():
