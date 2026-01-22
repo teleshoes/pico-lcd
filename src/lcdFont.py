@@ -19,6 +19,7 @@ class LcdFont:
     self.bytesPerChar = None
     self.fontReady = False
     self.cursor = None
+    self.pngInfosToShow = []
 
   def setup(self):
     if not self.fontReady:
@@ -82,7 +83,15 @@ class LcdFont:
       self.cursor['x'], self.cursor['y'], self.cursor['size'], self.cursor['color'])
     self.cursor['x'] += int(self.cursor['size'] * (self.fontWidth + self.cursor['hspace']))
   def cursorDrawPNG(self, filename):
-    self.lcd.png(filename, self.cursor['x'], self.cursor['y'])
+    if self.lcd.is_framebuf_enabled():
+      #delay drawing PNGs until after framebuf is shown
+      self.pngInfosToShow.append({
+        "filename":filename,
+        "x":self.cursor['x'],
+        "y":self.cursor['y'],
+      })
+    else:
+      self.lcd.png(filename, self.cursor['x'], self.cursor['y'])
   def cursorDrawRect(self, w, h):
     self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), True)
     self.cursor['x'] += w
@@ -252,9 +261,12 @@ class LcdFont:
 
   def show(self):
     self.lcd.show()
+    for pngInfo in self.pngInfosToShow:
+      self.lcd.png(pngInfo['filename'], pngInfo['x'], pngInfo['y'])
 
   def clear(self):
     self.lcd.fill(self.lcd.black)
+    self.pngInfosToShow = []
 
   def markup(self, markup, isClear=True, isShow=True,
     x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0
@@ -302,33 +314,26 @@ class LcdFont:
     #      cursor position is the top-left corner of the image
     #      NOTE:
     #        A) file must already be on the filesystem, uploaded beforehand with upload command
-    #        B) does not move the cursor, use !shift=Wx0! to do so
-    #        C) framebuf does not support PNG
-    #           if framebuf is enabled,
-    #             PNG is drawn directly, relative to the LCD, ignoring the framebuf offset,
-    #               'on top' of the previous content,
-    #               and the framebuf for that call is *not* rendered
-    #           this means all non-PNG markup is ignored
-    #           THEREFORE, either:
-    #             1) disable framebuf before using !png!, and everything works
-    #             or
-    #             2) draw all non-PNG markup first,
-    #                and then draw PNG markup in a second separate call
-    #                (multiple PNGs at once is fine)
-    #             e.g.: draw one 16x16 icon twice, with a label,
-    #                       and then another 16x16 icon with another label beneath it
-    #                     formatted like this:
-    #                       Ax2:[a][a]
-    #                       Bx1:[b]
-    #                     use two drawMarkup() calls,
-    #                       one to draw the labels first,
-    #                       and one just for the three PNGs
+    #        B) does not move the cursor, use !shift=<W>x0! to do so, where <W> is the PNG width
+    #        C) framebuf does not support PNG:
+    #             if framebuf is enabled:
+    #               -PNGs are drawn directly on the LCD, not the framebuf
+    #               -PNGs are offset by the same amount as the framebuf,
+    #                 but they may extend past the area of the framebuf
+    #               -PNGs are drawn only after building and showing the framebuf
+    #                  -PNGs are always 'on top' of any other markup in framebuf
+    #                  -PNGs will 'flicker' when being redrawn, if they overlap the framebuf
+    #               -PNGs are re-drawn on each show until clear() is called
     #
-    #                   drawMarkup(): !size=2!!color=red!  Ax2:!n!  Bx1:
-    #                   drawMarkup(): !shift=70x0!!png=icon_a_16x16.png!
-    #                                 !shift=16x0!!png=icon_a_16x16.png!
-    #                                 !size=2!!n!
-    #                                 !shift=70x0!!png=icon_b_16x16.png!
+    #      e.g.: draw one 16x16 icon twice, with a label,
+    #              and then another 16x16 icon with another label beneath it,
+    #              formatted like this:
+    #                Ax2:[a][a]
+    #                Bx1:[b]
+    #            !size=2!!color=red!
+    #            Ax2:!png=icon_a_16x16.png!!shift=16x0!!png=icon_a_16x16.png!
+    #            !n!
+    #            Bx1:!png=icon_b_16x16.png!
     #
     #    !rect=<W>x<H>!
     #    !rect=<W>,<H>!
