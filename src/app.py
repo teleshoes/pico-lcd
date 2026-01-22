@@ -476,6 +476,14 @@ def createButtons(lcdName):
     buttons['pins'][btnName] = machine.Pin(gpioPin, machine.Pin.IN, machine.Pin.PULL_UP)
     buttons['btnType'][btnName] = 'TOUCH_IRQ'
     buttons['touchData'][btnName] = touchData
+    for area in ['TL', 'TR', 'BL', 'BR']:
+      btnName = area
+      gpioPin = None
+      buttons['lastPress'][btnName] = None
+      buttons['count'][btnName] = 0
+      buttons['pins'][btnName] = None
+      buttons['btnType'][btnName] = 'TOUCH_AREA'
+      buttons['touchData'][btnName] = None
 
   return buttons
 
@@ -483,9 +491,10 @@ def addButtonHandlers(buttons, controller):
   if buttons != None:
     for btnName in buttons['pins']:
       pin = buttons['pins'][btnName]
-      pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
-        lambda pin, btn=btnName, c=controller: buttonPressedHandler(pin, btn, c)
-      ))
+      if pin != None:
+        pin.irq(trigger=machine.Pin.IRQ_FALLING, handler=(
+          lambda pin, btn=btnName, c=controller: buttonPressedHandler(pin, btn, c)
+        ))
 
 def buttonPressedHandler(pin, btnName, controller):
   #debounce 0.25s
@@ -498,7 +507,7 @@ def buttonPressedHandler(pin, btnName, controller):
   controller['buttons']['lastPress'][btnName] = nowTicks
 
   btnType = controller['buttons']['btnType'][btnName]
-  if btnType == 'BUTTON':
+  if btnType == 'BUTTON' or btnType == 'TOUCH_AREA':
     print("PRESSED: " + btnName + " " + str(pin))
     controller['buttons']['count'][btnName] += 1
     buttonPressedActions(btnName, controller)
@@ -506,6 +515,15 @@ def buttonPressedHandler(pin, btnName, controller):
     touchData = controller['buttons']['touchData'][btnName]
     (x, y) = controller['lcd'].get_touch_coord(touchData)
     print("TAPPED: %s  at (%d,%d)" % (btnName, x, y))
+    if x>0 or y>0:
+      if x<160 and y<120:
+        buttonPressedHandler(None, 'TL', controller)
+      elif x>=160 and y<120:
+        buttonPressedHandler(None, 'TR', controller)
+      elif x<160 and y>=120:
+        buttonPressedHandler(None, 'BL', controller)
+      elif x>=160 and y>=120:
+        buttonPressedHandler(None, 'BR', controller)
 
 
 def removeButtonHandlers(buttons):
