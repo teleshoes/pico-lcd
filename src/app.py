@@ -14,6 +14,9 @@ from rtc import RTC_DS3231
 from lcd import LCD, FramebufConf
 from lcdFont import LcdFont
 
+BOARD_RP2040 = "RP2040"
+BOARD_RP2350 = "RP2350"
+
 LCD_CONFS = {
   doc.LCD_NAME_1_3: {
     "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':None, 'MISO':None},
@@ -912,6 +915,15 @@ def maybeGetRTC():
     else:
       print("WARNING: rtc error " + str(e))
   return rtc
+
+def getBoard():
+  machine = os.uname().machine
+  if "RP2040" in machine:
+    return BOARD_RP2040
+  elif "RP2350" in machine:
+    return BOARD_RP2350
+  else:
+    return None
 
 def getSocket():
   addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
