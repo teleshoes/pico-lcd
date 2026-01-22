@@ -406,12 +406,22 @@ class LCD():
       self.framebuf.fill(color)
 
   def png(self, filename, x, y):
-    if self.colorProfile == COLOR_PROFILE_RGB444:
-      self.set_lcd_RGB565()
-    self.tft.png(filename, x, y)
-    if self.colorProfile == COLOR_PROFILE_RGB444:
-      self.set_lcd_RGB444()
-    self.isFramebufReady = False
+    if self.is_framebuf_enabled():
+      print("WARNING: PNG not supported by framebuf"
+        + " (drawing on top of framebuf,"
+        + " and disabling show until window reset)"
+      )
+
+      #st7789 supports RGB565 only
+      if self.colorProfile == COLOR_PROFILE_RGB444:
+        self.set_lcd_RGB565()
+      self.tft.png(filename, x, y)
+      if self.colorProfile == COLOR_PROFILE_RGB444:
+        self.set_lcd_RGB444()
+
+      self.isFramebufReady = False
+    else:
+      self.tft.png(filename, x, y)
 
   def rect(self, x, y, w, h, color, fill=True):
     if not self.is_framebuf_enabled():
@@ -599,7 +609,7 @@ class LCD():
     self.write_data(bytearray([yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]))
 
   def show(self):
-    if self.is_framebuf_enabled():
+    if self.is_framebuf_enabled() and self.isFramebufReady:
       self.write_cmd(0x2C)
       self.write_data(self.buffer)
 
