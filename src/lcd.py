@@ -583,6 +583,44 @@ class LCD():
     self.spi.write(data)
     self.cs(1)
 
+  def get_touch_coord(self):
+    self.spi.init(baudrate=5_000_000)
+    self.tpcs(0)
+    (xRaw, yRaw) = (0, 0)
+    samples = 20
+    for i in range(0, samples):
+      time.sleep_us(10)
+      self.spi.write(bytearray([0x90]))
+      xData = self.spi.read(2)
+
+      time.sleep_us(10)
+      self.spi.write(bytearray([0xD0]))
+      yData = self.spi.read(2)
+
+      xRaw += ((xData[0]<<8) + xData[1]) >> 3
+      yRaw += ((yData[0]<<8) + yData[1]) >> 3
+    xRaw /= samples
+    yRaw /= samples
+
+    xPico2Data = [8191, 7984, 4492]
+    yPico2Data = [4096, 4422, 7808]
+
+    (xNoTouch, leftEdge, rightEdge) = xPico2Data
+    (yNoTouch, topEdge, bottomEdge) = yPico2Data
+
+    maxX = self.lcdLandscapeWidth
+    maxY = self.lcdLandscapeHeight
+
+    x = int(maxX * ((xRaw - leftEdge) / (rightEdge  - leftEdge)) + 0.5)
+    y = int(maxY * ((yRaw - topEdge)  / (bottomEdge - topEdge))  + 0.5)
+
+    x = max(0, min(maxX, x))
+    y = max(0, min(maxY, y))
+
+    self.tpcs(1)
+    self.spi.init(baudrate=100_000_000)
+    return (x, y)
+
   def fill_mem_blank(self):
     numberOfChunks = 256
     memWidth = 320
