@@ -583,7 +583,9 @@ class LCD():
     self.spi.write(data)
     self.cs(1)
 
-  def get_touch_coord(self):
+  def get_touch_coord(self, touchData):
+    if self.tpcs == None or touchData == None:
+      return (None, None)
     self.spi.init(baudrate=5_000_000)
     self.tpcs(0)
     (xRaw, yRaw) = (0, 0)
@@ -602,14 +604,10 @@ class LCD():
     xRaw /= samples
     yRaw /= samples
 
-    xPico1Data = [4095, 3892, 384]
-    yPico1Data = [0,    304, 3744]
+    (xOff, yOff) = touchData['OFF']
 
-    xPico2Data = [8191, 7984, 4492]
-    yPico2Data = [4096, 4422, 7808]
-
-    (xNoTouch, leftEdge, rightEdge) = xPico2Data
-    (yNoTouch, topEdge, bottomEdge) = yPico2Data
+    (leftEdge, rightEdge, topEdge, bottomEdge) = (
+      touchData['L'], touchData['R'], touchData['T'], touchData['B'])
 
     maxX = self.lcdLandscapeWidth
     maxY = self.lcdLandscapeHeight

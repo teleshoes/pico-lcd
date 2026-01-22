@@ -22,6 +22,7 @@ LCD_CONFS = {
     "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':None, 'MISO':None},
     "buttons": {'A':15, 'B':17, 'X':19, 'Y':21,
                 'UP':2, 'DOWN':18, 'LEFT':16, 'RIGHT':20, 'CTRL':3},
+    "touchData": None,
     "landscapeWidth":  240,
     "landscapeHeight": 240,
     "rotationLayouts": [
@@ -34,6 +35,7 @@ LCD_CONFS = {
   doc.LCD_NAME_2_0: {
     "lcdPins": {'BL':13, 'DC':8, 'RST':12, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':None, 'MISO':None},
     "buttons": {'B1':15, 'B2':17, 'B3':2, 'B4':3},
+    "touchData": None,
     "landscapeWidth":  320,
     "landscapeHeight": 240,
     "rotationLayouts": [
@@ -46,6 +48,9 @@ LCD_CONFS = {
   doc.LCD_NAME_2_8: {
     "lcdPins": {'BL':13, 'DC':8, 'RST':15, 'MOSI':11, 'SCK':10, 'CS':9, 'TPCS':16, 'MISO':12},
     "buttons": {'TS':17},
+    "touchData": { BOARD_RP2040: {'OFF':(4095,   0), 'L':3892, 'R': 384, 'T':  304, 'B':3744},
+                   BOARD_RP2350: {'OFF':(8191,4096), 'L':7984, 'R':4492, 'T': 4422, 'B':7808},
+    },
     "landscapeWidth":  320,
     "landscapeHeight": 240,
     "rotationLayouts": [
