@@ -409,8 +409,6 @@ class LcdFont:
     #        looks similar to the following HTML:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
 
-    self.lcd.ensure_framebuf_window()
-
     if not self.fontReady:
       print("ERROR: no font loaded")
       return

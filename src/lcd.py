@@ -28,7 +28,7 @@ class LCD():
     self.buffer = None
     self.framebuf = None
     self.fbConf = FramebufConf(enabled=False)
-    self.isFramebufReady = False
+    self.isWindowSetToFramebuf = False
 
     self.colorProfile = None
     self.isColorProfileBigEndian = True
@@ -170,9 +170,9 @@ class LCD():
         self.set_framebuf_conf(None)
 
   def init_framebuf(self):
+    self.isWindowSetToFramebuf = False
     if self.buffer != None:
       (rotFBW, rotFBH) = self.get_framebuf_rotated_size()
-      self.isFramebufReady = False
       self.framebuf = framebuf.FrameBuffer(
         self.buffer, rotFBW, rotFBH, self.framebufColorProfile)
 
@@ -183,9 +183,9 @@ class LCD():
     self.init_colors()
 
   def ensure_framebuf_window(self):
-    if self.is_framebuf_enabled() and not self.isFramebufReady:
+    if self.is_framebuf_enabled() and not self.isWindowSetToFramebuf:
       self.set_window_to_rotated_framebuf()
-      self.isFramebufReady = True
+      self.isWindowSetToFramebuf = True
 
   def init_colors(self):
     if not self.is_framebuf_enabled():
@@ -419,7 +419,7 @@ class LCD():
       if self.colorProfile == COLOR_PROFILE_RGB444:
         self.set_lcd_RGB444()
 
-      self.isFramebufReady = False
+      self.isWindowSetToFramebuf = False
     else:
       self.tft.png(filename, x, y)
 
@@ -609,7 +609,8 @@ class LCD():
     self.write_data(bytearray([yStart >> 8, yStart & 0xff, yEnd >> 8, yEnd & 0xff]))
 
   def show(self):
-    if self.is_framebuf_enabled() and self.isFramebufReady:
+    if self.is_framebuf_enabled():
+      self.ensure_framebuf_window()
       self.write_cmd(0x2C)
       self.write_data(self.buffer)
 
