@@ -341,7 +341,7 @@ def cmdOrient(controller, params, socketReader):
   orient = maybeGetParamStr(params, "orient", None)
   print("orient=" + orient)
 
-  return setOrientation(controller['lcd'], orient)
+  return setOrientation(controller, orient)
 
 def cmdFramebuf(controller, params, socketReader):
   fbConfStr = maybeGetParamStr(params, "framebuf", None)
@@ -403,7 +403,7 @@ def cmdText(controller, params, socketReader):
 
   out = ""
   if orient != None:
-    out += setOrientation(controller['lcd'], orient)
+    out += setOrientation(controller, orient)
   if fbConf != None:
     out += setFramebuf(controller['lcd'], fbConf)
 
@@ -433,7 +433,7 @@ def createLCD(lcdName):
     lcd.get_lcd_landscape_height())
 
   msg += setFramebuf(lcd, fbConf) + "\n"
-  msg += setOrientation(lcd, str(readStateOrientation())) + "\n"
+  msg += setLCDOrientation(lcd, str(readStateOrientation())) + "\n"
 
   print(msg)
 
@@ -488,8 +488,10 @@ def formatButtonCount(buttons):
     fmt += btnName + "=" + str(buttons['count'][btnName])
   return fmt
 
+def setOrientation(controller, orient):
+  setLCDOrientation(controller['lcd'], orient)
 
-def setOrientation(lcd, orient):
+def setLCDOrientation(lcd, orient):
   degrees = None
   if orient == None:
     degrees = 0
