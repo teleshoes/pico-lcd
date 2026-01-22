@@ -144,7 +144,7 @@ class LcdFont:
   def text(self, text, x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0):
     self.lcd.fill(0)
     self.drawText(text, x, y, size, color, hspace, vspace)
-    self.lcd.show()
+    self.show()
 
   def maybeReadCmdVal(self, cmd, valStr, defaultVal):
     if cmd == "color":
@@ -250,6 +250,9 @@ class LcdFont:
         val += ch
     return val
 
+  def show(self):
+    self.lcd.show()
+
   def markup(self, markup, isClear=True, isShow=True,
     x=0, y=0, size=5, color=None, hspace=1.0, vspace=1.0
   ):
@@ -257,7 +260,7 @@ class LcdFont:
       self.lcd.fill(self.lcd.black)
     self.drawMarkup(markup, x, y, size, color, hspace, vspace)
     if isShow:
-      self.lcd.show()
+      self.show()
 
   def drawMarkup(self, markup, x, y, size, color, hspace, vspace):
     #  markup syntax is:
