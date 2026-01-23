@@ -296,3 +296,6 @@ CMD_TEXT = {
     -if 'show' is given, copy the framebuf to the LCD as in the 'show' cmd
   """,
 }
+
+if __name__=='__main__':
+  print(formatAllCommands())
