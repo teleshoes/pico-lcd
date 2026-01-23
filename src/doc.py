@@ -91,7 +91,7 @@ CMD_TEMPLATE = {
 CMD_TIMEOUT = {
   "name":   "timeout",
   "params": {
-    "timeoutS": "[OPTIONAL] timeout in seconds, missing means no timeout",
+    "timeoutMillis": "[OPTIONAL] timeout in milliseconds, missing means no timeout",
   },
   "body":   None,
   "desc":   "set a timeout on network. when reached, display the timeout template (see template)",
