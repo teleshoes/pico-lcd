@@ -10,6 +10,7 @@ def getAllCommands():
 LCD_NAME_1_3 = "1_3"
 LCD_NAME_2_0 = "2_0"
 LCD_NAME_2_8 = "2_8"
+LCD_NAMES = [LCD_NAME_1_3, LCD_NAME_2_0]
 
 CMD_INFO = {
   "name":   "info",
@@ -150,7 +151,7 @@ CMD_FILL = {
 CMD_LCD = {
   "name":   "lcd",
   "params": {
-    "name": "[REQUIRED] LCD name, one of: " + LCD_NAME_1_3 + " | " + LCD_NAME_2_0,
+    "name": "[REQUIRED] LCD name, one of: " + " | ".join(LCD_NAMES)
   },
   "body":   None,
   "desc":   "set the physical LCD device-type name, e.g.: 2_0",
