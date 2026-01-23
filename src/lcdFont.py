@@ -285,6 +285,7 @@ class LcdFont:
       self.show()
 
   def drawMarkup(self, markup, x, y, size, color, hspace, vspace):
+    #  ### MARKUP_SYNTAX ###
     #  markup syntax is:
     #    !CURSOR_CMD=VAL!
     #      CURSOR_CMD = color|size|x|y|hspace|vspace
@@ -426,6 +427,7 @@ class LcdFont:
     #      hello!n!!size=6!!color=red!world!!
     #        looks similar to the following HTML:
     #      hello<br/><span style="font-size:48px; color:red">world!</span>
+    #  ### MARKUP_SYNTAX ###
 
     if not self.fontReady:
       print("ERROR: no font loaded")
