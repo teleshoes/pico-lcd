@@ -41,6 +41,7 @@ CMD_INFO = {
     CHAR_GRID_8PX = <CH_GRID_W>x<CH_GRID_H>
       the number of 8px chars that can fit in the current WINDOW_SIZE
       first number is characters per row, second number is total rows
+      (similar to $COLUMNS and $LINES in a terminal emulator)
     ORIENTATION = 0 | 90 | 180 | 270
       0=landscape, 270=portrait, 180=inverted-landscape, 90=inverted-portrait
     MEM_FREE_BYTES = <INT>
