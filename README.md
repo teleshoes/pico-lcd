@@ -15,3 +15,15 @@ features:
   - timezone data can be added and markup supports formatting the offset timestamp with variables
   - it's a decent good customizable digital clock for places without wifi or constant power
 - optional low-RAM framebuf in RGB444 for Pico W
+
+## Command Documentation
+<pre>
+<!-- COMMAND_DOC -->
+<!-- COMMAND_DOC -->
+</pre>
+
+## Markup Syntax for 'text' command
+<pre>
+<!-- MARKUP_SYNTAX -->
+<!-- MARKUP_SYNTAX -->
+</pre>
