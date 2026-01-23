@@ -261,10 +261,13 @@ FONT = bytes((
     0x00, 0x00, 0x00, 0x00, 0x00  # #255 NBSP
 ))
 
+def writeFontFile(filename):
+  with open('font5x8.bin', 'wb') as outfile:
+      # Write a byte each for the character width, character height.
+      outfile.write(bytes((5, 8)))
+      # Now write all of the font character bytes.
+      for font_byte in FONT:
+          outfile.write(font_byte.to_bytes(1, 'big'))
+
 if __name__ == '__main__':
-    with open('font5x8.bin', 'wb') as outfile:
-        # Write a byte each for the character width, character height.
-        outfile.write(bytes((5, 8)))
-        # Now write all of the font character bytes.
-        for font_byte in FONT:
-            outfile.write(font_byte.to_bytes(1, 'big'))
+  writeFontFile('font5x8.bin')
