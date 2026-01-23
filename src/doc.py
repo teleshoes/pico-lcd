@@ -25,6 +25,13 @@ CMD_INFO = {
       orientation: <ORIENTATION> degrees
       RAM free: <MEM_FREE_BYTES> bytes
       buttons: <BUTTON_LIST>
+      lcdconf: <LCD_NAME>
+      framebuf-boot: <BOOT_FRAMEBUF_CONF>
+      timeout-millis: <TIMEOUT_MILLIS>
+      timeout-template: <TIMEOUT_TEMPLATE>
+      timezone: <TZ_NAME>
+      firmware: <FIRMWARE_FMT>
+      board: <BOARD_FMT>
     WINDOW_SIZE = <LCD_W>x<LCH_H> | <FB_W>x<FB_H> | <FB_H>x<FB_W>
       the actual available screen size in pixels in the current orientation+framebuf
         -if framebuf is disabled:                             <LCD_W>x<LCD_H>
@@ -50,6 +57,23 @@ CMD_INFO = {
       a CSV of <BUTTON> entries
     BUTTON = <BTN_NAME>=<BTN_PRESS_COUNT>
       the name of a button and the number of times pressed since last boot
+    LCD_NAME = """ + " | ".join(LCD_NAMES) + """
+      name of the LCD model, set by the 'lcd' cmd
+    BOOT_FRAMEBUF_CONF = off | <FB_W>x<FB_H> | <FB_W>x<FB_H>+<FB_X>+<FB_Y>
+      the framebuf conf, set by the 'framebuf' cmd
+      will be applied at the next boot, even if framebuf failed to load at runtime
+    TIMEOUT_MILLIS = <INT>
+      timeout in milliseconds, set by 'timeout' cmd
+    TIMEOUT_TEMPLATE = <STR>
+      markup template to be filled in and shown at timeout, set by 'template' cmd
+    TZ_NAME = <STR>
+      name of the timezone, set by 'timezone' cmd
+    FIRMWARE_FMT = <STR>
+      micropython firmware build info string, returned by os.uname().version
+      contains the git commit hash, build date, and the compiler version
+    BOARD_FMT = <STR>
+      the hardware string returned by os.uname().machine
+      contains either RP2040 for Pico or RP2350 for Pico2
   """
 }
 CMD_CONNECT = {
