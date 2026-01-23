@@ -138,6 +138,8 @@ def main():
 
   controller['rtc'] = maybeGetRTC()
 
+  ensureFont()
+
   controller['lcdFont'] = LcdFont('font5x8.bin', controller['lcd'], controller['rtc'])
   controller['lcdFont'].setup()
 
@@ -428,6 +430,16 @@ def cmdText(controller, params, socketReader):
 
 #####
 #####
+
+def ensureFont():
+  try:
+    if not fileExists('font5x8.bin'):
+      gc.collect()
+      import font_generator
+      font_generator.writeFontFile('font5x8.bin')
+      gc.collect()
+  except Exception as e:
+    print("WARNING: font-generator failed\n" + str(e))
 
 def createLCD(lcdName):
   lcdConf = LCD_CONFS[lcdName]
