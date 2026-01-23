@@ -17,6 +17,7 @@ my @PY_SRC_FILES_RAW = qw(
 my @PY_SRC_FILES_MPY = qw(
   src/app.py
   src/doc.py
+  src/font_generator.py
   src/lcdFont.py
   src/lcd.py
   src/rtc.py
