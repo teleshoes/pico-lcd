@@ -7,6 +7,25 @@ def getAllCommands():
       cmds.append(symbols[name])
   return cmds
 
+def formatAllCommands():
+  fmt = ""
+  for cmd in getAllCommands():
+    params = cmd['params']
+    fmt += "COMMAND %s\n" % cmd['name']
+    if len(params) == 0:
+      fmt += "  PARAMS: (none)\n"
+    else:
+      fmt += "  PARAMS:\n"
+      for paramName, paramDesc in params.items():
+        fmt += "    %8s = %s\n" % (paramName, paramDesc)
+    if cmd['body'] == None:
+      fmt += "  BODY: (none)\n"
+    else:
+      fmt += "  BODY: %s\n" % cmd['body']
+    fmt += "  DESC:\n    %s\n" % cmd['desc'].strip()
+    fmt += "\n"
+  return fmt
+
 LCD_NAME_1_3 = "1_3"
 LCD_NAME_2_0 = "2_0"
 LCD_NAME_2_8 = "2_8"
