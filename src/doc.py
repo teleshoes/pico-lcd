@@ -21,10 +21,10 @@ CMD_INFO = {
     FORMAT =
       window: <WINDOW_SIZE>
         (lcd: <LCD_SIZE>, framebuf: <FRAMEBUF_GEOMETRY>)
+      char8px: <CHAR_GRID_8PX>
       orientation: <ORIENTATION> degrees
       RAM free: <MEM_FREE_BYTES> bytes
       buttons: <BUTTON_LIST>
-      char8px: <CHAR_GRID_8PX>
     WINDOW_SIZE = <LCD_W>x<LCH_H> | <FB_W>x<FB_H> | <FB_H>x<FB_W>
       the actual available screen size in pixels in the current orientation+framebuf
         -if framebuf is disabled:                             <LCD_W>x<LCD_H>
@@ -38,6 +38,9 @@ CMD_INFO = {
       the total size of the screen in the current orientation
         -this DOES change when orientation changes (left-to-right dimension is first)
         -this does NOT change when framebuf is enabled/disabled/changed
+    CHAR_GRID_8PX = <CH_GRID_W>x<CH_GRID_H>
+      the number of 8px chars that can fit in the current WINDOW_SIZE
+      first number is characters per row, second number is total rows
     ORIENTATION = 0 | 90 | 180 | 270
       0=landscape, 270=portrait, 180=inverted-landscape, 90=inverted-portrait
     MEM_FREE_BYTES = <INT>
@@ -46,9 +49,6 @@ CMD_INFO = {
       a CSV of <BUTTON> entries
     BUTTON = <BTN_NAME>=<BTN_PRESS_COUNT>
       the name of a button and the number of times pressed since last boot
-    CHAR_GRID_8PX = <CH_GRID_W>x<CH_GRID_H>
-      the number of 8px chars that can fit in the current WINDOW_SIZE
-      first number is characters per row, second number is total rows
   """
 }
 CMD_CONNECT = {
