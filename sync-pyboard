@@ -48,12 +48,7 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS]
   $EXEC [OPTS} conf | --conf
-    same as: $EXEC --font && $EXEC --timezone && $EXEC --state
-
-  $EXEC [OPTS] font | --font
-    -build 5x8 font file with font_generator, if not already built
-    -copy files to /pyboard with `rshell rsync`:
-      font5x8.bin
+    same as: $EXEC --timezone && $EXEC --state
 
   $EXEC [OPTS] tz | timezone | zoneinfo | --tz | --timezone | --zoneinfo
     -calculate tzdata CSV with zoneinfo-tool and put in zoneinfo/ dir for:
@@ -83,7 +78,6 @@ my $USAGE = "Usage:
       delete all *.py and *.mpy files on /pyboard before installing
 ";
 
-my $MODE_FONT = "font";
 my $MODE_TIMEZONE = "timezone";
 my $MODE_STATE = "state";
 my $MODE_MPY = "mpy";
@@ -92,7 +86,7 @@ sub main(@){
   my $opts = {
     delete       => 0,
   };
-  my @modes = ($MODE_FONT, $MODE_TIMEZONE, $MODE_STATE);
+  my @modes = ($MODE_TIMEZONE, $MODE_STATE);
   my $board = undef;
   while(@_ > 0){
     my $arg = shift;
@@ -100,9 +94,7 @@ sub main(@){
       print $USAGE;
       exit 0;
     }elsif($arg =~ /^(--)?(conf)$/){
-      @modes = ($MODE_FONT, $MODE_TIMEZONE, $MODE_STATE);
-    }elsif($arg =~ /^(--)?(font)$/){
-      @modes = ($MODE_FONT);
+      @modes = ($MODE_TIMEZONE, $MODE_STATE);
     }elsif($arg =~ /^(--)?(tz|timezone|zoneinfo)$/){
       @modes = ($MODE_TIMEZONE);
     }elsif($arg =~ /^(--)?(state)$/){
@@ -128,13 +120,6 @@ sub main(@){
   my @files;
 
   my %okModes = map {$_ => 1} @modes;
-
-  if(defined $okModes{$MODE_FONT}){
-    if(not -f "font5x8.bin"){
-      run "python", "src/font_generator.py";
-    }
-    push @files, "font5x8.bin";
-  }
 
   if(defined $okModes{$MODE_TIMEZONE}){
     #calculate+install tzdata CSV files
