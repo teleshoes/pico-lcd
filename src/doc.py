@@ -150,7 +150,7 @@ CMD_FILL = {
 CMD_LCD = {
   "name":   "lcd",
   "params": {
-    "color": "[REQUIRED] LCD name, one of: " + LCD_NAME_1_3 + " | " + LCD_NAME_2_0,
+    "name": "[REQUIRED] LCD name, one of: " + LCD_NAME_1_3 + " | " + LCD_NAME_2_0,
   },
   "body":   None,
   "desc":   "set the physical LCD device-type name, e.g.: 2_0",
