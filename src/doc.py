@@ -13,7 +13,7 @@ LCD_NAME_2_8 = "2_8"
 
 CMD_INFO = {
   "name":   "info",
-  "params": [],
+  "params": {},
   "body":   None,
   "desc":   """
     print LCD info+state, formatted as FORMAT
