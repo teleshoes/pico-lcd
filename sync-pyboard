@@ -50,7 +50,7 @@ my $USAGE = "Usage:
     same as: $EXEC --font && $EXEC --timezone && $EXEC --state
 
   $EXEC [OPTS] font | --font
-    -build 5x8 font file with font-generator, if not already built
+    -build 5x8 font file with font_generator, if not already built
     -copy files to /pyboard with `rshell rsync`:
       font5x8.bin
 
@@ -130,7 +130,7 @@ sub main(@){
 
   if(defined $okModes{$MODE_FONT}){
     if(not -f "font5x8.bin"){
-      run "python", "src/font-generator.py";
+      run "python", "src/font_generator.py";
     }
     push @files, "font5x8.bin";
   }
