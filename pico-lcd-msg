@@ -11,8 +11,11 @@ my $EXEC = basename $0;
 my $DEVICE_CONFIG_FILE = "$ENV{HOME}/.config/pico-lcd.conf";
 my @DEVICES = parseConfig($DEVICE_CONFIG_FILE);
 my @DEVICE_NAMES = map {$$_{devName}} @DEVICES;
-my %DEVICE_IPS_BY_NAME = map {$$_{devName} => $$_{devIP}} @DEVICES;
-my $DEVICE_NAME_REGEX = join "|", @DEVICE_NAMES;
+my @DEVICE_SYNS = (map {@{$$_{syns}}} @DEVICES);
+my %DEVICE_IPS_BY_NAME = map {
+  my $ip = $$_{devIP}; map {$_ => $ip} ($$_{devName}, @{$$_{syns}})
+} @DEVICES;
+my $DEVICE_NAME_REGEX = join "|", (@DEVICE_NAMES, @DEVICE_SYNS);
 
 my $SPLIT_LINES_BIG_CHAR_LIMIT = 3000;
 
@@ -770,10 +773,14 @@ sub runCurlCmd($$$$$$){
 sub parseConfig($){
   my @devices;
   my @lines = `cat $DEVICE_CONFIG_FILE 2>/dev/null`;
+  my $sep = '(?:\s*[=,]\s*)';
   for my $line(@lines){
-    if($line =~ /^\s*(\w+)\s*=\s*(\d+\.\d+\.\d+\.\d+)$/){
-      my ($devName, $devIP) = ($1, $2);
-      push @devices, {devName => $devName, devIP => $devIP};
+    if($line =~ /^\s*(\w+)$sep(\d+\.\d+\.\d+\.\d+)(?:$sep(.*))?$/){
+      my ($devName, $devIP, $synStr) = ($1, $2, $3);
+      $synStr = "" if not defined $synStr;
+      my @syns = split /\s+/, $synStr;
+      @syns = grep {$_ =~ /^\w+$/} @syns;
+      push @devices, {devName => $devName, devIP => $devIP, syns => [@syns]};
     }
   }
   return @devices;
