@@ -636,7 +636,7 @@ sub main(@){
     $text =~ s/\r/\n/g;
 
     #replace '!n!' markup with newlines
-    my $newText;
+    my $newText = "";
     for(my $i=0; $i<length $text; $i++){
       my $ch = substr($text, $i, 1);
       if($ch eq "!"){
