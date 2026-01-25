@@ -598,15 +598,14 @@ sub main(@){
   }
 
   if(not defined $ipAddr){
-    for my $cfgDevName(@DEVICE_NAMES){
-      if(not defined $devName or (lc $devName eq lc $cfgDevName)){
-        $ipAddr = $DEVICE_IPS_BY_NAME{$cfgDevName};
-        last;
-      }
+    if(not defined $devName){
+      die "ERROR: no devices configured\n" if @DEVICE_NAMES == 0;
+      $devName = $DEVICE_NAMES[0];
     }
+
+    $ipAddr = $DEVICE_IPS_BY_NAME{lc $devName};
     if(not defined $ipAddr){
-      my $dev = defined $devName ? $devName : "any dev";
-      die "ERROR: could not find IP address for $dev in $DEVICE_CONFIG_FILE\n";
+      die "ERROR: could not find IP address for $devName in $DEVICE_CONFIG_FILE\n";
     }
   }
 
