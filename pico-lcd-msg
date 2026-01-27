@@ -781,7 +781,7 @@ sub parseConfig($){
   my @lines = `cat $DEVICE_CONFIG_FILE 2>/dev/null`;
   my $sep = '(?:\s*[=,]\s*)';
   for my $line(@lines){
-    if($line =~ /^\s*(\w+)$sep(\d+\.\d+\.\d+\.\d+)(?:$sep(.*))?$/){
+    if($line =~ /^\s*([0-9a-zA-Z_\-]+)$sep(\d+\.\d+\.\d+\.\d+)(?:$sep(.*))?$/){
       my ($devName, $devIP, $synStr) = ($1, $2, $3);
       $synStr = "" if not defined $synStr;
       my @syns = split /\s+/, $synStr;
