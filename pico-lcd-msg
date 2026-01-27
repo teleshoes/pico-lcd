@@ -275,14 +275,20 @@ my $USAGE = "Usage:
     DEV_NAME | --dev=DEV_NAME | --dev DEV_NAME
     DEV_NAME | --dev=DEV_NAME | --dev DEV_NAME
       -parse contents of $DEVICE_CONFIG_FILE
-      -find line that matches this device: DEV_NAME = IP_ADDRESS
+         -each entry is a single line that contains:
+           <CONF_DEV_NAME>, <IP_ADDRESS>, and optional space-separated <SYN_NAME> list
+         -each element is separated by a comma or equals sign
+         -i.e.:
+           CONF_DEV_NAME = IP_ADDRESS
+           CONF_DEV_NAME, IP_ADDRESS
+           CONF_DEV_NAME, IP_ADDRESS, [SYN_NAME SYN_NAME SYN_NAME...]
+      -find the first line where DEV_NAME equals CONF_DEV_NAME or SYN_NAME
+        -select the IP_ADDRESS for that entry
       -same as: --ip=IP_ADDRESS
         DEV_NAME
-          any of: @DEVICE_NAMES
+          one of: $DEVICE_NAME_REGEX
     --default-dev | --any-dev
-      -parse contents of $DEVICE_CONFIG_FILE
-      -find first line that matches any device: DEV_NAME = IP_ADDRESS
-      -same as: --ip=IP_ADDRESS
+      -select the IP_ADDRESS of the first CONF_DEV_NAME in $DEVICE_CONFIG_FILE
       (this is the default)
 
     --framebuf=FRAMEBUF
