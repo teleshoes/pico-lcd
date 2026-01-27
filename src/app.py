@@ -546,7 +546,8 @@ def removeButtonHandlers(buttons):
   if buttons != None:
     for btnName in buttons['pins']:
       pin = buttons['pins'][btnName]
-      pin.irq(handler=None)
+      if pin != None:
+        pin.irq(handler=None)
 
 def formatButtonCount(buttons):
   fmt = ""
