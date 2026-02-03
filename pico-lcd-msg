@@ -30,10 +30,10 @@ my $FONT_BASE_HEIGHT = 8;
 my $FONT_BASE_WIDTH = 5;
 
 my $CLOCK_MARKUP = ""
-  . "!size=4!!hr!!n!"
-  . "!color=green!!size=8!!rtc=%H:%M!!n!"
-  . "!color=white!!hr!!size=4!!n!"
-  . " !rtc=%H:%M:%S!"
+  . "[size=4][hr][n]"
+  . "[color=green][size=8][rtc=%H:%M][n]"
+  . "[color=white][hr][size=4][n]"
+  . " [rtc=%H:%M:%S]"
 ;
 
 my $TEMPLATE_SETS = {
@@ -46,23 +46,23 @@ my $TEMPLATE_SETS = {
   },
   "clock" => {
     "timeout" => ""
-      . "!size=4!!rtc=%Y-%m-%d!!n!"
+      . "[size=4][rtc=%Y-%m-%d][n]"
       . $CLOCK_MARKUP,
     "wifi-waiting" => ""
-      . "!size=2!WAITING WIFI   !rtc=%Y-%m-%d!!n!"
-      . "!var=ssid!!n!"
+      . "[size=2]WAITING WIFI   [rtc=%Y-%m-%d][n]"
+      . "[var=ssid][n]"
       . $CLOCK_MARKUP,
     "wifi-connected" => ""
-      . "!size=2!CONNECTED      !rtc=%Y-%m-%d!!n!"
-      . "!var=ip!!n!"
+      . "[size=2]CONNECTED      [rtc=%Y-%m-%d][n]"
+      . "[var=ip][n]"
       . $CLOCK_MARKUP,
     "ap-waiting" => ""
-      . "!size=2!AP WAITING     !rtc=%Y-%m-%d!!n!"
-      . "!var=ssid!!n!"
+      . "[size=2]AP WAITING     [rtc=%Y-%m-%d][n]"
+      . "[var=ssid][n]"
       . $CLOCK_MARKUP,
     "ap-active" => ""
-      . "!size=2!ssid=!var=ssid!  !rtc=%Y-%m-%d!!n!"
-      . "pw=!var=password!   !var=ip!!n!"
+      . "[size=2]ssid=[var=ssid]  [rtc=%Y-%m-%d][n]"
+      . "pw=[var=password]   [var=ip][n]"
       . $CLOCK_MARKUP,
   },
 };
@@ -142,7 +142,7 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] timezone [TZDATA_ZONE_NAME]
     write \"TZDATA_ZONENAME\" to state-timezone file
-      used for DS3231 real-time-clock in !rtc! markup
+      used for DS3231 real-time-clock in [rtc] markup
       requires calculating and installing tzdata CSV in advance
     if TZDATA_ZONE_NAME is omitted, delete state-timezone file
 
@@ -312,19 +312,19 @@ my $USAGE = "Usage:
         always send clear=false with all text commands
 
     --color=COLOR
-      prefix all TEXT with '!color=COLOR!'
+      prefix all TEXT with '[color=COLOR]'
     --size=SIZE
-      prefix all TEXT with '!size=SIZE!'
+      prefix all TEXT with '[size=SIZE]'
         (this is the number of pixels per dot, in a 5-dot by 8-dot font)
       NOTE: the default is to calculate the largest SIZE that fits all characters
     --hspace=HSPACE
-      prefix all TEXT with '!hspace=HSPACE!'
+      prefix all TEXT with '[hspace=HSPACE]'
     --vspace=VSPACE
-      prefix all TEXT with '!vspace=VSPACE!'
+      prefix all TEXT with '[vspace=VSPACE]'
     --x=X
-      prefix all TEXT with '!x=X!'
+      prefix all TEXT with '[x=X]'
     --y=Y
-      prefix all TEXT with '!y=Y!'
+      prefix all TEXT with '[y=Y]'
 
     --lcd-width=WIDTH_PX
       select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
@@ -338,7 +338,7 @@ my $USAGE = "Usage:
           -first line is OFFSET=0
           -add SIZE*8 for each subsequent line
           -assume SIZE=5 if not given
-        -prefix each TEXT_LINE with '!y=OFFSET!'
+        -prefix each TEXT_LINE with '[y=OFFSET]'
         -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
         -calculate SHOW as 'true' for the last TEXT_LINE, and 'false' otherwise
         -calculate CLEAR as 'true' for the first TEXT_LINE, and 'false' otherwise
@@ -641,33 +641,11 @@ sub main(@){
     $text =~ s/\r\n/\n/g;
     $text =~ s/\r/\n/g;
 
-    #replace '!n!' markup with newlines
-    my $newText = "";
-    for(my $i=0; $i<length $text; $i++){
-      my $ch = substr($text, $i, 1);
-      if($ch eq "!"){
-        my $cmd = "!";
-        $i++;
-        while($i < length $text and substr($text, $i, 1) ne "!"){
-          $cmd .= substr($text, $i, 1);
-          $i++;
-        }
-        if($i < length $text){
-          $cmd .= substr($text, $i, 1);
-          die "ERROR: failed to parse $text\n" if $cmd !~ /^![^!]*!$/;
-        }else{
-          die "ERROR: failed to parse $text\n" if $cmd !~ /^![^!]*$/;
-        }
-        if($cmd eq "!n!"){
-          $newText .= "\n";
-        }else{
-          $newText .= $cmd;
-        }
-      }else{
-        $newText .= $ch;
-      }
-    }
-    $text = $newText;
+    #replace '[[' literals with '[bracket]'
+    $text =~ s/\[\[/\[bracket\]/g;
+
+    #replace '[n]' markup wih literal '\n'
+    $text =~ s/\[n\]/\n/g;
 
     my @lines = split /\n/, $text;
 
@@ -708,7 +686,7 @@ sub main(@){
       my $height = ($FONT_BASE_HEIGHT+$vspace)*$size;
       my $offset = 0;
       for my $line(@lines){
-        push @messages, "!x=0!!y=$offset!$line";
+        push @messages, "[x=0][y=$offset]$line";
         $offset += $height;
       }
     }else{
@@ -721,12 +699,12 @@ sub main(@){
 
     for(my $i=0; $i<@messages; $i++){
       my $msg = $messages[$i];
-      $msg = "!size=$size!$msg" if defined $size;
-      $msg = "!color=$color!$msg" if defined $color;
-      $msg = "!hspace=$hspace!$msg" if defined $hspace and $hspace != 1.0;
-      $msg = "!vspace=$vspace!$msg" if defined $vspace and $vspace != 1.0;
-      $msg = "!x=$x!$msg" if defined $x;
-      $msg = "!y=$y!$msg" if defined $y;
+      $msg = "[size=$size]$msg" if defined $size;
+      $msg = "[color=$color]$msg" if defined $color;
+      $msg = "[hspace=$hspace]$msg" if defined $hspace and $hspace != 1.0;
+      $msg = "[vspace=$vspace]$msg" if defined $vspace and $vspace != 1.0;
+      $msg = "[x=$x]$msg" if defined $x;
+      $msg = "[y=$y]$msg" if defined $y;
 
       print "$msg\n" unless $quiet;
 
