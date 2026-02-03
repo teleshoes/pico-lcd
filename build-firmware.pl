@@ -103,6 +103,9 @@ sub ensureMicropythonRepo(){
 sub installMpyCross($$$){
   my ($binaryName, $commit, $makeArgs) = @_;
 
+  print "check sudo:\n";
+  run "sudo", "echo", "ok";
+
   ensureMicropythonRepo();
 
   run @GIT_CMD, "checkout", $commit;
@@ -123,6 +126,9 @@ sub installMpyCross($$$){
 }
 
 sub buildFirmware(){
+  print "check sudo:\n";
+  run "sudo", "echo", "ok";
+
   ensureMicropythonRepo();
 
   my $picoFW = "$DIR_MICROPYTHON_REPO/firmware_RPI_PICO_W.uf2";
