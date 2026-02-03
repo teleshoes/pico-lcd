@@ -125,7 +125,7 @@ CMD_TEMPLATE = {
   "body":   "message markup, blank for default",
   "desc":   """
     set the markup template for status messages
-    allows variable substitution with the syntax: !var=VARIABLE_NAME!
+    allows variable substitution with the syntax: [var=VARIABLE_NAME]
     VARIABLE_NAME
       ssid     = the external AP ssid to connect to, or the internal AP ssid
       password = the hardcoded WPA key for the internal AP (never the configured WPA)
