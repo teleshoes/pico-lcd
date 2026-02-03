@@ -82,32 +82,32 @@ DEFAULT_MARKUP_TEMPLATES = {
     + "TIMEOUT"
   ),
   'wifi-waiting': (""
-    + "!size=4!!color=green!" + "WAITING!n!"
-    + "!size=4!!color=green!" + "FOR WIFI!n!"
-    + "!size=4!!color=white!" + "--------!n!"
-    + "!size=2!!color=blue!"  + "!var=ssid!"
+    + "[size=4][color=green]" + "WAITING[n]"
+    + "[size=4][color=green]" + "FOR WIFI[n]"
+    + "[size=4][color=white]" + "--------[n]"
+    + "[size=2][color=blue]"  + "!var=ssid!"
   ),
   'wifi-connected': (""
-    + "!size=4!!color=green!"             + "CONNECTED!n!"
-    + "!size=3!!color=blue!"              + "!n!listening on:!n!"
-    + "!size=3!!color=green!!hspace=0.7!" + "!var=ip!!n!"
+    + "[size=4][color=green]"             + "CONNECTED[n]"
+    + "[size=3][color=blue]"              + "[n]listening on:[n]"
+    + "[size=3][color=green][hspace=0.7]" + "!var=ip![n]"
   ),
   'ap-waiting': (""
-    + "!size=4!!color=green!" + "TURNING ON!n!"
-    + "!size=4!!color=green!" + "WIFI AP!n!"
-    + "!size=4!!color=white!" + "--------!n!"
-    + "!size=2!!color=blue!"  + "!var=ssid!"
+    + "[size=4][color=green]" + "TURNING ON[n]"
+    + "[size=4][color=green]" + "WIFI AP[n]"
+    + "[size=4][color=white]" + "--------[n]"
+    + "[size=2][color=blue]"  + "!var=ssid!"
   ),
   'ap-active': (""
-    + "!size=2!!color=green!"             + "SSID:!n!"
-    + "!size=2!!color=white!"             + "!var=ssid!!n!"
-    + "!size=2!!color=green!"             + "PASSWORD:!n!"
-    + "!size=2!!color=white!"             + "!var=password!!n!"
-    + "!size=2!!color=blue!"              + "IP:!n!"
-    + "!size=2!!color=green!!hspace=0.7!" + "!var=ip!!n!"
-    + "!size=1!!color=white!"             + "e.g.:!n!"
-    + "!size=1!!color=white!"             + "curl 'http://!var=ip!/ssid?!n!"
-                                          + "ssid=MY_NETWORK&password=P4SSW0RD'!n!"
+    + "[size=2][color=green]"             + "SSID:[n]"
+    + "[size=2][color=white]"             + "!var=ssid![n]"
+    + "[size=2][color=green]"             + "PASSWORD:[n]"
+    + "[size=2][color=white]"             + "!var=password![n]"
+    + "[size=2][color=blue]"              + "IP:[n]"
+    + "[size=2][color=green][hspace=0.7]" + "!var=ip![n]"
+    + "[size=1][color=white]"             + "e.g.:[n]"
+    + "[size=1][color=white]"             + "curl 'http://!var=ip!/ssid?[n]"
+                                          + "ssid=MY_NETWORK&password=P4SSW0RD'[n]"
   ),
 }
 
@@ -949,7 +949,7 @@ def setupAccessPoint(controller):
     time.sleep(0.5)
 
   if not wlan.active:
-    controller['lcdFont'].markup("!size=7!!color=red!" + "FAILED\nWIFI")
+    controller['lcdFont'].markup("[size=7][color=red]" + "FAILED\nWIFI")
     raise RuntimeError('network connection failed')
 
   print("AP active: ssid=" + ssid + " password=" + password)

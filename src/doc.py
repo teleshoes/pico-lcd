@@ -147,7 +147,7 @@ CMD_TIMEZONE = {
   },
   "body":   None,
   "desc":   """
-     for DS3231 real-time-clock !rtc! markup
+     for DS3231 real-time-clock [rtc] markup
      use the tzdata ZONE_NAME to calculate offset,
      if a CSV exists at zoneinfo/<ZONE_NAME>.csv
   """,
@@ -288,7 +288,7 @@ CMD_TEXT = {
     -fetch 'markup' from body, decode as UTF-8
     -if 'orient' param is given, set the orientation as in the 'orient' cmd
     -if 'framebuf' param is given, set the framebuf as in the 'framebuf' cmd
-    -if 'markup' contains '!rtc':
+    -if 'markup' contains '[rtc]:
       -fetch the current RTC epoch
       -calculate the tz offset from CSV, if tz name is set and CSV exists
     -if 'clear' param is given, fill the window with black as in the 'fill' cmd
