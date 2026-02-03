@@ -322,8 +322,20 @@ COMMAND text
        move the cursor to the right exactly <W> px (no HSPACE)
          e.g.: !rect=10x20!    draw a vertical rectangle at the cursor
 
-    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
-    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
+    !rectoutline=<W>x<H>!
+    !rectoutline=<W>,<H>!
+       same as !rect!, except draw a hollow, not-filled-in rectangle
+
+    !ellipse=<RAD_X>x<RAD_Y>!
+    !ellipse=<RAD_X>,<RAD_Y>!
+       draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
+         centered at (CURSOR_X + RAD_X, CURSOR_Y + RAD_Y)
+         (left-most point is at CURSOR_X, right-most point is at CURSOR_Y)
+       move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
+         e.g.: !ellipse=5x5!    draw a 10px diameter circle
+
+    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
+    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
        draw two rectangles, to make a progress/status bar
          W           = the full outer width of the bar in pixels
          H           = the full outer height of the bar in pixels
