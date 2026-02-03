@@ -108,7 +108,7 @@ COMMAND template
   BODY: message markup, blank for default
   DESC:
     set the markup template for status messages
-    allows variable substitution with the syntax: !var=VARIABLE_NAME!
+    allows variable substitution with the syntax: [var=VARIABLE_NAME]
     VARIABLE_NAME
       ssid     = the external AP ssid to connect to, or the internal AP ssid
       password = the hardcoded WPA key for the internal AP (never the configured WPA)
@@ -126,7 +126,7 @@ COMMAND timezone
         name = [OPTIONAL] tzdata zone name, missing is the same as UTC
   BODY: (none)
   DESC:
-    for DS3231 real-time-clock !rtc! markup
+    for DS3231 real-time-clock [rtc] markup
      use the tzdata ZONE_NAME to calculate offset,
      if a CSV exists at zoneinfo/<ZONE_NAME>.csv
 
@@ -247,7 +247,7 @@ COMMAND text
     -fetch 'markup' from body, decode as UTF-8
     -if 'orient' param is given, set the orientation as in the 'orient' cmd
     -if 'framebuf' param is given, set the framebuf as in the 'framebuf' cmd
-    -if 'markup' contains '!rtc':
+    -if 'markup' contains '[rtc]:
       -fetch the current RTC epoch
       -calculate the tz offset from CSV, if tz name is set and CSV exists
     -if 'clear' param is given, fill the window with black as in the 'fill' cmd
@@ -260,42 +260,42 @@ COMMAND text
 <pre>
 <!-- MARKUP_SYNTAX -->
   markup syntax is:
-    !CURSOR_CMD=VAL!
+    [CURSOR_CMD=VAL]
       CURSOR_CMD = color|size|x|y|hspace|vspace
-        !color=<COLOR>!
+        [color=<COLOR>]
           set the cursor color to COLOR
           COLOR = either a NAMED_COLOR or a HEX_COLOR
           NAMED_COLOR = one of white black red green blue cyan magenta yellow aqua purple
           HEX_COLOR   = rgb hex color formatted '#RRGGBB' e.g.: '#C0C0C0'
-        !size=<SIZE>!
+        [size=<SIZE>]
           set the pixels-per-dot to SIZE
           for 5x8 font, font size in px is: 8*SIZE
-        !x=<X>!
+        [x=<X>]
           set the left position of cursor to X as absolute px on LCD
-        !y=<Y>!
+        [y=<Y>]
           set the top position of cursor to Y as absolute px on LCD
-        !hspace=<HSPACE>!
+        [hspace=<HSPACE>]
           leave floor(HSPACE*SIZE) dots between each character
             any non-negative number, 1.0=default, 0=no space, 2.0=wide
             for 5x8 font, total width of a char in px is: SIZE*(5+HSPACE)
-        !vspace=<VSPACE>!
+        [vspace=<VSPACE>]
           leave floor(VSPACE*SIZE) dots between lines
             any non-negative number, 1.0=default, 0=no space, 2.0=wide
             for 5x8 font, total height of a line in px is: SIZE*(8+VSPACE)
 
-    !CURSOR_CMD=prev!
+    [CURSOR_CMD=prev]
       CURSOR_CMD = color|size|x|y|hspace|vspace
         if VAL is 'prev', restore the value of CURSOR_CMD before the last change
-        e.g.:   !color=white! A !color=blue! B !color=prev! C
+        e.g.:   [color=white] A [color=blue] B [color=prev] C
                   is the same as:
-                !color=white! A !color=blue! B !color=white! C
+                [color=white] A [color=blue] B [color=white] C
 
-    !png=FILENAME!
+    [png=FILENAME]
       draw the PNG image, already present in the filesystem, at FILENAME
       cursor position is the top-left corner of the image
       NOTE:
         A) file must already be on the filesystem, uploaded beforehand with upload command
-        B) does not move the cursor, use !shift=<W>x0! to do so, where <W> is the PNG width
+        B) does not move the cursor, use [shift=<W>x0] to do so, where <W> is the PNG width
         C) framebuf does not support PNG:
              if framebuf is enabled:
                -PNGs are drawn directly on the LCD, not the framebuf
@@ -309,33 +309,33 @@ COMMAND text
       e.g.: draw one 16x16 icon twice, with a label,
               and then another 16x16 icon with another label beneath it,
               formatted like this:
-                Ax2:[a][a]
-                Bx1:[b]
-            !size=2!!color=red!
-            Ax2:!png=icon_a_16x16.png!!shift=16x0!!png=icon_a_16x16.png!
-            !n!
-            Bx1:!png=icon_b_16x16.png!
+                Ax2:|a||a|
+                Bx1:|b|
+            [size=2][color=red]
+            Ax2:[png=icon_a_16x16.png][shift=16x0][png=icon_a_16x16.png]
+            [n]
+            Bx1:[png=icon_b_16x16.png]
 
-    !rect=<W>x<H>!
-    !rect=<W>,<H>!
+    [rect=<W>x<H>]
+    [rect=<W>,<H>]
        draw a rectangle from cursor at top-left to (W,H) at bottom-right
        move the cursor to the right exactly <W> px (no HSPACE)
-         e.g.: !rect=10x20!    draw a vertical rectangle at the cursor
+         e.g.: [rect=10x20]    draw a vertical rectangle at the cursor
 
-    !rectoutline=<W>x<H>!
-    !rectoutline=<W>,<H>!
-       same as !rect!, except draw a hollow, not-filled-in rectangle
+    [rectoutline=<W>x<H>]
+    [rectoutline=<W>,<H>]
+       same as [rect], except draw a hollow, not-filled-in rectangle
 
-    !ellipse=<RAD_X>x<RAD_Y>!
-    !ellipse=<RAD_X>,<RAD_Y>!
+    [ellipse=<RAD_X>x<RAD_Y>]
+    [ellipse=<RAD_X>,<RAD_Y>]
        draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
          centered at (CURSOR_X + RAD_X, CURSOR_Y + RAD_Y)
          (left-most point is at CURSOR_X, right-most point is at CURSOR_Y)
        move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
-         e.g.: !ellipse=5x5!    draw a 10px diameter circle
+         e.g.: [ellipse=5x5]    draw a 10px diameter circle
 
-    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
-    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
+    [bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
+    [bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
        draw two rectangles, to make a progress/status bar
          W           = the full outer width of the bar in pixels
          H           = the full outer height of the bar in pixels
@@ -344,9 +344,9 @@ COMMAND text
          EMPTY_COLOR = the color of the outer rectangle of the bar
        -draw empty rectangle
            -draw one rectangle, without moving the cursor, as in:
-             !color=<EMPTY_COLOR>!!rect=<W>x<H>!
+             [color=<EMPTY_COLOR>][rect=<W>x<H>]
            -move the cursor back and restore previous color, as in:
-             !shift=-<W>x0!!color=prev!
+             [shift=-<W>x0][color=prev]
        -calculate filled-in rectangle
          -if <W> is bigger than <H> (horizontal bar):
             -calculate <FILL_W> as floor(<W>*<PCT>/100.0)
@@ -358,31 +358,31 @@ COMMAND text
             -calculate <FILL_SHIFT_Y> as <H> - <FILL_H>
        -draw filled-in rectangle
           -move the cursor down for vertical bars (filled-in on bottom), as in:
-            !shift=0x<FILL_SHIFT_Y>!
+            [shift=0x<FILL_SHIFT_Y>]
           -draw filled-in rectangle on top of empty rectangle as in:
-            !color=<FILL_COLOR>!!rect=<FILL_W>x<FILL_H>!
+            [color=<FILL_COLOR>][rect=<FILL_W>x<FILL_H>]
            -move the cursor back and restore previous color, as in:
-             !shift=-<W>x-<FILL_SHIFT_Y>!!color=prev!
+             [shift=-<W>x-<FILL_SHIFT_Y>][color=prev]
        -move the cursor to the right of the outer empty rect, as in:
-          !shift=<X>x0!
-       e.g.: !bar=20,100,65,green,red!   vertical 20x100 green-on-red bar 65% full
+          [shift=<X>x0]
+       e.g.: [bar=20,100,65,green,red]   vertical 20x100 green-on-red bar 65% full
                                           same as:
-                                             !color=red!!rect=20x100!
-                                             !shift=-20x0!!color=prev!
-                                             !shift=0x35!
-                                             !color=green!!rect=20x65!
-                                             !shift=-20x-35!!color=prev!
-                                             !shift=20x0!
+                                             [color=red][rect=20x100]
+                                             [shift=-20x0][color=prev]
+                                             [shift=0x35]
+                                             [color=green][rect=20x65]
+                                             [shift=-20x-35][color=prev]
+                                             [shift=20x0]
 
-    !shift=<W>x<H>!
-    !shift=<W>,<H>!
+    [shift=<W>x<H>]
+    [shift=<W>,<H>]
        move the left position of the cursor W pixels to the right (negative for left)
        move the top position of the cursor H pixels down (negative for up)
-       e.g.: !shift=0x-20!    move the cursor up 20 pixels
+       e.g.: [shift=0x-20]    move the cursor up 20 pixels
 
-    !rtc=FORMAT!
+    [rtc=FORMAT]
         use time from DS3231 rtc clock (if supported) and format with FORMAT string
-        NOTE: all !rtc=FORMAT! entries in markup share a single epoch time,
+        NOTE: all [rtc=FORMAT] entries in markup share a single epoch time,
               multiple entries cannot show different times due to race conditions
 
         FORMAT is any string, with the following replacements:
@@ -398,19 +398,20 @@ COMMAND text
           %a   abbreviated day of week Mon/Tue/Wed/Thu/Fri/Sat/Sun
           %b   abbreviated month Jan/Feb/Mar/Apr/May/Jun/Jul/Aug/Sep/Oct/Nov/Dec
           %%   literal '%' character
-    !n!
+    [n]
         treated the same as a newline literal
           moves the cursor down (8+vspace)*size px,
           and resets the left to initial
-    !hline!
-    !hl!
-    !hr!
+    [hline]
+    [hl]
+    [hr]
         draw a horizontal line at cursor
-    !!
-        literal '!' character
+    [[
+    [bracket]
+        literal '[' character
   e.g.:
-      hello!n!!size=6!!color=red!world!!
+      hello[n][size=6][color=red]world[[]]
         looks similar to the following HTML:
-      hello<br/><span style="font-size:48px; color:red">world!</span>
+      hello<br/><span style="font-size:48px; color:red">world[]]</span>
 <!-- MARKUP_SYNTAX -->
 </pre>
