@@ -92,8 +92,8 @@ class LcdFont:
       })
     else:
       self.lcd.png(filename, self.cursor['x'], self.cursor['y'])
-  def cursorDrawRect(self, w, h):
-    self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), True)
+  def cursorDrawRect(self, w, h, fill=True):
+    self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), fill)
     self.cursor['x'] += w
   def cursorDrawBar(self, w, h, pct, fillColor, emptyColor):
     x = self.cursor['x']
@@ -349,6 +349,10 @@ class LcdFont:
     #       move the cursor to the right exactly <W> px (no HSPACE)
     #         e.g.: !rect=10x20!    draw a vertical rectangle at the cursor
     #
+    #    !rectoutline=<W>x<H>!
+    #    !rectoutline=<W>,<H>!
+    #       same as !rect!, except draw a hollow, not-filled-in rectangle
+    #
     #    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
     #    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
     #       draw two rectangles, to make a progress/status bar
@@ -478,7 +482,10 @@ class LcdFont:
           self.cursorDrawPNG(val)
         elif cmd == "rect":
           (w, h) = self.maybeReadCoord(val, (0,0))
-          self.cursorDrawRect(w, h)
+          self.cursorDrawRect(w, h, True)
+        elif cmd == "rectoutline":
+          (w, h) = self.maybeReadCoord(val, (0,0))
+          self.cursorDrawRect(w, h, False)
         elif cmd == "shift":
           (x, y) = self.maybeReadCoord(val, (0,0))
           self.cursor['x'] += x
