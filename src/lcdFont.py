@@ -95,6 +95,9 @@ class LcdFont:
   def cursorDrawRect(self, w, h, fill=True):
     self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), fill)
     self.cursor['x'] += w
+  def cursorDrawEllipse(self, radX, radY, fill=True):
+    self.lcd.ellipse(self.cursor['x'] + radX, self.cursor['y'] + radY, radX, radY, self.getCursorColor(), fill)
+    self.cursor['x'] += radX * 2
   def cursorDrawBar(self, w, h, pct, fillColor, emptyColor):
     x = self.cursor['x']
     y = self.cursor['y']
@@ -353,6 +356,14 @@ class LcdFont:
     #    !rectoutline=<W>,<H>!
     #       same as !rect!, except draw a hollow, not-filled-in rectangle
     #
+    #    !ellipse=<RAD_X>x<RAD_Y>!
+    #    !ellipse=<RAD_X>,<RAD_Y>!
+    #       draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
+    #         centered at (CURSOR_X + RAD_X, CURSOR_Y + RAD_Y)
+    #         (left-most point is at CURSOR_X, right-most point is at CURSOR_Y)
+    #       move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
+    #         e.g.: !ellipse=5x5!    draw a 10px diameter circle
+    #
     #    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
     #    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
     #       draw two rectangles, to make a progress/status bar
@@ -486,6 +497,9 @@ class LcdFont:
         elif cmd == "rectoutline":
           (w, h) = self.maybeReadCoord(val, (0,0))
           self.cursorDrawRect(w, h, False)
+        elif cmd == "ellipse":
+          (radX, radY) = self.maybeReadCoord(val, (0,0))
+          self.cursorDrawEllipse(radX, radY, True)
         elif cmd == "shift":
           (x, y) = self.maybeReadCoord(val, (0,0))
           self.cursor['x'] += x
