@@ -353,8 +353,8 @@ class LcdFont:
     #    !rectoutline=<W>,<H>!
     #       same as !rect!, except draw a hollow, not-filled-in rectangle
     #
-    #    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
-    #    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>
+    #    !bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
+    #    !bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>!
     #       draw two rectangles, to make a progress/status bar
     #         W           = the full outer width of the bar in pixels
     #         H           = the full outer height of the bar in pixels
