@@ -331,13 +331,20 @@ class LcdFont:
     #    [rect=<W>,<H>,<IS_FILL>,<IS_SYMBOL>]
     #       -draw a rectangle from top-left at (<CURSOR_X>,<CURSOR_Y>) to bottom-right at (<W>,<H>)
     #       -move the cursor to the right exactly <W> px
-    #       -if <IS_FILL> is True:
-    #          -fill rectangle instead of drawing as an empty outline
-    #          (defaults to True if omitted)
-    #       -if <IS_SYMBOL> is True:
-    #          -scale rectangle by <SIZE>, i.e.: [rect=<W>*<SIZE>,<H>*<SIZE>]
-    #          -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
-    #          (defaults to False if omitted)
+    #       -fill pixels if <IS_FILL>
+    #          -if <IS_FILL> is 'true' or '1' or 'y':
+    #            -set fill=True, draw pixels contained by the rectangle
+    #            (True is the default if omitted)
+    #          -if <IS_FILL> is 'false' or '0' or 'n':
+    #            -set fill=False, draw only the outline of the rectangle
+    #       -scale and indent if <IS_SYMBOL>
+    #          -if <IS_SYMBOL> is 'true' or '1' or 'y':
+    #            -scale rectangle by <SIZE>, i.e.: [rect=<W>*<SIZE>,<H>*<SIZE>]
+    #            -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
+    #          -if <IS_SYMBOL> is 'false' or '0' or 'n':
+    #             -do not scale <W> or <H>
+    #             -do not shift by <HSPACE>
+    #            (False is the default if omitted)
     #       e.g.: [size=3][rect=5x10,True,True]      draw a 15x30 solid vertical rectangle
     #
     #    [rect=<W>x<H>]
@@ -350,13 +357,20 @@ class LcdFont:
     #         centered at (<CURSOR_X> + <RAD_X>, <CURSOR_Y> + <RAD_Y>)
     #         (left-most point is at <CURSOR_X>, top-most point is at <CURSOR_Y>)
     #       -move the cursor to the right exactly 2*<RAD_X>+1 px
-    #       -if <IS_FILL> is True:
-    #          -fill ellipse instead of drawing as an empty outline
-    #          (defaults to True if omitted)
-    #       -if <IS_SYMBOL> is True:
-    #          -scale ellipse by <SIZE>, i.e.: [ellipse=<RAD_X>*<SIZE>,<RAD_Y>*<SIZE>]
-    #          -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
-    #          (defaults to False if omitted)
+    #       -fill pixels if <IS_FILL>
+    #          -if <IS_FILL> is 'true' or '1' or 'y':
+    #            -set fill=True, draw pixels contained by the ellipse
+    #            (True is the default if omitted)
+    #          -if <IS_FILL> is 'false' or '0' or 'n':
+    #            -set fill=False, draw only the outline of the ellipse
+    #       -scale and indent if <IS_SYMBOL>
+    #          -if <IS_SYMBOL> is 'true' or '1' or 'y':
+    #            -scale ellipse by <SIZE>, i.e.: [ellipse=<RAD_X>*<SIZE>,<RAD_Y>*<SIZE>]
+    #            -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
+    #          -if <IS_SYMBOL> is 'false' or '0' or 'n':
+    #             -do not scale <RAD_X> or <RAD_Y>
+    #             -do not shift by <HSPACE>
+    #            (False is the default if omitted)
     #       e.g.: [size=3][ellipse=5x5,True,True]    draw a 31px diameter circle
     #
     #    [ellipse=<RAD_X>x<RAD_Y>]
