@@ -220,7 +220,7 @@ COMMAND upload
         name = [REQUIRED] filename
   BODY: file contents
   DESC:
-    write body to file 'filename'
+    write body to file 'filename', creating dirs as necessary if filename contains '/'
 
 COMMAND delete
   PARAMS:
@@ -271,9 +271,9 @@ COMMAND text
           set the pixels-per-dot to SIZE
           for 5x8 font, font size in px is: 8*SIZE
         [x=<X>]
-          set the left position of cursor to X as absolute px on LCD
+          set the left position of cursor <CURSOR_X> to <X>, as absolute px on LCD
         [y=<Y>]
-          set the top position of cursor to Y as absolute px on LCD
+          set the top position of cursor <CURSOR_Y> to <Y>, as absolute px on LCD
         [hspace=<HSPACE>]
           leave floor(HSPACE*SIZE) dots between each character
             any non-negative number, 1.0=default, 0=no space, 2.0=wide
@@ -292,7 +292,7 @@ COMMAND text
 
     [png=FILENAME]
       draw the PNG image, already present in the filesystem, at FILENAME
-      cursor position is the top-left corner of the image
+      top-left corner of the image is at cursor (<CURSOR_X>,<CURSOR_Y>)
       NOTE:
         A) file must already be on the filesystem, uploaded beforehand with upload command
         B) does not move the cursor, use [shift=<W>x0] to do so, where <W> is the PNG width
@@ -316,23 +316,83 @@ COMMAND text
             [n]
             Bx1:[png=icon_b_16x16.png]
 
+    [rect=<W>x<H>,<IS_FILL>,<IS_SYMBOL>]
+    [rect=<W>,<H>,<IS_FILL>,<IS_SYMBOL>]
+       -draw a rectangle from top-left at (<CURSOR_X>,<CURSOR_Y>) to bottom-right at (<W>,<H>)
+       -move the cursor to the right exactly <W> px
+       -fill pixels if <IS_FILL>
+          -if <IS_FILL> is 'true' or '1' or 'y':
+            -set fill=True, draw pixels contained by the rectangle
+            (True is the default if omitted)
+          -if <IS_FILL> is 'false' or '0' or 'n':
+            -set fill=False, draw only the outline of the rectangle
+       -scale and indent if <IS_SYMBOL>
+          -if <IS_SYMBOL> is 'true' or '1' or 'y':
+            -scale rectangle by <SIZE>, i.e.: [rect=<W>*<SIZE>,<H>*<SIZE>]
+            -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
+          -if <IS_SYMBOL> is 'false' or '0' or 'n':
+             -do not scale <W> or <H>
+             -do not shift by <HSPACE>
+            (False is the default if omitted)
+       e.g.:
+          [rect=10x10,n,n]           empty square 10x10
+          [size=3]A[rect=6x10,y,y]B  'A', solid rectangle 18x30 with 3px indent, 'B'
+          [size=5]A[rect=5x8,n,y]B   'A', placeholder char, 'B', same spacing as 'A_B'
+
     [rect=<W>x<H>]
     [rect=<W>,<H>]
-       draw a rectangle from cursor at top-left to (W,H) at bottom-right
-       move the cursor to the right exactly <W> px (no HSPACE)
-         e.g.: [rect=10x20]    draw a vertical rectangle at the cursor
+       same as: [rect=<W>x<H>,True,False]
 
-    [rectoutline=<W>x<H>]
-    [rectoutline=<W>,<H>]
-       same as [rect], except draw a hollow, not-filled-in rectangle
+    [ellipse=<RAD_X>x<RAD_Y>,<IS_FILL>,<IS_SYMBOL>]
+    [ellipse=<RAD_X>,<RAD_Y>,<IS_FILL>,<IS_SYMBOL>]
+       -draw an ellipse with x-radius=<RAD_X> and y-radius=<RAD_Y>,
+         centered at (<CURSOR_X> + <RAD_X>, <CURSOR_Y> + <RAD_Y>)
+         (left-most point is at <CURSOR_X>, top-most point is at <CURSOR_Y>)
+       -<RAD_X> and <RAD_Y> can be fractional, to be scaled by <IS_SYMBOL>
+       -move the cursor to the right exactly 2*<RAD_X>+1 px
+       -fill pixels if <IS_FILL>
+          -if <IS_FILL> is 'true' or '1' or 'y':
+            -set fill=True, draw pixels contained by the ellipse
+            (True is the default if omitted)
+          -if <IS_FILL> is 'false' or '0' or 'n':
+            -set fill=False, draw only the outline of the ellipse
+       -scale and indent if <IS_SYMBOL>
+          -if <IS_SYMBOL> is 'true' or '1' or 'y':
+            -scale ellipse diameters by <SIZE>
+                <RAD_X> = floor( (<RAD_X>*2+1)*<SIZE>) / 2)
+                <RAD_Y> = floor( (<RAD_Y>*2+1)*<SIZE>) / 2)
+            -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
+          -if <IS_SYMBOL> is 'false' or '0' or 'n':
+             -do not scale <RAD_X> or <RAD_Y>
+             -do not shift by <HSPACE>
+            (False is the default if omitted)
+
+       NOTE:
+         -all horizontal/vertical diameters are always an odd number of pixels
+
+         -if xR=0 or yR=0, the result is a line segment and <IS_FILL> has no effect
+
+         -with <CURSOR> = (<CURSOR_X>,<CURSOR_Y>)
+           [ellipse=0,0,n,n] => 1px single pixel at <CURSOR>+(0,0)
+           [ellipse=1,0,n,n] => 3px horizontal line from <CURSOR>+(0,0) to <CURSOR>+(2,0)
+           [ellipse=0,1,n,n] => 3px vertical line from <CURSOR>+(0,0) to <CURSOR>+(0,2)
+           [ellipse=1,1,n,n] => 3px cross centered at <CURSOR>+(1,1),
+                                with the point <CURSOR>+(0,0) omitted for fill=False,
+                                made of two 3px lines:
+                                  3px horizontal line from <CURSOR>+(0,1) to <CURSOR>+(2,1)
+                                  3px vertical line from <CURSOR>+(1,0) to <CURSOR>+(1,2)
+           [ellipse=2,2] => a 5px diameter circle centered at <CURSOR>+(2,2)
+
+       e.g.:
+          [ellipse=5x5,n,n]                 empty circle 10px diameter
+          [size=3]A[ellipse=5.1x4.9,y,y]B   'A', solid circle 33px diameter, 3px indent, 'B'
+                                            same as: [size=3]A[ellipse=16x16,y,n][shift=3x0]B
+          [size=5]25[ellipse=0.4x0.7,n,y]C  '25', stylized degree symbol, 3px indent, 'C'
+                                            same as: [size=5]25[ellipse=4,6,n,n][shift=5x0]C
 
     [ellipse=<RAD_X>x<RAD_Y>]
     [ellipse=<RAD_X>,<RAD_Y>]
-       draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
-         centered at (CURSOR_X + RAD_X, CURSOR_Y + RAD_Y)
-         (left-most point is at CURSOR_X, right-most point is at CURSOR_Y)
-       move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
-         e.g.: [ellipse=5x5]    draw a 10px diameter circle
+      same as: [ellipse=<RAD_X>x<RAD_Y>,True,False]
 
     [bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
     [bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
@@ -376,8 +436,8 @@ COMMAND text
 
     [shift=<W>x<H>]
     [shift=<W>,<H>]
-       move the left position of the cursor W pixels to the right (negative for left)
-       move the top position of the cursor H pixels down (negative for up)
+       add <W> to <CURSOR_X> (move the cursor <W> pixels to the right, negative <W> for left)
+       add <H> to <CURSOR_Y> (move the cursor <Y> pixels down, negative <H> for up)
        e.g.: [shift=0x-20]    move the cursor up 20 pixels
 
     [rtc=FORMAT]
