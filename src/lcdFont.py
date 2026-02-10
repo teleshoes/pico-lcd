@@ -184,6 +184,11 @@ class LcdFont:
       return float(valStr)
     except:
       return defaultVal
+  def maybeReadBool(self, valStr, defaultVal):
+    if valStr.lower() in ["true", "1", "y"]:
+      return True
+    elif valStr.lower() in ["false", "0", "n"]:
+      return False
     else:
       return defaultVal
 
@@ -319,15 +324,22 @@ class LcdFont:
     #            [n]
     #            Bx1:[png=icon_b_16x16.png]
     #
+    #    [rect=<W>x<H>,<IS_FILL>]
+    #    [rect=<W>,<H>,<IS_FILL>]
+    #       -draw a rectangle from cursor at top-left to (W,H) at bottom-right
+    #       -move the cursor to the right exactly <W> px (no HSPACE)
+    #       -if <IS_FILL> is True:
+    #          -fill rectangle instead of drawing as an empty outline
+    #          (defaults to True if omitted)
+    #         e.g.: [rect=10x20,True]    draw a solid vertical rectangle at the cursor
+    #
     #    [rect=<W>x<H>]
     #    [rect=<W>,<H>]
-    #       draw a rectangle from cursor at top-left to (W,H) at bottom-right
-    #       move the cursor to the right exactly <W> px (no HSPACE)
-    #         e.g.: [rect=10x20]    draw a vertical rectangle at the cursor
+    #       same as: [rect=<W>x<H>,True]
     #
     #    [rectoutline=<W>x<H>]
     #    [rectoutline=<W>,<H>]
-    #       same as [rect], except draw a hollow, not-filled-in rectangle
+    #       same as: [rect=<W>x<H>,False]
     #
     #    [ellipse=<RAD_X>x<RAD_Y>]
     #    [ellipse=<RAD_X>,<RAD_Y>]
@@ -474,11 +486,13 @@ class LcdFont:
         elif cmd == "png":
           self.cursorDrawPNG(val)
         elif cmd == "rect":
-          (w, h) = (0, 0)
-          if len(valArgList) == 2:
+          (w, h, isFill) = (0, 0, False)
+          if len(valArgList) >= 2:
             w = self.maybeReadInt(valArgList[0], 0)
             h = self.maybeReadInt(valArgList[1], 0)
-          self.cursorDrawRect(w, h, True)
+          if len(valArgList) >= 3:
+            isFill = self.maybeReadBool(valArgList[2], True)
+          self.cursorDrawRect(w, h, isFill)
         elif cmd == "rectoutline":
           (w, h) = (0, 0)
           if len(valArgList) == 2:
