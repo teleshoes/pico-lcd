@@ -348,7 +348,7 @@ class LcdFont:
     #    [ellipse=<RAD_X>,<RAD_Y>,<IS_FILL>,<IS_SYMBOL>]
     #       -draw an ellipse with x-radius=<RAD_X> and y-radius=<RAD_Y>,
     #         centered at (<CURSOR_X> + <RAD_X>, <CURSOR_Y> + <RAD_Y>)
-    #         (left-most point is at <CURSOR_X>, right-most point is at <CURSOR_Y>)
+    #         (left-most point is at <CURSOR_X>, top-most point is at <CURSOR_Y>)
     #       -move the cursor to the right exactly 2*<RAD_X> px
     #       -if <IS_FILL> is True:
     #          -fill ellipse instead of drawing as an empty outline
