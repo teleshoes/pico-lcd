@@ -327,33 +327,41 @@ class LcdFont:
     #            [n]
     #            Bx1:[png=icon_b_16x16.png]
     #
-    #    [rect=<W>x<H>,<IS_FILL>]
-    #    [rect=<W>,<H>,<IS_FILL>]
+    #    [rect=<W>x<H>,<IS_FILL>,<IS_SYMBOL>]
+    #    [rect=<W>,<H>,<IS_FILL>,<IS_SYMBOL>]
     #       -draw a rectangle from top-left at (<CURSOR_X>,<CURSOR_Y>) to bottom-right at (<W>,<H>)
-    #       -move the cursor to the right exactly <W> px (no HSPACE)
+    #       -move the cursor to the right exactly <W> px
     #       -if <IS_FILL> is True:
     #          -fill rectangle instead of drawing as an empty outline
     #          (defaults to True if omitted)
-    #         e.g.: [rect=10x20,True]    draw a solid vertical rectangle at the cursor
+    #       -if <IS_SYMBOL> is True:
+    #          -scale rectangle by <SIZE>, i.e.: [rect=<W>*<SIZE>,<H>*<SIZE>]
+    #          -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
+    #          (defaults to False if omitted)
+    #       e.g.: [size=3][rect=5x10,True,True]      draw a 15x30 solid vertical rectangle
     #
     #    [rect=<W>x<H>]
     #    [rect=<W>,<H>]
-    #       same as: [rect=<W>x<H>,True]
+    #       same as: [rect=<W>x<H>,True,False]
     #
-    #    [ellipse=<RAD_X>x<RAD_Y>,<IS_FILL>]
-    #    [ellipse=<RAD_X>,<RAD_Y>,<IS_FILL>]
+    #    [ellipse=<RAD_X>x<RAD_Y>,<IS_FILL>,<IS_SYMBOL>]
+    #    [ellipse=<RAD_X>,<RAD_Y>,<IS_FILL>,<IS_SYMBOL>]
     #       -draw an ellipse with x-radius=<RAD_X> and y-radius=<RAD_Y>,
     #         centered at (<CURSOR_X> + <RAD_X>, <CURSOR_Y> + <RAD_Y>)
     #         (left-most point is at <CURSOR_X>, right-most point is at <CURSOR_Y>)
-    #       -move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
+    #       -move the cursor to the right exactly 2*<RAD_X> px
     #       -if <IS_FILL> is True:
     #          -fill ellipse instead of drawing as an empty outline
     #          (defaults to True if omitted)
-    #       e.g.: [ellipse=5x5,True]    draw a 10px diameter solid circle
+    #       -if <IS_SYMBOL> is True:
+    #          -scale ellipse by <SIZE>, i.e.: [ellipse=<RAD_X>*<SIZE>,<RAD_Y>*<SIZE>]
+    #          -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
+    #          (defaults to False if omitted)
+    #       e.g.: [size=3][ellipse=5x5,True,True]    draw a 30px diameter circle
     #
     #    [ellipse=<RAD_X>x<RAD_Y>]
     #    [ellipse=<RAD_X>,<RAD_Y>]
-    #      same as: [ellipse=<RAD_X>x<RAD_Y>,True]
+    #      same as: [ellipse=<RAD_X>x<RAD_Y>,True,False]
     #
     #    [bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
     #    [bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
@@ -492,21 +500,38 @@ class LcdFont:
         elif cmd == "png":
           self.cursorDrawPNG(val)
         elif cmd == "rect":
-          (w, h, isFill) = (0, 0, False)
+          (w, h, isFill, isSymbol) = (0, 0, True, False)
           if len(valArgList) >= 2:
             w = self.maybeReadInt(valArgList[0], 0)
             h = self.maybeReadInt(valArgList[1], 0)
           if len(valArgList) >= 3:
             isFill = self.maybeReadBool(valArgList[2], True)
+          if len(valArgList) >= 4:
+            isSymbol = self.maybeReadBool(valArgList[3], True)
+
+          if isSymbol:
+            w = w * self.cursor['size']
+            h = h * self.cursor['size']
           self.cursorDrawRect(w, h, isFill)
+          if isSymbol:
+            self.cursorIndentHspace()
         elif cmd == "ellipse":
-          (radX, radY, isFill) = (0, 0, True)
+          (radX, radY, isFill, isSymbol) = (0, 0, True, False)
+
           if len(valArgList) >= 2:
             radX = self.maybeReadInt(valArgList[0], 0)
             radY = self.maybeReadInt(valArgList[1], 0)
           if len(valArgList) >= 3:
             isFill = self.maybeReadBool(valArgList[2], True)
+          if len(valArgList) >= 4:
+            isSymbol = self.maybeReadBool(valArgList[3], False)
+
+          if isSymbol:
+            radX = radX * self.cursor['size']
+            radY = radY * self.cursor['size']
           self.cursorDrawEllipse(radX, radY, isFill)
+          if isSymbol:
+            self.cursorIndentHspace()
         elif cmd == "shift":
           (x, y) = (0, 0)
           if len(valArgList) == 2:
