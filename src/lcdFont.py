@@ -345,7 +345,10 @@ class LcdFont:
     #             -do not scale <W> or <H>
     #             -do not shift by <HSPACE>
     #            (False is the default if omitted)
-    #       e.g.: [size=3][rect=5x10,True,True]      draw a 15x30 solid vertical rectangle
+    #       e.g.:
+    #          [rect=10x10,n,n]           empty square 10x10
+    #          [size=3]A[rect=6x10,y,y]B  'A', solid rectangle 18x30 with 3px indent, 'B'
+    #          [size=5]A[rect=5x8,n,y]B   'A', placeholder char, 'B', same spacing as 'A_B'
     #
     #    [rect=<W>x<H>]
     #    [rect=<W>,<H>]
@@ -391,7 +394,12 @@ class LcdFont:
     #                                  3px vertical line from <CURSOR>+(1,0) to <CURSOR>+(1,2)
     #           [ellipse=2,2] => a 5px diameter circle centered at <CURSOR>+(2,2)
     #
-    #       e.g.: [size=3][ellipse=5x5,True,True]    draw a 31px diameter circle
+    #       e.g.:
+    #          [ellipse=5x5,n,n]                 empty circle 10px diameter
+    #          [size=3]A[ellipse=5.1x4.9,y,y]B   'A', solid circle 33px diameter, 3px indent, 'B'
+    #                                            same as: [size=3]A[ellipse=16x16,y,n][shift=3x0]B
+    #          [size=5]25[ellipse=0.4x0.7,n,y]C  '25', stylized degree symbol, 3px indent, 'C'
+    #                                            same as: [size=5]25[ellipse=4,6,n,n][shift=5x0]C
     #
     #    [ellipse=<RAD_X>x<RAD_Y>]
     #    [ellipse=<RAD_X>,<RAD_Y>]
