@@ -365,7 +365,9 @@ class LcdFont:
     #            -set fill=False, draw only the outline of the ellipse
     #       -scale and indent if <IS_SYMBOL>
     #          -if <IS_SYMBOL> is 'true' or '1' or 'y':
-    #            -scale ellipse by <SIZE>, i.e.: [ellipse=<RAD_X>*<SIZE>,<RAD_Y>*<SIZE>]
+    #            -scale ellipse diameters by <SIZE>
+    #                <RAD_X> = floor( (<RAD_X>*2+1)*<SIZE>) / 2)
+    #                <RAD_Y> = floor( (<RAD_Y>*2+1)*<SIZE>) / 2)
     #            -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
     #          -if <IS_SYMBOL> is 'false' or '0' or 'n':
     #             -do not scale <RAD_X> or <RAD_Y>
@@ -541,8 +543,8 @@ class LcdFont:
             isSymbol = self.maybeReadBool(valArgList[3], False)
 
           if isSymbol:
-            radX = radX * self.cursor['size']
-            radY = radY * self.cursor['size']
+            radX = int((radX*2+1) * self.cursor['size'] / 2)
+            radY = int((radY*2+1) * self.cursor['size'] / 2)
           self.cursorDrawEllipse(radX, radY, isFill)
           if isSymbol:
             self.cursorIndentHspace()
