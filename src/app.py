@@ -1009,5 +1009,51 @@ def fileExists(filename):
   except OSError:
     return False
 
+def isDir(filename):
+  try:
+    S_IFMT = 61440
+    S_IFDIR = 16384
+    stat = os.stat(filename)
+    st_mode = stat[0]
+    if st_mode & S_IFMT == S_IFDIR:
+      return True
+    else:
+      return False
+  except OSError:
+    return False
+
+def dirname(filename):
+  if filename == None:
+    return None
+  isAbsolute = False
+  if len(filename) > 0 and filename[0] == "/":
+    isAbsolute = True
+
+  dirName = filename
+  dirName = dirName.rstrip('/')
+  lastSlash = dirName.rfind('/')
+  if lastSlash < 0:
+    lastSlash = 0
+  dirName = dirName[0:lastSlash]
+  dirName = dirName.rstrip('/')
+  if len(dirName) == 0:
+    if isAbsolute:
+      dirName = "/"
+    else:
+      dirName = "."
+  return dirName
+
+def getParentDirs(filename):
+  dirs = []
+  prevLen = len(filename)
+  while filename != None and filename != "/" and filename != ".":
+    filename = dirname(filename)
+    dirs.append(filename)
+    newLen = len(filename)
+    if newLen >= prevLen:
+      break
+    prevLen = newLen
+  return dirs
+
 if __name__=='__main__':
   main()
