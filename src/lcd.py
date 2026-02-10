@@ -482,6 +482,13 @@ class LCD():
     two_xrsq = 2 * radiusX * radiusX
     two_yrsq = 2 * radiusY * radiusY
 
+    #prevent infinite loop on (radX,radY)=(0,0)
+    #  treat point ellipses (xR=0, yR=0) as single pixels
+    if two_xrsq == 0:
+      two_xrsq = 1
+    if two_yrsq == 0:
+      two_yrsq = 1
+
     #first set of points, y' > -1
     curX = radiusX
     curY = 0
