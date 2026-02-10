@@ -337,13 +337,20 @@ class LcdFont:
     #    [rect=<W>,<H>]
     #       same as: [rect=<W>x<H>,True]
     #
-    #    [ellipse=<RAD_X>x<RAD_Y>]
-    #    [ellipse=<RAD_X>,<RAD_Y>]
-    #       draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
+    #    [ellipse=<RAD_X>x<RAD_Y>,<IS_FILL>]
+    #    [ellipse=<RAD_X>,<RAD_Y>,<IS_FILL>]
+    #       -draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
     #         centered at (CURSOR_X + RAD_X, CURSOR_Y + RAD_Y)
     #         (left-most point is at CURSOR_X, right-most point is at CURSOR_Y)
-    #       move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
-    #         e.g.: [ellipse=5x5]    draw a 10px diameter circle
+    #       -move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
+    #       -if <IS_FILL> is True:
+    #          -fill ellipse instead of drawing as an empty outline
+    #          (defaults to True if omitted)
+    #       e.g.: [ellipse=5x5,True]    draw a 10px diameter solid circle
+    #
+    #    [ellipse=<RAD_X>x<RAD_Y>]
+    #    [ellipse=<RAD_X>,<RAD_Y>]
+    #      same as: [ellipse=<RAD_X>x<RAD_Y>,True]
     #
     #    [bar=<W>x<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
     #    [bar=<W>,<H>,<PCT>,<FILL_COLOR>,<EMPTY_COLOR>]
@@ -490,11 +497,13 @@ class LcdFont:
             isFill = self.maybeReadBool(valArgList[2], True)
           self.cursorDrawRect(w, h, isFill)
         elif cmd == "ellipse":
-          (radX, radY) = (0, 0)
-          if len(valArgList) == 2:
+          (radX, radY, isFill) = (0, 0, True)
+          if len(valArgList) >= 2:
             radX = self.maybeReadInt(valArgList[0], 0)
             radY = self.maybeReadInt(valArgList[1], 0)
-          self.cursorDrawEllipse(radX, radY, True)
+          if len(valArgList) >= 3:
+            isFill = self.maybeReadBool(valArgList[2], True)
+          self.cursorDrawEllipse(radX, radY, isFill)
         elif cmd == "shift":
           (x, y) = (0, 0)
           if len(valArgList) == 2:
