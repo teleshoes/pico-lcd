@@ -337,10 +337,6 @@ class LcdFont:
     #    [rect=<W>,<H>]
     #       same as: [rect=<W>x<H>,True]
     #
-    #    [rectoutline=<W>x<H>]
-    #    [rectoutline=<W>,<H>]
-    #       same as: [rect=<W>x<H>,False]
-    #
     #    [ellipse=<RAD_X>x<RAD_Y>]
     #    [ellipse=<RAD_X>,<RAD_Y>]
     #       draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
@@ -467,7 +463,7 @@ class LcdFont:
           val = cmdVal[1]
 
         valArgList = []
-        if cmd in ["rect", "rectoutline", "ellipse", "bar", "shift"]:
+        if cmd in ["rect", "ellipse", "bar", "shift"]:
           valArgList = val.split(",")
           if "x" in valArgList[0]:
             #allow <X>x<Y> syntax instead of <X>,<Y> for first arg
@@ -493,12 +489,6 @@ class LcdFont:
           if len(valArgList) >= 3:
             isFill = self.maybeReadBool(valArgList[2], True)
           self.cursorDrawRect(w, h, isFill)
-        elif cmd == "rectoutline":
-          (w, h) = (0, 0)
-          if len(valArgList) == 2:
-            w = self.maybeReadInt(valArgList[0], 0)
-            h = self.maybeReadInt(valArgList[1], 0)
-          self.cursorDrawRect(w, h, False)
         elif cmd == "ellipse":
           (radX, radY) = (0, 0)
           if len(valArgList) == 2:
