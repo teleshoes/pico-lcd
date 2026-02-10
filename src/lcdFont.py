@@ -373,6 +373,23 @@ class LcdFont:
     #             -do not scale <RAD_X> or <RAD_Y>
     #             -do not shift by <HSPACE>
     #            (False is the default if omitted)
+    #
+    #       NOTE:
+    #         -all horizontal/vertical diameters are always an odd number of pixels
+    #
+    #         -if xR=0 or yR=0, the result is a line segment and <IS_FILL> has no effect
+    #
+    #         -with <CURSOR> = (<CURSOR_X>,<CURSOR_Y>)
+    #           [ellipse=0,0,n,n] => 1px single pixel at <CURSOR>+(0,0)
+    #           [ellipse=1,0,n,n] => 3px horizontal line from <CURSOR>+(0,0) to <CURSOR>+(2,0)
+    #           [ellipse=0,1,n,n] => 3px vertical line from <CURSOR>+(0,0) to <CURSOR>+(0,2)
+    #           [ellipse=1,1,n,n] => 3px cross centered at <CURSOR>+(1,1),
+    #                                with the point <CURSOR>+(0,0) omitted for fill=False,
+    #                                made of two 3px lines:
+    #                                  3px horizontal line from <CURSOR>+(0,1) to <CURSOR>+(2,1)
+    #                                  3px vertical line from <CURSOR>+(1,0) to <CURSOR>+(1,2)
+    #           [ellipse=2,2] => a 5px diameter circle centered at <CURSOR>+(2,2)
+    #
     #       e.g.: [size=3][ellipse=5x5,True,True]    draw a 31px diameter circle
     #
     #    [ellipse=<RAD_X>x<RAD_Y>]
