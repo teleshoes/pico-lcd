@@ -371,6 +371,13 @@ def cmdUpload(controller, params, socketReader):
   out = ""
   try:
     byteCount = 0
+    if "/" in filename:
+      dirs = getParentDirs(filename)
+      dirs.reverse()
+      for dirName in dirs:
+        if not isDir(dirName):
+          print("mkdir " + dirName)
+          os.mkdir(dirName)
     with open(filename, "w") as fh:
       while socketReader.isReady():
         data = socketReader.readDataChunk()

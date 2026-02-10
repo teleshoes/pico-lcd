@@ -255,7 +255,7 @@ CMD_UPLOAD = {
   },
   "body":   "file contents",
   "desc":   """
-    write body to file 'filename'
+    write body to file 'filename', creating dirs as necessary if filename contains '/'
   """,
 }
 CMD_DELETE = {
