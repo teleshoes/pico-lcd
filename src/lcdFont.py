@@ -356,6 +356,7 @@ class LcdFont:
     #       -draw an ellipse with x-radius=<RAD_X> and y-radius=<RAD_Y>,
     #         centered at (<CURSOR_X> + <RAD_X>, <CURSOR_Y> + <RAD_Y>)
     #         (left-most point is at <CURSOR_X>, top-most point is at <CURSOR_Y>)
+    #       -<RAD_X> and <RAD_Y> can be fractional, to be scaled by <IS_SYMBOL>
     #       -move the cursor to the right exactly 2*<RAD_X>+1 px
     #       -fill pixels if <IS_FILL>
     #          -if <IS_FILL> is 'true' or '1' or 'y':
@@ -552,16 +553,17 @@ class LcdFont:
           (radX, radY, isFill, isSymbol) = (0, 0, True, False)
 
           if len(valArgList) >= 2:
-            radX = self.maybeReadInt(valArgList[0], 0)
-            radY = self.maybeReadInt(valArgList[1], 0)
+            radX = self.maybeReadFloat(valArgList[0], 0)
+            radY = self.maybeReadFloat(valArgList[1], 0)
           if len(valArgList) >= 3:
             isFill = self.maybeReadBool(valArgList[2], True)
           if len(valArgList) >= 4:
             isSymbol = self.maybeReadBool(valArgList[3], False)
 
           if isSymbol:
-            radX = int((radX*2+1) * self.cursor['size'] / 2)
-            radY = int((radY*2+1) * self.cursor['size'] / 2)
+            radX = (radX*2+1) * self.cursor['size'] / 2
+            radY = (radY*2+1) * self.cursor['size'] / 2
+          (radX, radY) = (int(radX), int(radY))
           self.cursorDrawEllipse(radX, radY, isFill)
           if isSymbol:
             self.cursorIndentHspace()
