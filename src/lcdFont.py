@@ -100,7 +100,7 @@ class LcdFont:
     self.cursor['x'] += w
   def cursorDrawEllipse(self, radX, radY, fill=True):
     self.lcd.ellipse(self.cursor['x'] + radX, self.cursor['y'] + radY, radX, radY, self.getCursorColor(), fill)
-    self.cursor['x'] += radX * 2
+    self.cursor['x'] += radX * 2 + 1
   def cursorDrawBar(self, w, h, pct, fillColor, emptyColor):
     x = self.cursor['x']
     y = self.cursor['y']
@@ -349,7 +349,7 @@ class LcdFont:
     #       -draw an ellipse with x-radius=<RAD_X> and y-radius=<RAD_Y>,
     #         centered at (<CURSOR_X> + <RAD_X>, <CURSOR_Y> + <RAD_Y>)
     #         (left-most point is at <CURSOR_X>, top-most point is at <CURSOR_Y>)
-    #       -move the cursor to the right exactly 2*<RAD_X> px
+    #       -move the cursor to the right exactly 2*<RAD_X>+1 px
     #       -if <IS_FILL> is True:
     #          -fill ellipse instead of drawing as an empty outline
     #          (defaults to True if omitted)
@@ -357,7 +357,7 @@ class LcdFont:
     #          -scale ellipse by <SIZE>, i.e.: [ellipse=<RAD_X>*<SIZE>,<RAD_Y>*<SIZE>]
     #          -shift to the right by <HSPACE>*<SIZE>, i.e.: [shift=<HSPACE>*<SIZE>x0]
     #          (defaults to False if omitted)
-    #       e.g.: [size=3][ellipse=5x5,True,True]    draw a 30px diameter circle
+    #       e.g.: [size=3][ellipse=5x5,True,True]    draw a 31px diameter circle
     #
     #    [ellipse=<RAD_X>x<RAD_Y>]
     #    [ellipse=<RAD_X>,<RAD_Y>]
