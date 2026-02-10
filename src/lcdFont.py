@@ -279,9 +279,9 @@ class LcdFont:
     #          set the pixels-per-dot to SIZE
     #          for 5x8 font, font size in px is: 8*SIZE
     #        [x=<X>]
-    #          set the left position of cursor to X as absolute px on LCD
+    #          set the left position of cursor <CURSOR_X> to <X>, as absolute px on LCD
     #        [y=<Y>]
-    #          set the top position of cursor to Y as absolute px on LCD
+    #          set the top position of cursor <CURSOR_Y> to <Y>, as absolute px on LCD
     #        [hspace=<HSPACE>]
     #          leave floor(HSPACE*SIZE) dots between each character
     #            any non-negative number, 1.0=default, 0=no space, 2.0=wide
@@ -300,7 +300,7 @@ class LcdFont:
     #
     #    [png=FILENAME]
     #      draw the PNG image, already present in the filesystem, at FILENAME
-    #      cursor position is the top-left corner of the image
+    #      top-left corner of the image is at cursor (<CURSOR_X>,<CURSOR_Y>)
     #      NOTE:
     #        A) file must already be on the filesystem, uploaded beforehand with upload command
     #        B) does not move the cursor, use [shift=<W>x0] to do so, where <W> is the PNG width
@@ -326,7 +326,7 @@ class LcdFont:
     #
     #    [rect=<W>x<H>,<IS_FILL>]
     #    [rect=<W>,<H>,<IS_FILL>]
-    #       -draw a rectangle from cursor at top-left to (W,H) at bottom-right
+    #       -draw a rectangle from top-left at (<CURSOR_X>,<CURSOR_Y>) to bottom-right at (<W>,<H>)
     #       -move the cursor to the right exactly <W> px (no HSPACE)
     #       -if <IS_FILL> is True:
     #          -fill rectangle instead of drawing as an empty outline
@@ -339,9 +339,9 @@ class LcdFont:
     #
     #    [ellipse=<RAD_X>x<RAD_Y>,<IS_FILL>]
     #    [ellipse=<RAD_X>,<RAD_Y>,<IS_FILL>]
-    #       -draw an ellipse with x-radius=RAD_X and y-radius=RAD_Y,
-    #         centered at (CURSOR_X + RAD_X, CURSOR_Y + RAD_Y)
-    #         (left-most point is at CURSOR_X, right-most point is at CURSOR_Y)
+    #       -draw an ellipse with x-radius=<RAD_X> and y-radius=<RAD_Y>,
+    #         centered at (<CURSOR_X> + <RAD_X>, <CURSOR_Y> + <RAD_Y>)
+    #         (left-most point is at <CURSOR_X>, right-most point is at <CURSOR_Y>)
     #       -move the cursor to the right exactly 2*<RAD_X> px (no HSPACE)
     #       -if <IS_FILL> is True:
     #          -fill ellipse instead of drawing as an empty outline
@@ -394,8 +394,8 @@ class LcdFont:
     #
     #    [shift=<W>x<H>]
     #    [shift=<W>,<H>]
-    #       move the left position of the cursor W pixels to the right (negative for left)
-    #       move the top position of the cursor H pixels down (negative for up)
+    #       add <W> to <CURSOR_X> (move the cursor <W> pixels to the right, negative <W> for left)
+    #       add <H> to <CURSOR_Y> (move the cursor <Y> pixels down, negative <H> for up)
     #       e.g.: [shift=0x-20]    move the cursor up 20 pixels
     #
     #    [rtc=FORMAT]
