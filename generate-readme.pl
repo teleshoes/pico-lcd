@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use File::Basename qw(basename);
 
+sub cleanText($);
 sub getMarkupSyntax();
 
 my $EXEC = basename $0;
@@ -31,10 +32,12 @@ sub main(@){
   my $cmdDoc = `python src/doc.py`;
   $cmdDoc =~ s/^\n+//;
   $cmdDoc =~ s/\n+$//;
+  $cmdDoc = cleanText($cmdDoc);
 
   my $markupSyntax = getMarkupSyntax();
   $markupSyntax =~ s/^\n+//;
   $markupSyntax =~ s/\n+$//;
+  $markupSyntax = cleanText($markupSyntax);
 
   $readme =~ s/
     <!--\s*COMMAND_DOC\s*-->
@@ -51,6 +54,15 @@ sub main(@){
   open my $fh, "> README.md" or die "ERROR: could not write README.md\n$!\n";
   print $fh $readme;
   close $fh;
+}
+
+sub cleanText($){
+  my ($text) = @_;
+  $text =~ s/&/&amp;/g;
+  $text =~ s/</&lt;/g;
+  $text =~ s/>/&gt;/g;
+  $text =~ s/"/&quot;/g;
+  return $text;
 }
 
 sub getMarkupSyntax(){
