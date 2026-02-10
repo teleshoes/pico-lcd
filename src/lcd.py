@@ -478,6 +478,23 @@ class LCD():
       self.framebuf.ellipse(centerX, centerY, radiusX, radiusY, color, fill, quadrantMask)
       return
 
+    #NOTE:
+    #   all horizontal/vertical diameters are always an odd number of pixels
+    #     xDiameterPx = xR * 2 + 1
+    #     yDiameterPx = yR * 2 + 1
+    #
+    #   if xR=0 or yR=0, the result is a line segment and fill has no effect
+    #
+    #   xR=0, yR=0 => 1px single pixel at (0,0)
+    #   xR=1, yR=0 => 3px horizontal line from (-1,0) to (1,0)
+    #   xR=0, yR=1 => 3px vertical line from (0,-1) to (0,1)
+    #   xR=1, yR=1 => 3px cross centered at (1,1),
+    #                   with the point (0,0) omitted if fill=False,
+    #                   made of two 3px lines:
+    #                     3px horizontal line from (-1,0) to (1,0)
+    #                     3px vertical line from (0,-1) to (0,1)
+    #   xR=2, yR=2 => a 5px diameter circle centered at (0,0)
+
     #adapted from micropython mod_framebuf.c
     two_xrsq = 2 * radiusX * radiusX
     two_yrsq = 2 * radiusY * radiusY
