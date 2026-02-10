@@ -81,7 +81,10 @@ class LcdFont:
   def cursorDrawChar(self, charStr):
     self.drawChar(charStr,
       self.cursor['x'], self.cursor['y'], self.cursor['size'], self.cursor['color'])
-    self.cursor['x'] += int(self.cursor['size'] * (self.fontWidth + self.cursor['hspace']))
+    self.cursor['x'] += self.cursor['size'] * self.fontWidth
+    self.cursorIndentHspace()
+  def cursorIndentHspace(self):
+    self.cursor['x'] += int(self.cursor['size'] * self.cursor['hspace'])
   def cursorDrawPNG(self, filename):
     if self.lcd.is_framebuf_enabled():
       #delay drawing PNGs until after framebuf is shown
