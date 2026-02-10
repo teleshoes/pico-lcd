@@ -184,33 +184,6 @@ class LcdFont:
       return float(valStr)
     except:
       return defaultVal
-  def maybeReadCoord(self, valStr, defaultVal):
-    valStr = valStr.replace("x", ",", 1) #<X>x<Y> => <X>,<Y>
-    valArr = valStr.split(",")
-    if len(valArr) == 2:
-      x = self.maybeReadInt(valArr[0], None)
-      y = self.maybeReadInt(valArr[1], None)
-      if x != None and y != None:
-        return (x,y)
-      else:
-        return defaultVal
-    else:
-      return defaultVal
-  def maybeReadBar(self, valStr, defaultVal):
-    if valStr.find("x") < valStr.find(","):
-      #replace the first 'x', if it is before first ','
-      valStr = valStr.replace("x", ",", 1) #<X>x<Y> => <X>,<Y>
-    valArr = valStr.split(",")
-    if len(valArr) == 5:
-      x = self.maybeReadInt(valArr[0], None)
-      y = self.maybeReadInt(valArr[1], None)
-      pct = self.maybeReadInt(valArr[2], None)
-      fillColor = self.maybeReadColor(valArr[3], None)
-      emptyColor = self.maybeReadColor(valArr[4], None)
-      if x != None and y != None and pct != None and fillColor != None and emptyColor != None:
-        return (x,y,pct,fillColor,emptyColor)
-      else:
-        return defaultVal
     else:
       return defaultVal
 
@@ -474,18 +447,20 @@ class LcdFont:
         else:
           cmdValStr = markup[i+1:end]
 
-        cmdVal = cmdValStr.split("=")
+        cmdVal = cmdValStr.split("=", 2)
 
-        if len(cmdVal) == 1:
-          cmd = cmdVal[0].lower()
-          val = ""
-        elif len(cmdVal) == 2:
-          cmd = cmdVal[0].lower()
+        cmd = cmdVal[0].lower()
+        val = ""
+        if len(cmdVal) == 2:
           val = cmdVal[1]
-        else:
-          #bad cmd=val format, treat as unknown command
-          cmd = None
-          val = None
+
+        valArgList = []
+        if cmd in ["rect", "rectoutline", "ellipse", "bar", "shift"]:
+          valArgList = val.split(",")
+          if "x" in valArgList[0]:
+            #allow <X>x<Y> syntax instead of <X>,<Y> for first arg
+            val = val.replace("x", ",", 1)
+            valArgList = val.split(",")
 
         if cmd == "bracket":
           # literal '[', either '[bracket]' or '[['
@@ -499,20 +474,40 @@ class LcdFont:
         elif cmd == "png":
           self.cursorDrawPNG(val)
         elif cmd == "rect":
-          (w, h) = self.maybeReadCoord(val, (0,0))
+          (w, h) = (0, 0)
+          if len(valArgList) == 2:
+            w = self.maybeReadInt(valArgList[0], 0)
+            h = self.maybeReadInt(valArgList[1], 0)
           self.cursorDrawRect(w, h, True)
         elif cmd == "rectoutline":
-          (w, h) = self.maybeReadCoord(val, (0,0))
+          (w, h) = (0, 0)
+          if len(valArgList) == 2:
+            w = self.maybeReadInt(valArgList[0], 0)
+            h = self.maybeReadInt(valArgList[1], 0)
           self.cursorDrawRect(w, h, False)
         elif cmd == "ellipse":
-          (radX, radY) = self.maybeReadCoord(val, (0,0))
+          (radX, radY) = (0, 0)
+          if len(valArgList) == 2:
+            radX = self.maybeReadInt(valArgList[0], 0)
+            radY = self.maybeReadInt(valArgList[1], 0)
           self.cursorDrawEllipse(radX, radY, True)
         elif cmd == "shift":
-          (x, y) = self.maybeReadCoord(val, (0,0))
+          (x, y) = (0, 0)
+          if len(valArgList) == 2:
+            x = self.maybeReadInt(valArgList[0], 0)
+            y = self.maybeReadInt(valArgList[1], 0)
           self.cursor['x'] += x
           self.cursor['y'] += y
         elif cmd == "bar":
-          (w, h, pct, fillColor, emptyColor) = self.maybeReadBar(val, (0,0,0,None,None))
+          (w, h, pct, fillColor, emptyColor) = (0,0,0,None,None)
+
+          if len(valArgList) == 5:
+            w = self.maybeReadInt(valArgList[0], 0)
+            h = self.maybeReadInt(valArgList[1], 0)
+            pct = self.maybeReadInt(valArgList[2], 0)
+            fillColor = self.maybeReadColor(valArgList[3], None)
+            emptyColor = self.maybeReadColor(valArgList[4], None)
+
           self.cursorDrawBar(w, h, pct, fillColor, emptyColor)
         elif cmd == "rtc":
           if rtcEpoch == None:
