@@ -221,17 +221,18 @@ class LCD():
     self.white   = self.get_color(0xFF, 0xFF, 0xFF)
     self.black   = self.get_color(0x00, 0x00, 0x00)
 
-  def get_color(self, r, g, b):
-    color = None
+  @micropython.viper
+  def get_color(self, r:int, g:int, b:int) -> int:
+    color = 0
     if self.colorProfile == COLOR_PROFILE_RGB565:
-      r5 = int(0b11111  * r/255 + 0.5)
-      g6 = int(0b111111 * g/255 + 0.5)
-      b5 = int(0b11111  * b/255 + 0.5)
+      r5 = (0b11111  * r * 2 + 1) // (255*2)
+      g6 = (0b111111 * g * 2 + 1) // (255*2)
+      b5 = (0b11111  * b * 2 + 1) // (255*2)
       color = (r5<<11) + (g6<<5) + (b5<<0)
     elif self.colorProfile == COLOR_PROFILE_RGB444:
-      r4 = int(0b1111 * r/255 + 0.5)
-      g4 = int(0b1111 * g/255 + 0.5)
-      b4 = int(0b1111 * b/255 + 0.5)
+      r4 = (0b1111 * r * 2 + 1) // (255*2)
+      g4 = (0b1111 * g * 2 + 1) // (255*2)
+      b4 = (0b1111 * b * 2 + 1) // (255*2)
       color = (r4<<8) + (g4<<4) + (b4<<0)
     else:
       color = 0
@@ -239,11 +240,12 @@ class LCD():
 
     if not self.isColorProfileBigEndian:
       #RGB565 byte order is swapped in framebuf vs st7789
-      color = self.swap_hi_lo_byte_order(color)
+      color = int(self.swap_hi_lo_byte_order(color))
 
     return color
 
-  def swap_hi_lo_byte_order(self, h):
+  @micropython.viper
+  def swap_hi_lo_byte_order(self, h:int) -> int:
     bHi = h >> 8
     bLo = h & 0xff
     return (bLo << 8) | (bHi & 0xff)
