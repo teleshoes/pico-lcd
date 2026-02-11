@@ -222,6 +222,22 @@ class LCD():
     self.black   = self.get_color(0x00, 0x00, 0x00)
 
   @micropython.viper
+  def get_color_rgba(self, r:int, g:int, b:int, a:int) -> int:
+    return int(self.get_color(
+      ((r * a * 2 + 1) // (255*2)),
+      ((g * a * 2 + 1) // (255*2)),
+      ((b * a * 2 + 1) // (255*2)),
+    ))
+
+  @micropython.viper
+  def get_color_rgba_bg(self, r:int, g:int, b:int, a:int, bgR:int, bgG:int, bgB:int) -> int:
+    return int(self.get_color(
+      ((r * a * 2 + 1) // (255*2)) + ((bgR * (255-a) * 2 + 1) // (255*2)),
+      ((g * a * 2 + 1) // (255*2)) + ((bgG * (255-a) * 2 + 1) // (255*2)),
+      ((b * a * 2 + 1) // (255*2)) + ((bgB * (255-a) * 2 + 1) // (255*2)),
+    ))
+
+  @micropython.viper
   def get_color(self, r:int, g:int, b:int) -> int:
     color = 0
     if self.colorProfile == COLOR_PROFILE_RGB565:
