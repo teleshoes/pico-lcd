@@ -843,11 +843,16 @@ class PNMParser:
     else:
       renderPixelFct = self.lcd.tft.pixel
 
-    getColorFct = self.lcd.get_color_rgba
-    if self.tuplType == b"RGB_ALPHA":
-      self.renderPixels(getColorFct, renderPixelFct)
+    getColorFct = None
+    if self.tuplType.startswith("RGB"):
+      if self.depth == 4:
+        getColorFct = self.lcd.get_color_rgba
+      else:
+        raise("ERROR: unimplemented PAM RGB depth '" + str(self.depth) + "'\n")
     else:
-      raise("ERROR: unimplemented PAM TUPLTYPE '" + str(tuplType) + "'\n")
+      raise("ERROR: unimplemented PAM TUPLTYPE '" + str(self.tuplType) + "'\n")
+
+    self.renderPixels(getColorFct, renderPixelFct)
 
   @micropython.viper
   def renderPixels(self, getColorFct:object, renderPixelFct:object):
