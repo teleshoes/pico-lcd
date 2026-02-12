@@ -837,7 +837,11 @@ class PNMParser:
 
   def render(self):
     self.parseHeader()
-    renderPixelFct = self.lcd.pixel
+    renderPixelFct = None
+    if self.lcd.is_framebuf_enabled():
+      renderPixelFct = self.lcd.framebuf.pixel
+    else:
+      renderPixelFct = self.lcd.tft.pixel
 
     getColorFct = self.lcd.get_color_rgba
     if self.tuplType == b"RGB_ALPHA":
