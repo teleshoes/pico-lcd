@@ -845,12 +845,12 @@ class PNMParser:
 
     getColorFct = self.lcd.get_color_rgba
     if self.tuplType == b"RGB_ALPHA":
-      self.drawRGBAImg(getColorFct, renderPixelFct)
+      self.renderPixels(getColorFct, renderPixelFct)
     else:
       raise("ERROR: unimplemented PAM TUPLTYPE '" + str(tuplType) + "'\n")
 
   @micropython.viper
-  def drawRGBAImg(self, getColorFct:object, renderPixelFct:object):
+  def renderPixels(self, getColorFct:object, renderPixelFct:object):
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
     depth = int(self.depth)
@@ -859,7 +859,14 @@ class PNMParser:
     col = 0
     curPx = self.fh.read(depth)
     while int(len(curPx)) == depth:
-      c = int(getColorFct(curPx[0], curPx[1], curPx[2], curPx[3]))
+      if depth == 1:
+        c = int(getColorFct(curPx[0]))
+      elif depth == 2:
+        c = int(getColorFct(curPx[0], curPx[1]))
+      elif depth == 3:
+        c = int(getColorFct(curPx[0], curPx[1], curPx[2]))
+      elif depth == 4:
+        c = int(getColorFct(curPx[0], curPx[1], curPx[2], curPx[3]))
       renderPixelFct(col+offsetX, row+offsetY, c)
       col += 1
       if col >= imgW:
