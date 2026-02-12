@@ -844,8 +844,8 @@ class PNMParser:
 
   @micropython.viper
   def drawRGBAImg(self):
-    x = int(self.offsetX)
-    y = int(self.offsetY)
+    offsetX = int(self.offsetX)
+    offsetY = int(self.offsetY)
     imgW = int(self.w)
     row = 0
     col = 0
@@ -854,7 +854,7 @@ class PNMParser:
     while int(len(curPx)) == pixelByteLen:
       (r, g, b, a) = curPx
       c = int(self.lcd.get_color_rgba(r, g, b, a))
-      self.lcd.pixel(col+x, row+y, c)
+      self.lcd.pixel(col+offsetX, row+offsetY, c)
       col += 1
       if col >= imgW:
         row += 1
