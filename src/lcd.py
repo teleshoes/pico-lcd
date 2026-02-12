@@ -863,6 +863,7 @@ class PNMParser:
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
     depth = int(self.depth)
+    start = time.ticks_ms()
 
     segmentSize = 1024
 
@@ -879,6 +880,7 @@ class PNMParser:
         buf = ptr8(segmentBytes)
         bufLen = int(len(segmentBytes))
         pxByte = pxIdx*depth - prevBufsLen
+        #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
 
       (x, y) = (pxIdx%imgW + offsetX, pxIdx//imgW + offsetY)
 
@@ -891,3 +893,5 @@ class PNMParser:
       elif depth == 4:
         c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
       renderPixelFct(x, y, c)
+    end = time.ticks_ms()
+    #print("ELAPSED: " + str(time.ticks_diff(end, start)))
