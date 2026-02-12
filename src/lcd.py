@@ -853,17 +853,16 @@ class PNMParser:
   def drawRGBAImg(self, getColorFct:object, renderPixelFct:object):
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
+    depth = int(self.depth)
     imgW = int(self.w)
     row = 0
     col = 0
-    pixelByteLen = 4 #depth
-    curPx = self.fh.read(pixelByteLen)
-    while int(len(curPx)) == pixelByteLen:
-      (r, g, b, a) = curPx
-      c = int(getColorFct(r, g, b, a))
+    curPx = self.fh.read(depth)
+    while int(len(curPx)) == depth:
+      c = int(getColorFct(curPx[0], curPx[1], curPx[2], curPx[3]))
       renderPixelFct(col+offsetX, row+offsetY, c)
       col += 1
       if col >= imgW:
         row += 1
         col = 0
-      curPx = self.fh.read(pixelByteLen)
+      curPx = self.fh.read(depth)
