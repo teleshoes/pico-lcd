@@ -845,7 +845,9 @@ class PNMParser:
 
     getColorFct = None
     if self.tuplType.startswith("RGB"):
-      if self.depth == 4:
+      if self.depth == 3:
+        getColorFct = self.lcd.get_color
+      elif self.depth == 4:
         getColorFct = self.lcd.get_color_rgba
       else:
         raise("ERROR: unimplemented PAM RGB depth '" + str(self.depth) + "'\n")
