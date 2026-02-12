@@ -430,6 +430,52 @@ class LCD():
     else:
       self.framebuf.fill(color)
 
+  def pnm(self, filename, x, y):
+    (w, h, depth, maxval, tuplType) = (0, 0, 0, 0, '')
+    with open(filename, mode='rb', buffering=8192) as fh:
+      magNum = fh.readline()
+      if magNum.startswith("P7"): #PAM
+        header = fh.readline()
+        while header != None and not header.startswith("ENDHDR"):
+          headerArr = header.split()
+          if len(headerArr) == 2:
+            (field, val) = headerArr
+            if field == b"WIDTH":
+              w = int(val)
+            elif field == b"HEIGHT":
+              h = int(val)
+            elif field == b"DEPTH":
+              depth = int(val);
+            elif field == b"MAXVAL":
+              maxval = int(val)
+            elif field == b"TUPLTYPE":
+              tuplType = val
+          header = fh.readline()
+
+        if tuplType == b"RGB_ALPHA":
+          self.drawRGBAImg(x, y, w, h, fh)
+        else:
+          raise("ERROR: unimplemented PAM TUPLTYPE '" + str(tuplType) + "'\n")
+      else:
+        raise("ERROR: unimplemented netpbm file type '" + str(magNum) + "'\n")
+    return (w, h)
+
+  @micropython.viper
+  def drawRGBAImg(self, x:int, y:int, imgW:int, imgH:int, pixelData:object):
+    row = 0
+    col = 0
+    pixelByteLen = 4 #depth
+    curPx = pixelData.read(pixelByteLen)
+    while int(len(curPx)) == pixelByteLen:
+      (r, g, b, a) = curPx
+      c = int(self.get_color_rgba(r, g, b, a))
+      self.pixel(col+x, row+y, c)
+      col += 1
+      if col >= imgW:
+        row += 1
+        col = 0
+      curPx = pixelData.read(pixelByteLen)
+
   def png(self, filename, x, y):
     if self.is_framebuf_enabled():
       #framebuf does not support PNG, so draw it directly
