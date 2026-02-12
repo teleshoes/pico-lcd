@@ -856,17 +856,31 @@ class PNMParser:
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
     depth = int(self.depth)
+
+    segmentSize = 1024
+
+    pxIdx = 0
+    buf = ptr8(0)
+    bufLen = 0
+    prevBufsLen = 0
     for pxIdx in range(0, pxCount):
-      curPx = self.fh.read(depth)
+      pxByte = pxIdx*depth - prevBufsLen
+      if pxByte > bufLen:
+        #load next segment from file
+        prevBufsLen += bufLen
+        segmentBytes = self.fh.read(segmentSize)
+        buf = ptr8(segmentBytes)
+        bufLen = int(len(segmentBytes))
+        pxByte = pxIdx*depth - prevBufsLen
 
       (x, y) = (pxIdx%imgW + offsetX, pxIdx//imgW + offsetY)
 
       if depth == 1:
-        c = int(getColorFct(curPx[0]))
+        c = int(getColorFct(buf[pxByte+0]))
       elif depth == 2:
-        c = int(getColorFct(curPx[0], curPx[1]))
+        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1]))
       elif depth == 3:
-        c = int(getColorFct(curPx[0], curPx[1], curPx[2]))
+        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2]))
       elif depth == 4:
-        c = int(getColorFct(curPx[0], curPx[1], curPx[2], curPx[3]))
+        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
       renderPixelFct(x, y, c)
