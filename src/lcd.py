@@ -431,50 +431,11 @@ class LCD():
       self.framebuf.fill(color)
 
   def pnm(self, filename, x, y):
-    (w, h, depth, maxval, tuplType) = (0, 0, 0, 0, '')
-    with open(filename, mode='rb', buffering=8192) as fh:
-      magNum = fh.readline()
-      if magNum.startswith("P7"): #PAM
-        header = fh.readline()
-        while header != None and not header.startswith("ENDHDR"):
-          headerArr = header.split()
-          if len(headerArr) == 2:
-            (field, val) = headerArr
-            if field == b"WIDTH":
-              w = int(val)
-            elif field == b"HEIGHT":
-              h = int(val)
-            elif field == b"DEPTH":
-              depth = int(val);
-            elif field == b"MAXVAL":
-              maxval = int(val)
-            elif field == b"TUPLTYPE":
-              tuplType = val
-          header = fh.readline()
-
-        if tuplType == b"RGB_ALPHA":
-          self.drawRGBAImg(x, y, w, h, fh)
-        else:
-          raise("ERROR: unimplemented PAM TUPLTYPE '" + str(tuplType) + "'\n")
-      else:
-        raise("ERROR: unimplemented netpbm file type '" + str(magNum) + "'\n")
+    parser = PNMParser(filename, x, y, self)
+    parser.render()
+    (w, h) = (parser.getWidth(), parser.getHeight())
+    parser.close()
     return (w, h)
-
-  @micropython.viper
-  def drawRGBAImg(self, x:int, y:int, imgW:int, imgH:int, pixelData:object):
-    row = 0
-    col = 0
-    pixelByteLen = 4 #depth
-    curPx = pixelData.read(pixelByteLen)
-    while int(len(curPx)) == pixelByteLen:
-      (r, g, b, a) = curPx
-      c = int(self.get_color_rgba(r, g, b, a))
-      self.pixel(col+x, row+y, c)
-      col += 1
-      if col >= imgW:
-        row += 1
-        col = 0
-      curPx = pixelData.read(pixelByteLen)
 
   def png(self, filename, x, y):
     if self.is_framebuf_enabled():
@@ -821,3 +782,81 @@ class FramebufConf():
       return '%dx%d' % (self.fbW, self.fbH)
     else:
       return '%dx%d+%d+%d' % (self.fbW, self.fbH, self.fbX, self.fbY)
+
+class PNMParser:
+  def __init__(self, filename, offsetX, offsetY, lcd):
+    self.filename = filename
+    self.offsetX = offsetX
+    self.offsetY = offsetY
+    self.lcd = lcd
+    self.fh = None
+    self.w = None
+    self.h = None
+    self.depth = None
+    self.maxval = None
+    self.tuplType = None
+
+  def open(self):
+    if self.fh == None:
+      self.fh = open(self.filename, mode='rb', buffering=8192)
+  def close(self):
+    if self.fh != None:
+      self.fh.close()
+      self.fh = None
+
+  def parseHeader(self):
+    self.open()
+    if self.tuplType != None:
+      return
+
+    magNum = self.fh.readline()
+    if magNum.startswith("P7"): #PAM
+      header = self.fh.readline()
+      while header != None and not header.startswith("ENDHDR"):
+        headerArr = header.split()
+        if len(headerArr) == 2:
+          (field, val) = headerArr
+          if field == b"WIDTH":
+            self.w = int(val)
+          elif field == b"HEIGHT":
+            self.h = int(val)
+          elif field == b"DEPTH":
+            self.depth = int(val);
+          elif field == b"MAXVAL":
+            self.maxval = int(val)
+          elif field == b"TUPLTYPE":
+            self.tuplType = val
+        header = self.fh.readline()
+    else:
+      raise("ERROR: unimplemented netpbm file type '" + str(magNum) + "'\n")
+
+  def getWidth(self):
+    return self.w
+  def getHeight(self):
+    return self.h
+
+  def render(self):
+    self.parseHeader()
+    if self.tuplType == b"RGB_ALPHA":
+      self.drawRGBAImg()
+    else:
+      raise("ERROR: unimplemented PAM TUPLTYPE '" + str(tuplType) + "'\n")
+
+  @micropython.viper
+  def drawRGBAImg(self):
+    x = int(self.offsetX)
+    y = int(self.offsetY)
+    imgW = int(self.w)
+    row = 0
+    col = 0
+    pixelByteLen = 4 #depth
+    curPx = self.fh.read(pixelByteLen)
+    while int(len(curPx)) == pixelByteLen:
+      (r, g, b, a) = curPx
+      c = int(self.lcd.get_color_rgba(r, g, b, a))
+      self.lcd.pixel(col+x, row+y, c)
+      col += 1
+      if col >= imgW:
+        row += 1
+        col = 0
+      curPx = self.fh.read(pixelByteLen)
