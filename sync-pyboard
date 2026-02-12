@@ -180,7 +180,7 @@ sub rshellInstallFiles(@){
   tryrun "pkill -9 rshell";
   run $RSHELL_EXEC, "rsync", "$pyboardTmpDir/", "/pyboard/";
 
-  run "rm", "-rf", "$pyboardTmpDir/";
+  run "rm -rf pyboard-tmp-*/";
 }
 
 sub nowMillis(){
