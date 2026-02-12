@@ -95,6 +95,9 @@ class LcdFont:
       })
     else:
       self.lcd.png(filename, self.cursor['x'], self.cursor['y'])
+  def cursorDrawPNM(self, filename):
+    (w, h) = self.lcd.pnm(filename, self.cursor['x'], self.cursor['y'])
+    self.cursor['x'] += w
   def cursorDrawRect(self, w, h, fill=True):
     self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), fill)
     self.cursor['x'] += w
@@ -300,6 +303,25 @@ class LcdFont:
     #        e.g.:   [color=white] A [color=blue] B [color=prev] C
     #                  is the same as:
     #                [color=white] A [color=blue] B [color=white] C
+    #
+    #    [pnm=FILENAME]
+    #      draw the Netpbm image, already present in the filesystem, at FILENAME
+    #      top-left corner of the image is at cursor (<CURSOR_X>,<CURSOR_Y>)
+    #        -cursor is shifted to the right by the image size
+    #        -writing to framebuf is fully supported
+    #        -file extension is ignored, the magic byte is used instead
+    #        -NOTE: quite slow, but fairly RAM efficient (pixels read directly from file)
+    #        -NOTE: only the following formats are implemented:
+    #           -PAM (P7) RGB_ALPHA
+    #      e.g.: draw one 16x16 icon twice, with a label,
+    #              and then another 16x16 icon with another label beneath it,
+    #              formatted like this:
+    #                Ax2:|a||a|
+    #                Bx1:|b|
+    #            [size=2][color=red]
+    #            Ax2:[pnm=icon_a_16x16.pam][pnm=icon_a_16x16.pam]
+    #            [n]
+    #            Bx1:[pnm=icon_b_16x16.pam]
     #
     #    [png=FILENAME]
     #      draw the PNG image, already present in the filesystem, at FILENAME
@@ -541,6 +563,8 @@ class LcdFont:
           self.cursorHline()
         elif cmd == "png":
           self.cursorDrawPNG(val)
+        elif cmd == "pnm":
+          self.cursorDrawPNM(val)
         elif cmd == "rect":
           (w, h, isFill, isSymbol) = (0, 0, True, False)
           if len(valArgList) >= 2:
