@@ -851,14 +851,16 @@ class PNMParser:
 
   @micropython.viper
   def renderPixels(self, getColorFct:object, renderPixelFct:object):
+    pxCount = int(self.w) * int(self.h)
+    imgW = int(self.w)
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
     depth = int(self.depth)
-    imgW = int(self.w)
-    row = 0
-    col = 0
-    curPx = self.fh.read(depth)
-    while int(len(curPx)) == depth:
+    for pxIdx in range(0, pxCount):
+      curPx = self.fh.read(depth)
+
+      (x, y) = (pxIdx%imgW + offsetX, pxIdx//imgW + offsetY)
+
       if depth == 1:
         c = int(getColorFct(curPx[0]))
       elif depth == 2:
@@ -867,9 +869,4 @@ class PNMParser:
         c = int(getColorFct(curPx[0], curPx[1], curPx[2]))
       elif depth == 4:
         c = int(getColorFct(curPx[0], curPx[1], curPx[2], curPx[3]))
-      renderPixelFct(col+offsetX, row+offsetY, c)
-      col += 1
-      if col >= imgW:
-        row += 1
-        col = 0
-      curPx = self.fh.read(depth)
+      renderPixelFct(x, y, c)
