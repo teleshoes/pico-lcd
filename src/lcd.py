@@ -829,7 +829,32 @@ class PNMParser:
             self.tuplType = val.decode()
         header = self.fh.readline()
     else:
-      raise("ERROR: unimplemented netpbm file type '" + str(magNum) + "'\n")
+      headerLine = self.fh.readline()
+      while headerLine != None and headerLine.startswith("#"):
+        #skip comments
+        headerLine = self.fh.readline()
+
+      (wStr, hStr) = headerLine.split()
+      self.w = int(wStr)
+      self.h = int(wStr)
+
+      if magNum.startswith("P4"):
+        #skip maxval line for PGM
+        self.maxval = 1
+      else:
+        headerLine = self.fh.readline()
+        while headerLine != None and headerLine.startswith("#"):
+          #skip comments
+          headerLine = self.fh.readline()
+        maxValLine = headerLine
+        self.maxval = int(maxValLine)
+
+      if self.maxval != None and self.maxval > 255:
+        raise Exception("ERROR: maxval above 255 not implemented")
+
+      if False:
+      else:
+        raise Exception("ERROR: unimplemented netpbm file type '" + str(magNum) + "'")
 
   def getWidth(self):
     return self.w
