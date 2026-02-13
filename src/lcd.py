@@ -816,16 +816,17 @@ class PNMParser:
         headerArr = header.split()
         if len(headerArr) == 2:
           (field, val) = headerArr
-          if field == b"WIDTH":
+          field = field.decode()
+          if field == "WIDTH":
             self.w = int(val)
-          elif field == b"HEIGHT":
+          elif field == "HEIGHT":
             self.h = int(val)
-          elif field == b"DEPTH":
+          elif field == "DEPTH":
             self.depth = int(val);
-          elif field == b"MAXVAL":
+          elif field == "MAXVAL":
             self.maxval = int(val)
-          elif field == b"TUPLTYPE":
-            self.tuplType = val
+          elif field == "TUPLTYPE":
+            self.tuplType = val.decode()
         header = self.fh.readline()
     else:
       raise("ERROR: unimplemented netpbm file type '" + str(magNum) + "'\n")
