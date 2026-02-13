@@ -901,7 +901,7 @@ class PNMParser:
     prevBufsLen = 0
     for pxIdx in range(0, pxCount):
       pxByte = pxIdx*depth - prevBufsLen
-      if pxByte > bufLen:
+      if pxByte >= bufLen:
         #load next segment from file
         prevBufsLen += bufLen
         segmentBytes = self.fh.read(segmentSize)
