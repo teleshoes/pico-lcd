@@ -906,6 +906,10 @@ class PNMParser:
       #PBM, one bit per pixel, with 0b1=black and 0b0=white
       getColorFct = self.lcd.get_color
       self.renderSingleBitPixels(getColorFct, renderPixelFct)
+    elif self.tuplType == "BLACKANDWHITE" and self.depth == 1:
+      #PAM BLACKANDWHITE, one BYTE per pixel, with 0x00=black and 0x01=white
+      getColorFct = lambda bw: self.lcd.get_color_grayscale(bw*255)
+      self.renderPixels(getColorFct, renderPixelFct)
     else:
       raise Exception("ERROR: unimplemented PNM TUPLTYPE/DEPTH: "
         + self.tuplType + "/" + str(self.depth))
