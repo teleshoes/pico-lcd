@@ -314,6 +314,7 @@ class LcdFont:
     #        -only the following formats are implemented:
     #            FILETYPE | COLORSPACE/TUPLTYPE | MAXVAL | DEPTH
     #            =========|=====================|========|======
+    #            P4 [PBM] | BLACKANDWHITE       | 1      | 1/8  (1bit per px, 0 for white)
     #            P6 [PPM] | RGB                 | 255    | 3
     #            P7 [PAM] | RGB                 | 255    | 3    (same as PPM)
     #            P7 [PAM] | RGB_ALPHA           | 255    | 4
