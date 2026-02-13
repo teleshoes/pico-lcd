@@ -314,6 +314,8 @@ class LcdFont:
     #        -only the following formats are implemented:
     #            FILETYPE | COLORSPACE/TUPLTYPE | MAXVAL | DEPTH
     #            =========|=====================|========|======
+    #            P6 [PPM] | RGB                 | 255    | 3
+    #            P7 [PAM] | RGB                 | 255    | 3    (same as PPM)
     #            P7 [PAM] | RGB_ALPHA           | 255    | 4
     #         -P1, P2, and P3 (the ASCII/plaintext versions of PBM/PGM/PPM) are *not* implemented
     #         -MAXVAL above 256 (e.g.: for 48bit RGB) are not implemented for any type
