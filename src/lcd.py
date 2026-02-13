@@ -852,7 +852,10 @@ class PNMParser:
       if self.maxval != None and self.maxval > 255:
         raise Exception("ERROR: maxval above 255 not implemented")
 
-      if magNum.startswith("P6"): #PPM
+      if magNum.startswith("P4"): #PBM
+        self.depth = 1/8
+        self.tuplType = "BLACKANDWHITE"
+      elif magNum.startswith("P6"): #PPM
         self.depth = 3
         self.tuplType = "RGB"
       else:
@@ -880,6 +883,10 @@ class PNMParser:
       #PAM RGB_ALPHA
       getColorFct = self.lcd.get_color_rgba
       self.renderPixels(getColorFct, renderPixelFct)
+    elif self.tuplType == "BLACKANDWHITE" and self.depth < 1:
+      #PBM, one bit per pixel, with 0b1=black and 0b0=white
+      getColorFct = self.lcd.get_color
+      self.renderSingleBitPixels(getColorFct, renderPixelFct)
     else:
       raise Exception("ERROR: unimplemented PNM TUPLTYPE/DEPTH: "
         + self.tuplType + "/" + str(self.depth))
@@ -920,6 +927,47 @@ class PNMParser:
         c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2]))
       elif depth == 4:
         c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
+      renderPixelFct(x, y, c)
+    end = time.ticks_ms()
+    #print("ELAPSED: " + str(time.ticks_diff(end, start)))
+
+  @micropython.viper
+  def renderSingleBitPixels(self, getColorFct:object, renderPixelFct:object):
+    pxCount = int(self.w) * int(self.h)
+    imgW = int(self.w)
+    offsetX = int(self.offsetX)
+    offsetY = int(self.offsetY)
+    start = time.ticks_ms()
+
+    black = getColorFct(0, 0, 0)
+    white = getColorFct(255, 255, 255)
+
+    segmentSize = 1024
+
+    pxIdx = 0
+    buf = ptr8(0)
+    bufLen = 0
+    prevBufsLen = 0
+    for pxIdx in range(0, pxCount):
+      pxByte = (pxIdx//8) - prevBufsLen
+      if pxByte >= bufLen:
+        #load next segment from file
+        prevBufsLen += bufLen
+        segmentBytes = self.fh.read(segmentSize)
+        buf = ptr8(segmentBytes)
+        bufLen = int(len(segmentBytes))
+        pxByte = pxIdx//8 - prevBufsLen
+        #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
+
+      (x, y) = (pxIdx%imgW + offsetX, pxIdx//imgW + offsetY)
+
+      bitIdx = 7 - pxIdx%8 #first pixel is MSB
+      bit = (buf[pxByte]>>bitIdx) % 2
+      if bit == 1:
+        c = black
+      else:
+        c = white
+
       renderPixelFct(x, y, c)
     end = time.ticks_ms()
     #print("ELAPSED: " + str(time.ticks_diff(end, start)))
