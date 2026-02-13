@@ -308,11 +308,17 @@ class LcdFont:
     #      draw the Netpbm image, already present in the filesystem, at FILENAME
     #      top-left corner of the image is at cursor (<CURSOR_X>,<CURSOR_Y>)
     #        -cursor is shifted to the right by the image size
-    #        -writing to framebuf is fully supported
-    #        -file extension is ignored, the magic byte is used instead
-    #        -NOTE: quite slow, but fairly RAM efficient (pixels read directly from file)
-    #        -NOTE: only the following formats are implemented:
-    #           -PAM (P7) RGB_ALPHA
+    #        -writing to framebuf is supported
+    #        -NOTE: fairly RAM efficient, reads 1KiB of file at a time to render
+    #               moderately fast impl using micropython.viper
+    #        -only the following formats are implemented:
+    #            FILETYPE | COLORSPACE/TUPLTYPE | MAXVAL | DEPTH
+    #            =========|=====================|========|======
+    #            P7 [PAM] | RGB_ALPHA           | 255    | 4
+    #         -P1, P2, and P3 (the ASCII/plaintext versions of PBM/PGM/PPM) are *not* implemented
+    #         -MAXVAL above 256 (e.g.: for 48bit RGB) are not implemented for any type
+    #         -alpha channels are removed (with a black background) before rendering
+    #
     #      e.g.: draw one 16x16 icon twice, with a label,
     #              and then another 16x16 icon with another label beneath it,
     #              formatted like this:
