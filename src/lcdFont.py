@@ -317,7 +317,10 @@ class LcdFont:
     #            P4 [PBM] | BLACKANDWHITE       | 1      | 1/8  (1bit per px, 0 for white)
     #            P5 [PGM] | GRAYSCALE           | 255    | 1
     #            P6 [PPM] | RGB                 | 255    | 3
+    #            P7 [PAM] | BLACKANDWHITE       | 1      | 1    (1byte per px, 0x00 for black)
+    #            P7 [PAM] | BLACKANDWHITE_ALPHA | 1      | 2    (1byte for bw, one byte for alpha)
     #            P7 [PAM] | GRAYSCALE           | 255    | 1    (same as PGM)
+    #            P7 [PAM] | GRAYSCALE_ALPHA     | 255    | 2
     #            P7 [PAM] | RGB                 | 255    | 3    (same as PPM)
     #            P7 [PAM] | RGB_ALPHA           | 255    | 4
     #         -P1, P2, and P3 (the ASCII/plaintext versions of PBM/PGM/PPM) are *not* implemented
