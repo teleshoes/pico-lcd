@@ -261,6 +261,10 @@ class LCD():
     return color
 
   @micropython.viper
+  def get_color_grayscale(self, val:int) -> int:
+    return int(self.get_color(val, val, val))
+
+  @micropython.viper
   def swap_hi_lo_byte_order(self, h:int) -> int:
     bHi = h >> 8
     bLo = h & 0xff
@@ -855,6 +859,9 @@ class PNMParser:
       if magNum.startswith("P4"): #PBM
         self.depth = 1/8
         self.tuplType = "BLACKANDWHITE"
+      elif magNum.startswith("P5"): #PGM
+        self.depth = 1
+        self.tuplType = "GRAYSCALE"
       elif magNum.startswith("P6"): #PPM
         self.depth = 3
         self.tuplType = "RGB"
@@ -882,6 +889,10 @@ class PNMParser:
     elif self.tuplType == "RGB_ALPHA" and self.depth == 4:
       #PAM RGB_ALPHA
       getColorFct = self.lcd.get_color_rgba
+      self.renderPixels(getColorFct, renderPixelFct)
+    elif self.tuplType == "GRAYSCALE" and self.depth == 1:
+      #PGM or PAM GRAYSCALE
+      getColorFct = self.lcd.get_color_grayscale
       self.renderPixels(getColorFct, renderPixelFct)
     elif self.tuplType == "BLACKANDWHITE" and self.depth < 1:
       #PBM, one bit per pixel, with 0b1=black and 0b0=white
