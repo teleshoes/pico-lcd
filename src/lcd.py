@@ -852,7 +852,9 @@ class PNMParser:
       if self.maxval != None and self.maxval > 255:
         raise Exception("ERROR: maxval above 255 not implemented")
 
-      if False:
+      if magNum.startswith("P6"): #PPM
+        self.depth = 3
+        self.tuplType = "RGB"
       else:
         raise Exception("ERROR: unimplemented netpbm file type '" + str(magNum) + "'")
 
@@ -871,7 +873,7 @@ class PNMParser:
 
     getColorFct = None
     if self.tuplType == "RGB" and self.depth == 3:
-      #PAM RGB
+      #PPM or PAM RGB
       getColorFct = self.lcd.get_color
       self.renderPixels(getColorFct, renderPixelFct)
     elif self.tuplType == "RGB_ALPHA" and self.depth == 4:
