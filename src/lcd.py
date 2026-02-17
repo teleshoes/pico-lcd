@@ -849,7 +849,7 @@ class PNMParser:
 
       (wStr, hStr) = headerLine.split()
       self.w = int(wStr)
-      self.h = int(wStr)
+      self.h = int(hStr)
 
       if magNum.startswith("P4"):
         #skip maxval line for PGM
