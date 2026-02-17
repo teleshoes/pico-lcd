@@ -438,8 +438,8 @@ class LCD():
     else:
       self.framebuf.fill(color)
 
-  def pnm(self, filename, x, y):
-    parser = PNMParser(filename, x, y, self)
+  def pnm(self, filename, x, y, scale=1):
+    parser = PNMParser(filename, x, y, scale, self)
     parser.render()
     (w, h) = (parser.getWidth(), parser.getHeight())
     parser.close()
@@ -792,8 +792,9 @@ class FramebufConf():
       return '%dx%d+%d+%d' % (self.fbW, self.fbH, self.fbX, self.fbY)
 
 class PNMParser:
-  def __init__(self, filename, offsetX, offsetY, lcd):
+  def __init__(self, filename, offsetX, offsetY, scale, lcd):
     self.filename = filename
+    self.scale = scale
     self.offsetX = offsetX
     self.offsetY = offsetY
     self.lcd = lcd
@@ -922,6 +923,7 @@ class PNMParser:
   def renderPixels(self, getColorFct:object, renderer:object):
     pxCount = int(self.w) * int(self.h)
     imgW = int(self.w)
+    scale = int(self.scale)
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
     depth = int(self.depth)
@@ -955,7 +957,11 @@ class PNMParser:
         c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2]))
       elif depth == 4:
         c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
-      renderer.pixel(x, y, c)
+
+      if scale == 1:
+        renderer.pixel(x, y, c)
+      else:
+        renderer.rect(x*scale, y*scale, scale, scale, c)
     end = time.ticks_ms()
     #print("ELAPSED: " + str(time.ticks_diff(end, start)) + "ms")
 
@@ -963,6 +969,7 @@ class PNMParser:
   def renderSingleBitPixels(self, getColorFct:object, renderer:object):
     pxCount = int(self.w) * int(self.h)
     imgW = int(self.w)
+    scale = int(self.scale)
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
     start = time.ticks_ms()
@@ -997,6 +1004,9 @@ class PNMParser:
       else:
         c = white
 
-      renderer.pixel(x, y, c)
+      if scale == 1:
+        renderer.pixel(x, y, c)
+      else:
+        renderer.rect(x*scale, y*scale, scale, scale, c)
     end = time.ticks_ms()
     #print("ELAPSED: " + str(time.ticks_diff(end, start)) + "ms")
