@@ -3,6 +3,7 @@ import st7789
 
 import framebuf
 import gc
+import math
 import os
 import time
 
@@ -909,7 +910,7 @@ class PNMParser:
     elif self.tuplType == "BLACKANDWHITE" and self.depth < 1:
       #PBM, one bit per pixel, with 0b1=black and 0b0=white
       getColorFct = None #hardcode 1=>black and 0=>white
-      self.renderSingleBitPixels(getColorFct, renderer)
+      self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "BLACKANDWHITE" and self.depth == 1:
       #PAM BLACKANDWHITE, one BYTE per pixel, with 0x00=black and 0x01=white
       getColorFct = lambda bw: self.lcd.get_color_grayscale(bw*255)
@@ -929,52 +930,7 @@ class PNMParser:
     scale = int(self.scale)
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
-    depth = int(self.depth)
-    start = time.ticks_ms()
-
-    segmentSize = 1024
-
-    pxIdx = 0
-    buf = ptr8(0)
-    bufLen = 0
-    prevBufsLen = 0
-    for pxIdx in range(0, pxCount):
-      pxByte = pxIdx*depth - prevBufsLen
-      if pxByte >= bufLen:
-        #load next segment from file
-        prevBufsLen += bufLen
-        segmentBytes = self.fh.read(segmentSize)
-        buf = ptr8(segmentBytes)
-        bufLen = int(len(segmentBytes))
-        pxByte = pxIdx*depth - prevBufsLen
-        #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
-
-      x = pxIdx%imgW + offsetX
-      y = pxIdx//imgW + offsetY
-
-      if depth == 1:
-        c = int(getColorFct(buf[pxByte+0]))
-      elif depth == 2:
-        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1]))
-      elif depth == 3:
-        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2]))
-      elif depth == 4:
-        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
-
-      if scale == 1:
-        renderer.pixel(x, y, c)
-      else:
-        renderer.rect(x*scale, y*scale, scale, scale, c)
-    end = time.ticks_ms()
-    #print("ELAPSED: " + str(time.ticks_diff(end, start)) + "ms")
-
-  @micropython.viper
-  def renderSingleBitPixels(self, getColorFct:object, renderer:object):
-    pxCount = int(self.w) * int(self.h)
-    imgW = int(self.w)
-    scale = int(self.scale)
-    offsetX = int(self.offsetX)
-    offsetY = int(self.offsetY)
+    depth = int(math.floor(self.depth)) #depth=0 means 1 bit per pixel
     start = time.ticks_ms()
 
     black = int(self.black)
@@ -987,25 +943,43 @@ class PNMParser:
     bufLen = 0
     prevBufsLen = 0
     for pxIdx in range(0, pxCount):
-      pxByte = (pxIdx//8) - prevBufsLen
+      if depth == 0:
+        pxByte = (pxIdx//8) - prevBufsLen
+      else:
+        pxByte = pxIdx*depth - prevBufsLen
+
       if pxByte >= bufLen:
         #load next segment from file
         prevBufsLen += bufLen
         segmentBytes = self.fh.read(segmentSize)
         buf = ptr8(segmentBytes)
         bufLen = int(len(segmentBytes))
-        pxByte = pxIdx//8 - prevBufsLen
+        if depth == 0:
+          pxByte = (pxIdx//8) - prevBufsLen
+        else:
+          pxByte = pxIdx*depth - prevBufsLen
         #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
 
       x = pxIdx%imgW + offsetX
       y = pxIdx//imgW + offsetY
 
-      bitIdx = 7 - pxIdx%8 #first pixel is MSB
-      bit = (buf[pxByte]>>bitIdx) % 2
-      if bit == 1:
-        c = black
-      else:
-        c = white
+      if depth == 0:
+        #one bit per pixel, first pixel in byte is MSB
+        bitIdx = 7 - pxIdx%8
+        bit = (buf[pxByte]>>bitIdx) % 2
+        #P4 pbm uses 1 for black, 0 for white
+        if bit == 1:
+          c = black
+        else:
+          c = white
+      elif depth == 1:
+        c = int(getColorFct(buf[pxByte+0]))
+      elif depth == 2:
+        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1]))
+      elif depth == 3:
+        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2]))
+      elif depth == 4:
+        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
 
       if scale == 1:
         renderer.pixel(x, y, c)
