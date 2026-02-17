@@ -944,7 +944,8 @@ class PNMParser:
         pxByte = pxIdx*depth - prevBufsLen
         #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
 
-      (x, y) = (pxIdx%imgW + offsetX, pxIdx//imgW + offsetY)
+      x = pxIdx%imgW + offsetX
+      y = pxIdx//imgW + offsetY
 
       if depth == 1:
         c = int(getColorFct(buf[pxByte+0]))
@@ -986,7 +987,8 @@ class PNMParser:
         pxByte = pxIdx//8 - prevBufsLen
         #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
 
-      (x, y) = (pxIdx%imgW + offsetX, pxIdx//imgW + offsetY)
+      x = pxIdx%imgW + offsetX
+      y = pxIdx//imgW + offsetY
 
       bitIdx = 7 - pxIdx%8 #first pixel is MSB
       bit = (buf[pxByte]>>bitIdx) % 2
