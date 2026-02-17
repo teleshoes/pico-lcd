@@ -956,7 +956,7 @@ class PNMParser:
         c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
       renderer.pixel(x, y, c)
     end = time.ticks_ms()
-    #print("ELAPSED: " + str(time.ticks_diff(end, start)))
+    #print("ELAPSED: " + str(time.ticks_diff(end, start)) + "ms")
 
   @micropython.viper
   def renderSingleBitPixels(self, getColorFct:object, renderer:object):
@@ -997,4 +997,4 @@ class PNMParser:
 
       renderer.pixel(x, y, c)
     end = time.ticks_ms()
-    #print("ELAPSED: " + str(time.ticks_diff(end, start)))
+    #print("ELAPSED: " + str(time.ticks_diff(end, start)) + "ms")
