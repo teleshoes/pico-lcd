@@ -805,6 +805,9 @@ class PNMParser:
     self.maxval = None
     self.tuplType = None
 
+    self.black = self.lcd.get_color(0, 0, 0)
+    self.white = self.lcd.get_color(255, 255, 255)
+
   def open(self):
     if self.fh == None:
       self.fh = open(self.filename, mode='rb', buffering=8192)
@@ -905,7 +908,7 @@ class PNMParser:
       self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "BLACKANDWHITE" and self.depth < 1:
       #PBM, one bit per pixel, with 0b1=black and 0b0=white
-      getColorFct = self.lcd.get_color
+      getColorFct = None #hardcode 1=>black and 0=>white
       self.renderSingleBitPixels(getColorFct, renderer)
     elif self.tuplType == "BLACKANDWHITE" and self.depth == 1:
       #PAM BLACKANDWHITE, one BYTE per pixel, with 0x00=black and 0x01=white
@@ -974,8 +977,8 @@ class PNMParser:
     offsetY = int(self.offsetY)
     start = time.ticks_ms()
 
-    black = getColorFct(0, 0, 0)
-    white = getColorFct(255, 255, 255)
+    black = int(self.black)
+    white = int(self.white)
 
     segmentSize = 1024
 
