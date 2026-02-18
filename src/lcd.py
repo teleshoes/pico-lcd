@@ -440,11 +440,15 @@ class LCD():
       self.framebuf.fill(color)
 
   def pnm(self, filename, x, y, scale=1):
-    parser = PNMParser(filename, x, y, scale, self)
-    parser.render()
-    (w, h) = (parser.getWidth(), parser.getHeight())
-    parser.close()
-    return (w, h)
+    try:
+      parser = PNMParser(filename, x, y, scale, self)
+      parser.render()
+      (w, h) = (parser.getWidth(), parser.getHeight())
+      parser.close()
+      return (w, h)
+    except Exception as e:
+      print("WARNING: PNM render failed\n" + str(e))
+      return (0, 0)
 
   def png(self, filename, x, y):
     if self.is_framebuf_enabled():
