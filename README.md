@@ -290,6 +290,44 @@ COMMAND text
                   is the same as:
                 [color=white] A [color=blue] B [color=white] C
 
+    [pnm=&lt;FILENAME&gt;]
+       same as: [pnm=1,&lt;FILENAME&gt;]
+
+    [pnm=&lt;SCALE&gt;,&lt;FILENAME&gt;]
+      draw the Netpbm image, already present in the filesystem, at FILENAME
+      top-left corner of the image is at cursor (&lt;CURSOR_X&gt;,&lt;CURSOR_Y&gt;)
+        -&lt;SCALE&gt; (if given) must be a positive integer (integer scaling, no interpolation)
+        -cursor is shifted to the right by the image width times the &lt;SCALE&gt;
+        -writing to framebuf is supported
+        -NOTE: fairly RAM efficient, reads 1KiB of file at a time to render
+               moderately fast impl using micropython.viper
+        -only the following formats are implemented:
+            FILETYPE | COLORSPACE/TUPLTYPE | MAXVAL | DEPTH
+            =========|=====================|========|======
+            P4 [PBM] | BLACKANDWHITE       | 1      | 1/8  (1bit per px, 0 for white)
+            P5 [PGM] | GRAYSCALE           | 255    | 1
+            P6 [PPM] | RGB                 | 255    | 3
+            P7 [PAM] | BLACKANDWHITE       | 1      | 1    (1byte per px, 0x00 for black)
+            P7 [PAM] | BLACKANDWHITE_ALPHA | 1      | 2    (1byte for bw, one byte for alpha)
+            P7 [PAM] | GRAYSCALE           | 255    | 1    (same as PGM)
+            P7 [PAM] | GRAYSCALE_ALPHA     | 255    | 2
+            P7 [PAM] | RGB                 | 255    | 3    (same as PPM)
+            P7 [PAM] | RGB_ALPHA           | 255    | 4
+         -P1, P2, and P3 (the ASCII/plaintext versions of PBM/PGM/PPM) are *not* implemented
+         -MAXVAL above 256 (e.g.: for 48bit RGB) are not implemented for any type
+         -alpha channels are removed (with a black background) before rendering
+
+      e.g.: draw one 16x16 icon twice, with a label,
+              and then another 16x16 icon scaled to 32x32 with another label beneath it,
+              formatted like this:
+                Ax2:|a||a|
+                Bx1:|bb|
+                    |bb|
+            [size=2][color=red]
+            Ax2:[pnm=icon_a_16x16.pam][pnm=icon_a_16x16.pam]
+            [n]
+            Bx1:[pnm=2,icon_b_16x16.pam]
+
     [png=FILENAME]
       draw the PNG image, already present in the filesystem, at FILENAME
       top-left corner of the image is at cursor (&lt;CURSOR_X&gt;,&lt;CURSOR_Y&gt;)
