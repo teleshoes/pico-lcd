@@ -985,6 +985,6 @@ class PNMParser:
       if scale == 1:
         renderer.pixel(x, y, c)
       else:
-        renderer.rect(x*scale, y*scale, scale, scale, c)
+        renderer.fill_rect(x*scale, y*scale, scale, scale, c)
     end = time.ticks_ms()
     #print("ELAPSED: " + str(time.ticks_diff(end, start)) + "ms")
