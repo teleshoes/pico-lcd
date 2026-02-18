@@ -573,14 +573,21 @@ class LcdFont:
           "shift"   :2,
           "pnm"     :2,
         }
+        pointArgCmdNames = [
+          "rect",
+          "ellipse",
+          "bar",
+          "shift",
+        ]
 
         valArgList = []
         if cmd in maxArgCounts:
           valArgList = val.split(",", maxArgCounts[cmd]-1)
-          if "x" in valArgList[0]:
+
+          if cmd in pointArgCmdNames and "x" in valArgList[0]:
             #allow <X>x<Y> syntax instead of <X>,<Y> for first arg
             val = val.replace("x", ",", 1)
-            valArgList = val.split(",")
+            valArgList = val.split(",", maxArgCounts[cmd]-1)
 
         if cmd == "bracket":
           # literal '[', either '[bracket]' or '[['
