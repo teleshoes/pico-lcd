@@ -914,10 +914,10 @@ class PNMParser:
       getColorFct = None #hardcode 1=>black and 0=>white
     elif self.tuplType == "BLACKANDWHITE" and self.depth == 1:
       #PAM BLACKANDWHITE, one BYTE per pixel, with 0x00=black and 0x01=white
-      getColorFct = lambda bw: self.lcd.get_color_grayscale(bw*255)
+      getColorFct = self.lcd.get_color_grayscale
     elif self.tuplType == "BLACKANDWHITE_ALPHA" and self.depth == 2:
       #PAM BLACKANDWHITE_ALPHA, one BYTE per pixel, with 0x00=black and 0x01=white
-      getColorFct = lambda bw, alpha: self.lcd.get_color_grayscale_alpha(bw*255, alpha*255)
+      getColorFct = self.lcd.get_color_grayscale_alpha
     else:
       raise Exception("ERROR: unimplemented PNM TUPLTYPE/DEPTH: "
         + self.tuplType + "/" + str(self.depth))
@@ -928,6 +928,7 @@ class PNMParser:
   def renderPixels(self, getColorFct:object, renderer:object):
     pxCount = int(self.w) * int(self.h)
     imgW = int(self.w)
+    maxval = int(self.maxval)
     scale = int(self.scale)
     offsetX = int(self.offsetX)
     offsetY = int(self.offsetY)
@@ -937,12 +938,15 @@ class PNMParser:
     black = int(self.black)
     white = int(self.white)
 
+    colorByteScale = 255//maxval
+
     segmentSize = 1024
 
     pxIdx = 0
     buf = ptr8(0)
     bufLen = 0
     prevBufsLen = 0
+    colorBytes = ptr8(bytearray(4))
     for pxIdx in range(0, pxCount):
       if depth == 0:
         pxByte = (pxIdx>>3) - prevBufsLen
@@ -964,6 +968,9 @@ class PNMParser:
       x = pxIdx%imgW + offsetX
       y = pxIdx//imgW + offsetY
 
+      for i in range(0, depth):
+        colorBytes[i] = colorByteScale * buf[pxByte+i]
+
       if depth == 0:
         #one bit per pixel, first pixel in byte is MSB
         bitIdx = (~pxIdx & 7) # 7 - pxIdx%7
@@ -974,13 +981,13 @@ class PNMParser:
         else:
           c = white
       elif depth == 1:
-        c = int(getColorFct(buf[pxByte+0]))
+        c = int(getColorFct(colorBytes[0]))
       elif depth == 2:
-        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1]))
+        c = int(getColorFct(colorBytes[0], colorBytes[1]))
       elif depth == 3:
-        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2]))
+        c = int(getColorFct(colorBytes[0], colorBytes[1], colorBytes[2]))
       elif depth == 4:
-        c = int(getColorFct(buf[pxByte+0], buf[pxByte+1], buf[pxByte+2], buf[pxByte+3]))
+        c = int(getColorFct(colorBytes[0], colorBytes[1], colorBytes[2], colorBytes[3]))
 
       if scale == 1:
         renderer.pixel(x, y, c)
