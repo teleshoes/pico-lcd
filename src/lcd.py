@@ -944,35 +944,41 @@ class PNMParser:
     buf = ptr8(0)
     bufLen = 0
     prevBufsLen = 0
-    colorBytes = ptr8(bytearray(4))
-    for pxIdx in range(0, pxCount):
-      if depth == 0:
-        pxByte = (pxIdx>>3) - prevBufsLen
-      else:
-        pxByte = pxIdx*depth - prevBufsLen
 
-      if pxByte >= bufLen:
-        #load next segment from file
-        prevBufsLen += bufLen
-        segmentBytes = self.fh.read(segmentSize)
-        buf = ptr8(segmentBytes)
-        bufLen = int(len(segmentBytes))
+    bytesLen = int(max(1, depth))
+    colorBytes = ptr8(bytearray(bytesLen))
+
+    for pxIdx in range(0, pxCount):
+      for i in range(0, bytesLen):
         if depth == 0:
-          pxByte = (pxIdx>>3) - prevBufsLen
+          pxByte = (pxIdx>>3) - prevBufsLen + i
         else:
-          pxByte = pxIdx*depth - prevBufsLen
-        #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
+          pxByte = pxIdx*depth - prevBufsLen + i
+
+        if pxByte >= bufLen:
+          #load next segment from file
+          prevBufsLen += bufLen
+          segmentBytes = self.fh.read(segmentSize)
+          buf = ptr8(segmentBytes)
+          bufLen = int(len(segmentBytes))
+          if depth == 0:
+            pxByte = (pxIdx>>3) - prevBufsLen + i
+          else:
+            pxByte = pxIdx*depth - prevBufsLen + i
+          #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx) + " byte " + str(i))
+
+        if depth == 0:
+          colorBytes[i] = buf[pxByte]
+        else:
+          colorBytes[i] = colorByteScale * buf[pxByte]
 
       x = pxIdx%imgW * scale + offsetX
       y = pxIdx//imgW * scale + offsetY
 
-      for i in range(0, depth):
-        colorBytes[i] = colorByteScale * buf[pxByte+i]
-
       if depth == 0:
         #one bit per pixel, first pixel in byte is MSB
         bitIdx = (~pxIdx & 7) # 7 - pxIdx%7
-        bit = (buf[pxByte]>>bitIdx) & 1
+        bit = (colorBytes[0]>>bitIdx) & 1
         #P4 pbm uses 1 for black, 0 for white
         if bit == 1:
           c = black
