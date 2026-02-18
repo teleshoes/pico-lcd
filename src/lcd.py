@@ -841,12 +841,6 @@ class PNMParser:
           elif field == "TUPLTYPE":
             self.tuplType = val.decode()
         header = self.fh.readline()
-
-      if self.maxval == 1:
-        if self.tuplType == "GRAYSCALE_ALPHA":
-          self.tuplType = "BLACKANDWHITE_ALPHA"
-        elif self.tuplType == "GRAYSCALE":
-          self.tuplType = "BLACKANDWHITE"
     else:
       headerLine = self.fh.readline()
       while headerLine != None and headerLine.startswith("#"):
