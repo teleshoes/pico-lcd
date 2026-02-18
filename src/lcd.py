@@ -945,7 +945,7 @@ class PNMParser:
     prevBufsLen = 0
     for pxIdx in range(0, pxCount):
       if depth == 0:
-        pxByte = (pxIdx//8) - prevBufsLen
+        pxByte = (pxIdx>>3) - prevBufsLen
       else:
         pxByte = pxIdx*depth - prevBufsLen
 
@@ -956,7 +956,7 @@ class PNMParser:
         buf = ptr8(segmentBytes)
         bufLen = int(len(segmentBytes))
         if depth == 0:
-          pxByte = (pxIdx//8) - prevBufsLen
+          pxByte = (pxIdx>>3) - prevBufsLen
         else:
           pxByte = pxIdx*depth - prevBufsLen
         #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
@@ -966,8 +966,8 @@ class PNMParser:
 
       if depth == 0:
         #one bit per pixel, first pixel in byte is MSB
-        bitIdx = 7 - pxIdx%8
-        bit = (buf[pxByte]>>bitIdx) % 2
+        bitIdx = (~pxIdx & 7) # 7 - pxIdx%7
+        bit = (buf[pxByte]>>bitIdx) & 1
         #P4 pbm uses 1 for black, 0 for white
         if bit == 1:
           c = black
