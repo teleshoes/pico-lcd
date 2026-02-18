@@ -900,34 +900,29 @@ class PNMParser:
     if self.tuplType == "RGB" and self.depth == 3:
       #PPM or PAM RGB
       getColorFct = self.lcd.get_color
-      self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "RGB_ALPHA" and self.depth == 4:
       #PAM RGB_ALPHA
       getColorFct = self.lcd.get_color_rgba
-      self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "GRAYSCALE" and self.depth == 1:
       #PGM or PAM GRAYSCALE
       getColorFct = self.lcd.get_color_grayscale
-      self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "GRAYSCALE_ALPHA" and self.depth == 2:
       #PAM GRAYSCALE_ALPHA
       getColorFct = self.lcd.get_color_grayscale_alpha
-      self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "BLACKANDWHITE" and self.depth < 1:
       #PBM, one bit per pixel, with 0b1=black and 0b0=white
       getColorFct = None #hardcode 1=>black and 0=>white
-      self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "BLACKANDWHITE" and self.depth == 1:
       #PAM BLACKANDWHITE, one BYTE per pixel, with 0x00=black and 0x01=white
       getColorFct = lambda bw: self.lcd.get_color_grayscale(bw*255)
-      self.renderPixels(getColorFct, renderer)
     elif self.tuplType == "BLACKANDWHITE_ALPHA" and self.depth == 2:
       #PAM BLACKANDWHITE_ALPHA, one BYTE per pixel, with 0x00=black and 0x01=white
       getColorFct = lambda bw, alpha: self.lcd.get_color_grayscale_alpha(bw*255, alpha)
-      self.renderPixels(getColorFct, renderer)
     else:
       raise Exception("ERROR: unimplemented PNM TUPLTYPE/DEPTH: "
         + self.tuplType + "/" + str(self.depth))
+
+    self.renderPixels(getColorFct, renderer)
 
   @micropython.viper
   def renderPixels(self, getColorFct:object, renderer:object):
