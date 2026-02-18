@@ -558,9 +558,16 @@ class LcdFont:
         if len(cmdVal) == 2:
           val = cmdVal[1]
 
+        maxArgCounts = {
+          "rect"    :4,
+          "ellipse" :4,
+          "bar"     :5,
+          "shift"   :2,
+        }
+
         valArgList = []
-        if cmd in ["rect", "ellipse", "bar", "shift"]:
-          valArgList = val.split(",")
+        if cmd in maxArgCounts:
+          valArgList = val.split(",", maxArgCounts[cmd]-1)
           if "x" in valArgList[0]:
             #allow <X>x<Y> syntax instead of <X>,<Y> for first arg
             val = val.replace("x", ",", 1)
