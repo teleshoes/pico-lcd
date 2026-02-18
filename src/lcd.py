@@ -959,8 +959,8 @@ class PNMParser:
           pxByte = pxIdx*depth - prevBufsLen
         #print("pnm: loaded " + str(bufLen) + " bytes at px " + str(pxIdx))
 
-      x = pxIdx%imgW + offsetX
-      y = pxIdx//imgW + offsetY
+      x = pxIdx%imgW * scale + offsetX
+      y = pxIdx//imgW * scale + offsetY
 
       for i in range(0, depth):
         colorBytes[i] = colorByteScale * buf[pxByte+i]
@@ -986,6 +986,6 @@ class PNMParser:
       if scale == 1:
         renderer.pixel(x, y, c)
       else:
-        renderer.fill_rect(x*scale, y*scale, scale, scale, c)
+        renderer.fill_rect(x, y, scale, scale, c)
     end = time.ticks_ms()
     #print("ELAPSED: " + str(time.ticks_diff(end, start)) + "ms")
