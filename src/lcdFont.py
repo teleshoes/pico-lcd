@@ -95,9 +95,12 @@ class LcdFont:
       })
     else:
       self.lcd.png(filename, self.cursor['x'], self.cursor['y'])
-  def cursorDrawPNM(self, filename):
-    (w, h) = self.lcd.pnm(filename, self.cursor['x'], self.cursor['y'])
-    self.cursor['x'] += w
+  def cursorDrawPNM(self, filename, scale):
+    if scale < 1 or scale != int(scale):
+      raise Exception("ERROR: invalid scale for PNM image,"
+        + " only positive integer scaling is supported")
+    (w, h) = self.lcd.pnm(filename, self.cursor['x'], self.cursor['y'], int(scale))
+    self.cursor['x'] += w * scale
   def cursorDrawRect(self, w, h, fill=True):
     self.lcd.rect(self.cursor['x'], self.cursor['y'], w, h, self.getCursorColor(), fill)
     self.cursor['x'] += w
@@ -304,10 +307,14 @@ class LcdFont:
     #                  is the same as:
     #                [color=white] A [color=blue] B [color=white] C
     #
-    #    [pnm=FILENAME]
+    #    [pnm=<FILENAME>]
+    #       same as: [pnm=1,<FILENAME>]
+    #
+    #    [pnm=<SCALE>,<FILENAME>]
     #      draw the Netpbm image, already present in the filesystem, at FILENAME
     #      top-left corner of the image is at cursor (<CURSOR_X>,<CURSOR_Y>)
-    #        -cursor is shifted to the right by the image size
+    #        -<SCALE> (if given) must be a positive integer (integer scaling, no interpolation)
+    #        -cursor is shifted to the right by the image width times the <SCALE>
     #        -writing to framebuf is supported
     #        -NOTE: fairly RAM efficient, reads 1KiB of file at a time to render
     #               moderately fast impl using micropython.viper
@@ -328,14 +335,15 @@ class LcdFont:
     #         -alpha channels are removed (with a black background) before rendering
     #
     #      e.g.: draw one 16x16 icon twice, with a label,
-    #              and then another 16x16 icon with another label beneath it,
+    #              and then another 16x16 icon scaled to 32x32 with another label beneath it,
     #              formatted like this:
     #                Ax2:|a||a|
-    #                Bx1:|b|
+    #                Bx1:|bb|
+    #                    |bb|
     #            [size=2][color=red]
     #            Ax2:[pnm=icon_a_16x16.pam][pnm=icon_a_16x16.pam]
     #            [n]
-    #            Bx1:[pnm=icon_b_16x16.pam]
+    #            Bx1:[pnm=2,icon_b_16x16.pam]
     #
     #    [png=FILENAME]
     #      draw the PNG image, already present in the filesystem, at FILENAME
@@ -563,6 +571,7 @@ class LcdFont:
           "ellipse" :4,
           "bar"     :5,
           "shift"   :2,
+          "pnm"     :2,
         }
 
         valArgList = []
@@ -585,7 +594,13 @@ class LcdFont:
         elif cmd == "png":
           self.cursorDrawPNG(val)
         elif cmd == "pnm":
-          self.cursorDrawPNM(val)
+          if len(valArgList) == 1:
+            scale = 1
+            filename = valArgList[0]
+          elif len(valArgList) == 2:
+            scale = self.maybeReadInt(valArgList[0], 1)
+            filename = valArgList[1]
+          self.cursorDrawPNM(filename, scale)
         elif cmd == "rect":
           (w, h, isFill, isSymbol) = (0, 0, True, False)
           if len(valArgList) >= 2:
