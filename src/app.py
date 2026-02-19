@@ -196,7 +196,7 @@ def main():
       if out == None:
         out = ""
 
-      cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n' + out)
+      cl.sendall('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n' + out)
       cl.close()
 
     except Exception as e:
