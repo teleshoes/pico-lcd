@@ -524,6 +524,9 @@ class LcdFont:
     #    [[
     #    [bracket]
     #        literal '[' character
+    #    [show]
+    #        show the current framebuf before processing any more markup
+    #        (no effect if framebuf is not set)
     #  e.g.:
     #      hello[n][size=6][color=red]world[[]]
     #        looks similar to the following HTML:
@@ -668,6 +671,8 @@ class LcdFont:
             else:
               rtcEpoch = self.rtc.getTimeEpochPlusTZOffset()
           self.cursorDrawText(self.formatTime(val, rtcEpoch))
+        elif cmd == "show":
+          self.show()
         elif cmd in self.cursor and len(val) > 0:
           # '[CMD=VAL]' => manipulate cursor without drawing anything
           if val == "prev":
