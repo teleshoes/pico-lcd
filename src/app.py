@@ -594,8 +594,9 @@ def formatButtonCount(buttons):
   return fmt
 
 def setOrientation(controller, orient):
-  setLCDOrientation(controller['lcd'], orient)
+  out = setLCDOrientation(controller['lcd'], orient)
   controller['lcdFont'].show()
+  return out
 
 def setLCDOrientation(lcd, orient):
   degrees = None
