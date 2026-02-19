@@ -262,7 +262,7 @@ my $USAGE = "Usage:
     --max-time=CURL_MAX_TIME_FRAC_SECONDS
       pass '--max-time CURL_MAX_TIME_FRAC_SECONDS' to all calls to curl
 
-    --data=DATA
+    --data DATA | --data=DATA
       for --cmd, pass in DATA as POST payload with curl (using '--data DATA')
     --upload-file=FILENAME
       for --cmd, pass in FILENAME contents as PUT payload with curl
@@ -427,6 +427,9 @@ sub main(@){
       while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
         push @cmdParams, shift @_;
       }
+    }elsif($arg =~ /^(--data)$/ and @_ > 0){
+      $cmdData = shift @_;
+      die "ERROR: --data must follow --cmd\n" if $mode ne $MODE_CMD;
     }elsif($arg =~ /^--data=(.+)$/s){
       $cmdData = $1;
       die "ERROR: --data must follow --cmd\n" if $mode ne $MODE_CMD;
