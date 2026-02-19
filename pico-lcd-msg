@@ -118,7 +118,7 @@ my $USAGE = "Usage:
         'TIMEOUT,SSID = PASSWORD'
         or
         'SSID = PASSWORD'
-    -same as: $EXEC [OPTS] --ssid ssid=SSID password=PASSWORD timeout=TIMEOUT
+      -same as: $EXEC [OPTS] --ssid ssid=SSID password=PASSWORD timeout=TIMEOUT
 
   $EXEC [OPTS] resetwifi | --resetwifi
     REMOVE all configured wifi network SSIDs for next boot/connect
@@ -128,6 +128,7 @@ my $USAGE = "Usage:
     write \"TEMPLATE_MARKUP\" to state-template-TEMPLATE_NAME file
       TEMPLATE_NAME: timeout | wifi-waiting | wifi-connected | ap-waiting | ap-active
     if TEMPLATE_MARKUP is omitted, the default markup for that template is used
+      -same as: $EXEC [OPTS] --template name=TZDATA_ZONE_NAME --data=TEMPLATE_MARKUP
 
   $EXEC [OPTS] timeout [TIMEOUT_MILLIS]
   $EXEC [OPTS] --timeout [TIMEOUT_MILLIS]
@@ -136,15 +137,18 @@ my $USAGE = "Usage:
       clear LCD, set LCD text to 'timeout' template, and show LCD
     if TIMEOUT_MILLIS is omitted, the timeout is removed,
       and the socket blocks forever
+      -same as: $EXEC [OPTS] --cmd timeout timeoutMillis=TIMEOUT_MILLIS
 
   $EXEC [OPTS] timezone [TZDATA_ZONE_NAME]
     write \"TZDATA_ZONENAME\" to state-timezone file
       used for DS3231 real-time-clock in [rtc] markup
       requires calculating and installing tzdata CSV in advance
     if TZDATA_ZONE_NAME is omitted, delete state-timezone file
+      -same as: $EXEC [OPTS] --cmd timezone name=TZDATA_ZONE_NAME
 
   $EXEC [OPTS] rtc RTC_EPOCH
     set the DS3231 RTC epoch to RTC_EPOCH
+      -same as: $EXEC [OPTS] --cmd rtc epoch=RTC_EPOCH
 
   $EXEC [OPTS] clear | --clear
     clear the entire LCD memory
@@ -228,8 +232,7 @@ my $USAGE = "Usage:
   $EXEC [OPTS] --delete FILENAME
   $EXEC [OPTS] --delete=FILENAME
     delete remote file FILENAME
-    -same as:
-      $EXEC [OPTS] --cmd delete filename=FILENAME
+    -same as: $EXEC [OPTS] --cmd delete filename=FILENAME
 
   $EXEC [OPTS] bootloader | --bootloader | bootsel | --bootsel
     enter bootloader (bootsel mass storage mode)
