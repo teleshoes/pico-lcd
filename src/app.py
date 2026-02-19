@@ -120,7 +120,7 @@ def buttonPressedActions(btnName, controller):
 def main():
   controller = {
     'lcdName': None, 'lcd': None, 'lcdFont': None,
-    'timeoutMarkup': None,
+    'timeoutMarkupCache': None,
     'rtc': None,
     'socket': None,
     'buttons': None,
@@ -178,10 +178,10 @@ def main():
         print('client connected from', addr)
       except:
         print("SOCKET TIMEOUT (" + str(controller['timeoutMillis']) + "ms)\n")
-        if controller['timeoutMarkup'] == None:
-          controller['timeoutMarkup'] = replaceMarkupTemplate('timeout',
+        if controller['timeoutMarkupCache'] == None:
+          controller['timeoutMarkupCache'] = replaceMarkupTemplate('timeout',
             {})
-        controller['lcdFont'].markup(controller['timeoutMarkup'])
+        controller['lcdFont'].markup(controller['timeoutMarkupCache'])
         continue
 
       (cmdName, params, socketReader) = readCommandRequest(cl)
@@ -286,7 +286,7 @@ def cmdResetWifi(controller, params, socketReader):
   return out
 
 def cmdTemplate(controller, params, socketReader):
-  controller['timeoutMarkup'] = None
+  controller['timeoutMarkupCache'] = None #recalculate timeout markup on next timeout
   templateName = maybeGetParamStr(params, "templateName", None)
   templateMarkup = socketReader.readDataStr()
   out = ""
