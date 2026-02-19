@@ -43,6 +43,7 @@ CMD_INFO = {
       char8px: <CHAR_GRID_8PX>
       orientation: <ORIENTATION> degrees
       RAM free: <MEM_FREE_BYTES> bytes
+      FS used: <USED_KIB>/<TOTAL_KIB> KiB (<USED_BLK>/<TOTAL_BLK> <BLKSIZE_KIB>k blocks)
       buttons: <BUTTON_LIST>
       lcdconf: <LCD_NAME>
       framebuf-boot: <BOOT_FRAMEBUF_CONF>
@@ -72,6 +73,20 @@ CMD_INFO = {
       0=landscape, 270=portrait, 180=inverted-landscape, 90=inverted-portrait
     MEM_FREE_BYTES = <INT>
       free RAM in bytes
+    TOTAL_BLK = <INT>
+      total filesystem blocks, as reported by os.statvfs('/')
+    AVAIL_BLK = <INT>
+      available filesystem blocks, as reported by os.statvfs('/')
+    BLKSIZE_BYTES = <INT>
+      filesystem blocksize, as reported by os.statvfs('/') (NOTE: 4096 on LFS)
+    BLKSIZE_KIB = <INT>
+      <BLKSIZE_BYTES> divided by 1024, rounded down in case of weird blocksize (NOTE: 4 on LFS)
+    USED_BLK = <INT>
+      <TOTAL_BLK> minus <AVAIL_BLK>
+    USED_KIB = <INT>
+      <USED_BLK> times <BLKSIZE_KIB>
+    TOTAL_KIB = <INT>
+      <TOTAL_BLK> times <BLKSIZE_KIB>
     BUTTON_LIST = <BUTTON>, <BUTTON_LIST> | <EMPTY>
       a CSV of <BUTTON> entries
     BUTTON = <BTN_NAME>=<BTN_PRESS_COUNT>

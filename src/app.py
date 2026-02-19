@@ -222,6 +222,13 @@ def cmdInfo(controller, params, data):
   fbConfBootState = readStateFramebuf()
   tz = readStateTimezone()
 
+  statvfs = os.statvfs("/")
+  fsBlockSizeBytes = statvfs[0]
+  fsSize = statvfs[2]
+  fsAvail = statvfs[3]
+  fsUsed = fsSize - fsAvail
+  fsBlockSizeKiB = fsBlockSizeBytes // 1024
+
   out = ""
   out += "window: %sx%s\n" % (winW, winH)
   out += "  (lcd: %sx%s, framebuf: %s)\n" % (lcdW, lcdH, fbConf)
@@ -230,6 +237,13 @@ def cmdInfo(controller, params, data):
     controller['lcd'].get_rotation_degrees())
   out += "RAM free: %s bytes\n" % (
     gc.mem_free())
+  out += "FS used: %d/%d KiB (%d/%d %dk blocks)\n" % (
+           fsUsed * fsBlockSizeKiB,
+           fsSize * fsBlockSizeKiB,
+           fsUsed,
+           fsSize,
+           fsBlockSizeKiB,
+         )
   out += "buttons: %s\n" % (
     formatButtonCount(controller['buttons']))
   out += "lcdconf: %s\n" % controller['lcdName']
