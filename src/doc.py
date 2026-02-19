@@ -263,6 +263,18 @@ CMD_FRAMEBUF = {
     <HALF_LCD_H>: 120 for lcd_2_0 or 120 for lcd_1_3
   """
 }
+CMD_STAT = {
+  "name":   "stat",
+  "params": {},
+  "body":   None,
+  "desc":   """
+    list all files on the filesystem (recursively),
+      one per line,
+      sorted by full file path,
+      formatted:
+        <ABSOLUTE_FILE_PATH>,<SIZE_BYTES>b,<MTIME_EPOCH>
+  """,
+}
 CMD_UPLOAD = {
   "name":   "upload",
   "params": {

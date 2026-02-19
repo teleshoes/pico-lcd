@@ -380,6 +380,21 @@ def cmdFramebuf(controller, params, socketReader):
   print("framebuf=" + str(fbConf))
   return setFramebuf(controller['lcd'], fbConf)
 
+def cmdStat(controller, params, socketReader):
+  files = getAllFiles()
+  out = ""
+  for f in files:
+    if not f.endswith("/"):
+      stat = os.stat(f)
+      sizeBytes = stat[6]
+      mtime = stat[8]
+    else:
+      #dirs have nonsense sizes and mtime=0
+      sizeBytes = 0
+      mtime = 0
+    out += f"{f},{sizeBytes}b,{mtime}\n"
+  return out
+
 def cmdUpload(controller, params, socketReader):
   filename = maybeGetParamStr(params, "filename", None)
   out = ""
@@ -1063,6 +1078,23 @@ def dirname(filename):
     else:
       dirName = "."
   return dirName
+
+def getAllFiles():
+  files = []
+  findFilesRecursively("/", files)
+  files.sort()
+  return files
+
+def findFilesRecursively(path, filesResult):
+  #all resulting dirs end in /
+  #depth first
+  for file in os.listdir(path):
+    filePath = path.rstrip("/") + "/" + file
+    if isDir(filePath):
+      filesResult.append(filePath.rstrip() + "/")
+      findFilesRecursively(filePath, filesResult)
+    else:
+      filesResult.append(filePath)
 
 def getParentDirs(filename):
   dirs = []
