@@ -427,7 +427,7 @@ sub main(@){
       while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
         push @cmdParams, shift @_;
       }
-    }elsif($arg =~ /^--data=(.+)$/){
+    }elsif($arg =~ /^--data=(.+)$/s){
       $cmdData = $1;
       die "ERROR: --data must follow --cmd\n" if $mode ne $MODE_CMD;
     }elsif($arg =~ /^--upload-file=(.+)$/){
