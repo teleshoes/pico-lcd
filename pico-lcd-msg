@@ -83,15 +83,12 @@ my $USAGE = "Usage:
     -otherwise:
       -run: curl 'http://<IP_ADDRESS>/text?clear=<CLEAR>&show=true' --data '<TEXT>'
 
-  $EXEC [OPTS] WORD_OR_FILE [WORD_OR_FILE WORD_OR_FILE]
-    -NOTE: the first WORD_OR_FILE cannot start with '-'
-    -combine WORD_OR_FILE args into TEXT
-      -if WORD_OR_FILE is a file:
-        -append contents of WORD_OR_FILE to TEXT
-      -otherwise:
-        -replace '\\n' with literal newline in WORD_OR_FILE
-        -if TEXT is not empty, append a space character
-        -append ARG to TEXT
+  $EXEC [OPTS] WORD [WORD WORD]
+    -NOTE: the first WORD cannot start with '-'
+    -combine WORD args into TEXT
+      -replace '\\n' with literal newline in WORD
+      -if TEXT is not empty, append a space character
+      -append ARG to TEXT
     -same as: $EXEC --text=TEXT
 
   $EXEC [OPTS] --template-set TEMPLATE_SET_NAME
@@ -585,12 +582,6 @@ sub main(@){
       $x = $1;
     }elsif($arg =~ /^--y=(.+)$/){
       $y = $1;
-    }elsif(-f $arg and (not defined $mode or $mode eq $MODE_TEXT)){
-      open FH, "< $arg" or die "ERROR: could not read $arg\n$!\n";
-      my $contents = join '', <FH>;
-      close FH;
-      $text .= $contents;
-      $mode = $MODE_TEXT;
     }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
