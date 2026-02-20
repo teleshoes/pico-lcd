@@ -155,8 +155,8 @@ my $USAGE = "Usage:
         COLOR
           one of: white black red green blue
 
-  $EXEC [OPTS] --lcd|lcd NAME
-    set the lcd model to NAME
+  $EXEC [OPTS] --lcd|lcd LCD_NAME
+    set the lcd model to LCD_NAME
       -same as: $EXEC [OPTS] --cmd lcd name=<LCD_NAME>
         LCD_NAME
           one of: 1_3 2_0
