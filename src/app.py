@@ -340,10 +340,10 @@ def cmdButtons(controller, params, socketReader):
 
 def cmdFill(controller, params, socketReader):
   colorName = maybeGetParamStr(params, "color", None)
-  color = controller['lcd'].get_color_by_name(colorName)
+  color = controller['lcdFont'].maybeReadColor(colorName, None)
   out = ""
   if color == None:
-    out = "ERROR: could not parse color " + colorName + "\n"
+    out = "ERROR: could not parse color " + str(colorName) + "\n"
   else:
     controller['lcd'].fill(color)
     controller['lcd'].show()
