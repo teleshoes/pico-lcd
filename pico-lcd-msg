@@ -284,16 +284,6 @@ my $USAGE = "Usage:
     --default-dev | --any-dev
       -select the IP_ADDRESS of the first CONF_DEV_NAME in $DEVICE_CONFIG_FILE
       (this is the default)
-
-    --framebuf=FRAMEBUF
-    --orient=ORIENT
-    --full
-    --left
-    --top
-    --right
-    --bottom
-    --square
-      if specified after TEXT, send orient/framebuf params as part of the /text cmd
 ";
 
 my $MODE_TEXT = "text";
@@ -308,7 +298,6 @@ sub main(@){
   my $curlMaxTime = undef;
 
   my $text = "";
-  my @textParams;
 
   my $templateSet = undef;
 
@@ -431,26 +420,18 @@ sub main(@){
       $cmd = "orient";
       $mode = $MODE_CMD;
       push @cmdParams, "orient=" . shift @_;
-    }elsif($arg =~ /^--orient=(\w+)$/){
-      if(not defined $mode or $mode eq $MODE_CMD){
-        $cmd = "orient";
-        $mode = $MODE_CMD;
-        push @cmdParams, "orient=$1";
-      }elsif($mode eq $MODE_TEXT){
-        push @textParams, "orient=$1";
-      }
+    }elsif($arg =~ /^--orient=(\w+)$/ and (not defined $mode or $mode eq $MODE_CMD)){
+      $cmd = "orient";
+      $mode = $MODE_CMD;
+      push @cmdParams, "orient=$1";
     }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=" . shift @_;
-    }elsif($arg =~ /^--framebuf=(.+)$/){
-      if(not defined $mode or $mode eq $MODE_CMD){
-        $cmd = "framebuf";
-        $mode = $MODE_CMD;
-        push @cmdParams, "framebuf=$1";
-      }elsif($mode eq $MODE_TEXT){
-        push @textParams, "framebuf=$1";
-      }
+    }elsif($arg =~ /^--framebuf=(.+)$/ and (not defined $mode or $mode eq $MODE_CMD)){
+      $cmd = "framebuf";
+      $mode = $MODE_CMD;
+      push @cmdParams, "framebuf=$1";
     }elsif($arg =~ /^(--upload|upload)$/ and @_ > 0 and not defined $mode){
       $cmd = "upload";
       $mode = $MODE_CMD;
@@ -481,20 +462,11 @@ sub main(@){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
       $curlMaxTime = 3;
-    }elsif($arg =~ /^(full|left|right|top|bottom|square)$/ and not defined $mode){
+    }elsif($arg =~ /^(full|left|right|top|bottom|square)$/ and (not defined $mode or $mode eq $MODE_CMD)){
       my $framebufConfName = $1;
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=$framebufConfName";
-    }elsif($arg =~ /^--(full|left|right|top|bottom|square)$/){
-      my $framebufConfName = $1;
-      if(not defined $mode or $mode eq $MODE_CMD){
-        $cmd = "framebuf";
-        $mode = $MODE_CMD;
-        push @cmdParams, "framebuf=$framebufConfName";
-      }else{
-        push @textParams, "framebuf=$framebufConfName";
-      }
     }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
@@ -546,7 +518,7 @@ sub main(@){
 
     print "$msg\n" unless $quiet;
 
-    my @params = (@textParams);
+    my @params = ();
     @params = (@params, "clear=true");
     @params = (@params, "info=true");
     @params = (@params, "show=true");
