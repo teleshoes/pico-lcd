@@ -167,7 +167,7 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] --fill|fill COLOR
     fill the LCD with COLOR
-      COLOR = any supported color string, e.g.: 'black', 'red', '#RRGGBB'
+      COLOR = any supported color string, e.g.: 'black', 'red', '#FF00FF'
     same as: $EXEC [OPTS] --cmd fill color=COLOR
 
   $EXEC [OPTS] --lcd|lcd LCD_NAME
