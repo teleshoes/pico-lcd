@@ -227,19 +227,6 @@ my $USAGE = "Usage:
       -same as: $EXEC [OPTS] --cmd bootloader -m 3
 
 
-  $EXEC [OPTS] full | --full
-    -same as: $EXEC [OPTS] framebuf full
-  $EXEC [OPTS] left | --left
-    -same as: $EXEC [OPTS] framebuf left
-  $EXEC [OPTS] right | --right
-    -same as: $EXEC [OPTS] framebuf right
-  $EXEC [OPTS] top | --top
-    -same as: $EXEC [OPTS] framebuf top
-  $EXEC [OPTS] bottom | --bottom
-    -same as: $EXEC [OPTS] framebuf bottom
-  $EXEC [OPTS] square | --square
-    -same as: $EXEC [OPTS] framebuf square
-
   OPTS
     -q | --quiet
       do not print messages sent with curl
@@ -418,11 +405,6 @@ sub main(@){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
       $curlMaxTime = 3;
-    }elsif($arg =~ /^(full|left|right|top|bottom|square)$/ and (not defined $mode or $mode eq $MODE_CMD)){
-      my $framebufConfName = $1;
-      $cmd = "framebuf";
-      $mode = $MODE_CMD;
-      push @cmdParams, "framebuf=$framebufConfName";
     }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
