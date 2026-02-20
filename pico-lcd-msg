@@ -17,12 +17,6 @@ my %DEVICE_IPS_BY_NAME = map {
 } @DEVICES;
 my $DEVICE_NAME_REGEX = join "|", (@DEVICE_NAMES, @DEVICE_SYNS);
 
-my $SPLIT_LINES_BIG_CHAR_LIMIT = 3000;
-
-my $SPLIT_LINES_BIG_ONLY = "big-only";
-my $SPLIT_LINES_ALWAYS = "always";
-my $SPLIT_LINES_NEVER = "never";
-
 my $DEFAULT_LCD_WIDTH = 240;
 my $DEFAULT_LCD_HEIGHT = 240;
 
@@ -77,8 +71,6 @@ my $USAGE = "Usage:
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -modify TEXT with markup
       -see: --lcd-width/--lcd-height
-    -possibly split text into lines, add x/y markup, and run curl for each line
-      -see: --lines/--no-lines/--lines-big-only
     -set CLEAR to 'true' or 'false' based on --clear-text/--no-clear-text
     -otherwise:
       -run: curl 'http://<IP_ADDRESS>/text?clear=<CLEAR>&show=true' --data '<TEXT>'
@@ -303,12 +295,8 @@ my $USAGE = "Usage:
       if specified after TEXT, send orient/framebuf params as part of the /text cmd
 
     --clear-text
-      when setting text, clear the screen first
-        if multiple messages (e.g.: with --lines):
-          send param clear=true for first message, clear=false for others
-        otherwise:
-          send param clear=true with text
-       (this is the default)
+      when setting text, clear the screen first (set clear=true)
+      (this is the default)
     --no-clear-text | --no-clear
         always send clear=false with all text commands
 
@@ -316,28 +304,6 @@ my $USAGE = "Usage:
       select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
     --lcd-height=HEIGHT_PX
       select a SIZE based on HEIGHT_PX, VSPACE, and number of lines in TEXT
-
-    --lines
-      -split TEXT into lines, TEXT_LINE
-      -for each TEXT_LINE:
-        -calculate the OFFSET for each line
-          -first line is OFFSET=0
-          -add SIZE*8 for each subsequent line
-          -assume SIZE=5 if not given
-        -prefix each TEXT_LINE with '[y=OFFSET]'
-        -treat TEXT_LINE as TEXT
-        -calculate SHOW as 'true' for the last TEXT_LINE, and 'false' otherwise
-        -calculate CLEAR as 'true' for the first TEXT_LINE, and 'false' otherwise
-          -unless --no-clear-text is given, then false always
-        -run: curl 'http://<IP_ADDRESS>/text?clear=CLEAR&show=SHOW' 'TEXT_LINE'
-    --no-lines
-      never split lines as in --lines
-    --lines-big-only
-      if TEXT is $SPLIT_LINES_BIG_CHAR_LIMIT chars or more:
-        same as: --lines
-      otherwise:
-        same as: --no-lines
-      (this is the default)
 ";
 
 my $MODE_TEXT = "text";
@@ -354,7 +320,6 @@ sub main(@){
   my $text = "";
   my @textParams;
   my $isClearText = 1;
-  my $splitLines = $SPLIT_LINES_BIG_ONLY;
   my $lcdWidthPx = undef;
   my $lcdHeightPx = undef;
 
@@ -551,12 +516,6 @@ sub main(@){
       $lcdWidthPx = $1;
     }elsif($arg =~ /^--lcd-height=(\d+)$/){
       $lcdHeightPx = $1;
-    }elsif($arg =~ /^(--lines)$/){
-      $splitLines = $SPLIT_LINES_ALWAYS;
-    }elsif($arg =~ /^(--no-lines)$/){
-      $splitLines = $SPLIT_LINES_NEVER;
-    }elsif($arg =~ /^(--lines-big-only)$/){
-      $splitLines = $SPLIT_LINES_BIG_ONLY;
     }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
@@ -597,15 +556,6 @@ sub main(@){
     runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
   }elsif($mode eq $MODE_TEXT){
     my $charsTotal = length $text;
-
-    my $isLines;
-    if($splitLines eq $SPLIT_LINES_ALWAYS){
-      $isLines = 1;
-    }elsif($splitLines eq $SPLIT_LINES_BIG_ONLY){
-      $isLines = $charsTotal > $SPLIT_LINES_BIG_CHAR_LIMIT ? 1 : 0;
-    }else{
-      $isLines = 0;
-    }
 
     #remove '\r' chars
     $text =~ s/\r\n/\n/g;
@@ -649,20 +599,7 @@ sub main(@){
     my $size = $hSize < $vSize ? $hSize : $vSize;
     $size = 1 if $size < 1;
 
-    my @messages;
-    if($isLines){
-      my $height = ($FONT_BASE_HEIGHT+$vspace)*$size;
-      my $offset = 0;
-      for my $line(@lines){
-        push @messages, "[x=0][y=$offset]$line";
-        $offset += $height;
-      }
-    }else{
-      if(length $text > 0){
-        @messages = ($text);
-      }
-    }
-
+    my @messages = ($text);
     @messages = grep {length $_ > 0} @messages;
 
     for(my $i=0; $i<@messages; $i++){
