@@ -203,7 +203,7 @@ my $USAGE = "Usage:
 
   OPTS
     -q | --quiet
-      do not print messages sent with curl
+      do not print curl command messages
 
     -m CURL_MAX_TIME_FRAC_SECONDS
     --max-time CURL_MAX_TIME_FRAC_SECONDS
@@ -416,6 +416,13 @@ sub main(@){
       my $size = calculateMaxFontSize($cmdData, $windowWidthPx, $windowHeightPx);
       $cmdData = "[size=$size]$cmdData";
     }
+    my $msgFmt = "running curl with"
+      . " cmd:$cmd"
+      . " params:@cmdParams"
+      . (defined $cmdData ? " data:$cmdData" : "")
+      . (defined $cmdFile ? " uploadFile:$cmdFile" : "")
+      . "\n";
+    print($msgFmt) unless $quiet;
     runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
   }elsif($mode eq $MODE_TEMPLATE_SET){
     my $set = $$TEMPLATE_SETS{$templateSet};
