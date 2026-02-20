@@ -87,7 +87,7 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] --template-set TEMPLATE_SET_NAME
     apply pre-configured set of markup templates
-    TEMPLATE_SET_NAME: " . join(" | ", sort keys %$TEMPLATE_SETS) . "
+    TEMPLATE_SET_NAME = " . join(" | ", sort keys %$TEMPLATE_SETS) . "
 
   $EXEC [OPTS] --cmd|cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
     -parse <IP_ADDRESS> for device from $DEVICE_CONFIG_FILE
