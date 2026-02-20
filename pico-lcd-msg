@@ -599,37 +599,22 @@ sub main(@){
     my $size = $hSize < $vSize ? $hSize : $vSize;
     $size = 1 if $size < 1;
 
-    my @messages = ($text);
-    @messages = grep {length $_ > 0} @messages;
+    my $msg = $text;
+    $msg = "[size=$size]$msg" if defined $size;
 
-    for(my $i=0; $i<@messages; $i++){
-      my $msg = $messages[$i];
-      $msg = "[size=$size]$msg" if defined $size;
+    print "$msg\n" unless $quiet;
 
-      print "$msg\n" unless $quiet;
-
-      my @params = (@textParams);
-      #clear() on the first message unless --no-clear
-      if($isClearText and $i == 0){
-        @params = (@params, "clear=true");
-      }else{
-        @params = (@params, "clear=false");
-      }
-
-      #send info=true on the last message
-      if($i == $#messages){
-        @params = (@params, "info=true");
-      }
-
-      #do not show() until last message
-      if($i < $#messages){
-        @params = (@params, "show=false");
-      }else{
-        @params = (@params, "show=true");
-      }
-
-      runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg, undef);
+    my @params = (@textParams);
+    if($isClearText){
+      @params = (@params, "clear=true");
+    }else{
+      @params = (@params, "clear=false");
     }
+
+    @params = (@params, "info=true");
+    @params = (@params, "show=true");
+
+    runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg, undef);
   }elsif($mode eq $MODE_TEMPLATE_SET){
     my $set = $$TEMPLATE_SETS{$templateSet};
     for my $templateName(sort keys %$set){
