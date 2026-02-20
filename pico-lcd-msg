@@ -270,7 +270,6 @@ my $USAGE = "Usage:
       never calculate max size or prepend [size] markup
 ";
 
-my $MODE_TEXT = "text";
 my $MODE_CMD = "cmd";
 my $MODE_TEMPLATE_SET = "template-set";
 
@@ -281,15 +280,13 @@ sub main(@){
   my $quiet = 0;
   my $curlMaxTime = undef;
 
-  my $text = undef;
-
   my $templateSet = undef;
 
   my $cmd = undef;
   my @cmdParams;
   my $cmdData = undef;
   my $cmdFile = undef;
-  my $isBodyPrependSize = 1;
+  my $isBodyPrependSize = undef;
 
   while(@_ > 0){
     my $arg = shift @_;
@@ -319,8 +316,11 @@ sub main(@){
     }elsif($arg =~ /^(--no-prepend-size)$/){
       $isBodyPrependSize = 0;
     }elsif($arg =~ /^(--text|text)$/ and @_ > 0 and not defined $mode){
-      $text = shift @_;
-      $mode = $MODE_TEXT;
+      $cmdData = shift @_;
+      $mode = $MODE_CMD;
+      $cmd = "text";
+      @cmdParams = (@DEFAULT_MARKUP_TEXT_PARAMS, @cmdParams);
+      $isBodyPrependSize = 1 if not defined $isBodyPrependSize;
     }elsif($arg =~ /^(--template-set|template-set)$/ and @_ > 0 and not defined $mode){
       $templateSet = shift @_;
       if(not defined $$TEMPLATE_SETS{$templateSet}){
@@ -413,9 +413,12 @@ sub main(@){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
       $curlMaxTime = 3;
-    }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode and not defined $text)){
-      $text = $arg;
-      $mode = $MODE_TEXT;
+    }elsif($arg !~ /^-/ and not defined $mode and not defined $cmdData){
+      $cmdData = $arg;
+      $mode = $MODE_CMD;
+      $cmd = "text";
+      @cmdParams = (@DEFAULT_MARKUP_TEXT_PARAMS, @cmdParams);
+      $isBodyPrependSize = 1 if not defined $isBodyPrependSize;
     }elsif((defined $cmd and $cmd eq "template") and @cmdParams == 0){
       push @cmdParams, "templateName=$arg";
     }elsif((defined $cmd and $cmd eq "template") and @cmdParams == 1 and not defined $cmdData){
@@ -444,26 +447,21 @@ sub main(@){
   }
 
   if(not defined $mode){
-    $mode = $MODE_TEXT;
-    $text = "";
+    $mode = $MODE_CMD;
+    $cmd = "text";
+    $cmdData = "";
   }
 
   my @curlOpts = ("--no-progress-meter");
   @curlOpts = (@curlOpts, "--max-time", $curlMaxTime) if defined $curlMaxTime;
 
   if($mode eq $MODE_CMD){
-    runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
-  }elsif($mode eq $MODE_TEXT){
-    my $msg = $text;
-    if($isBodyPrependSize){
+    if($cmd eq "text" and $isBodyPrependSize and defined $cmdData){
       my ($windowWidthPx, $windowHeightPx) = fetchWindowGeometry($ipAddr, [@curlOpts]);
-      my $size = calculateMaxFontSize($text, $windowWidthPx, $windowHeightPx);
-      $msg = "[size=$size]$msg";
+      my $size = calculateMaxFontSize($cmdData, $windowWidthPx, $windowHeightPx);
+      $cmdData = "[size=$size]$cmdData";
     }
-
-    my @params = @DEFAULT_MARKUP_TEXT_PARAMS;
-
-    runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg, undef);
+    runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
   }elsif($mode eq $MODE_TEMPLATE_SET){
     my $set = $$TEMPLATE_SETS{$templateSet};
     for my $templateName(sort keys %$set){
