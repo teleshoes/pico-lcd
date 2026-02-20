@@ -256,7 +256,9 @@ sub main(@){
   my $mode = $MODE_CMD;
   my $ipAddr = undef;
   my $devName = undef;
-  my $quiet = 0;
+  my $opts = {
+    quiet => 0,
+  };
   my $curlMaxTime = undef;
 
   my $templateSet = undef;
@@ -273,7 +275,7 @@ sub main(@){
       print $USAGE;
       exit 0;
     }elsif($arg =~ /^(-q|--quiet)$/){
-      $quiet = 1;
+      $$opts{quiet} = 1;
     }elsif($arg =~ /^(-m|--max-time)$/ and @_ > 0 and $_[0] =~ /^(\d+|\d*\.\d+)$/){
       $curlMaxTime = shift @_;
     }elsif($arg =~ /^(?:--max-time)=(\d+|\d*\.\d+)$/){
@@ -422,7 +424,7 @@ sub main(@){
       . (defined $cmdData ? " data:$cmdData" : "")
       . (defined $cmdFile ? " uploadFile:$cmdFile" : "")
       . "\n";
-    print($msgFmt) unless $quiet;
+    print($msgFmt) unless $$opts{quiet};
     runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
   }elsif($mode eq $MODE_TEMPLATE_SET){
     my $set = $$TEMPLATE_SETS{$templateSet};
