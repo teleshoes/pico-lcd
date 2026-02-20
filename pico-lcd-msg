@@ -8,6 +8,7 @@ sub fetchWindowGeometry($);
 sub calculateMaxFontSize($$$);
 sub runCurlCmd($$$$$$);
 sub parseConfig($);
+sub chunkArr($@);
 
 my $EXEC = basename $0;
 
@@ -235,7 +236,9 @@ my $USAGE = "Usage:
         -select the IP_ADDRESS for that entry
       -same as: --ip=IP_ADDRESS
         DEV_NAME
-          one of: $DEVICE_NAME_REGEX
+          one of:\n" . join("",
+                       map {"            " . join("|", @$_) . "\n"}
+                       chunkArr(5, (@DEVICE_NAMES, @DEVICE_SYNS))) . "
     --default-dev | --any-dev
       -select the IP_ADDRESS of the first CONF_DEV_NAME in $DEVICE_CONFIG_FILE
       (this is the default)
@@ -518,6 +521,15 @@ sub parseConfig($){
     }
   }
   return @devices;
+}
+
+sub chunkArr($@){
+  my ($size, @arr) = @_;
+  my @chunks;
+  while(@arr){
+    push @chunks, [splice @arr, 0, $size];
+  }
+  return @chunks;
 }
 
 &main(@ARGV);
