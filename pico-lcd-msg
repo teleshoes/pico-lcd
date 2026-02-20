@@ -76,7 +76,7 @@ my $USAGE = "Usage:
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -modify TEXT with markup
-      -see: --color/--size/--hspace/--vspace/--x/--y/--lcd-width/--lcd-height
+      -see: --lcd-width/--lcd-height
     -possibly split text into lines, add x/y markup, and run curl for each line
       -see: --lines/--no-lines/--lines-big-only
     -set CLEAR to 'true' or 'false' based on --clear-text/--no-clear-text
@@ -312,21 +312,6 @@ my $USAGE = "Usage:
     --no-clear-text | --no-clear
         always send clear=false with all text commands
 
-    --color=COLOR
-      prefix all TEXT with '[color=COLOR]'
-    --size=SIZE
-      prefix all TEXT with '[size=SIZE]'
-        (this is the number of pixels per dot, in a 5-dot by 8-dot font)
-      NOTE: the default is to calculate the largest SIZE that fits all characters
-    --hspace=HSPACE
-      prefix all TEXT with '[hspace=HSPACE]'
-    --vspace=VSPACE
-      prefix all TEXT with '[vspace=VSPACE]'
-    --x=X
-      prefix all TEXT with '[x=X]'
-    --y=Y
-      prefix all TEXT with '[y=Y]'
-
     --lcd-width=WIDTH_PX
       select a SIZE based on WIDTH_PX, HSPACE, and number of chars in longest line of TEXT
     --lcd-height=HEIGHT_PX
@@ -340,7 +325,7 @@ my $USAGE = "Usage:
           -add SIZE*8 for each subsequent line
           -assume SIZE=5 if not given
         -prefix each TEXT_LINE with '[y=OFFSET]'
-        -treat TEXT_LINE as TEXT, and prefix with --color/--size/etc
+        -treat TEXT_LINE as TEXT
         -calculate SHOW as 'true' for the last TEXT_LINE, and 'false' otherwise
         -calculate CLEAR as 'true' for the first TEXT_LINE, and 'false' otherwise
           -unless --no-clear-text is given, then false always
@@ -372,7 +357,6 @@ sub main(@){
   my $splitLines = $SPLIT_LINES_BIG_ONLY;
   my $lcdWidthPx = undef;
   my $lcdHeightPx = undef;
-  my ($color, $size, $hspace, $vspace, $x, $y);
 
   my $templateSet = undef;
 
@@ -573,18 +557,6 @@ sub main(@){
       $splitLines = $SPLIT_LINES_NEVER;
     }elsif($arg =~ /^(--lines-big-only)$/){
       $splitLines = $SPLIT_LINES_BIG_ONLY;
-    }elsif($arg =~ /^--color=(.+)$/){
-      $color = $1;
-    }elsif($arg =~ /^--size=(.+)$/){
-      $size = $1;
-    }elsif($arg =~ /^--hspace=(.+)$/){
-      $hspace = $1;
-    }elsif($arg =~ /^--vspace=(.+)$/){
-      $vspace = $1;
-    }elsif($arg =~ /^--x=(.+)$/){
-      $x = $1;
-    }elsif($arg =~ /^--y=(.+)$/){
-      $y = $1;
     }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
@@ -655,29 +627,27 @@ sub main(@){
     $charsW = 1 if $charsW <= 1;
     $charsH = 1 if $charsH <= 1;
 
-    $vspace = 1 if not defined $vspace;
-    $hspace = 1 if not defined $hspace;
+    my $vspace = 1;
+    my $hspace = 1;
 
     #select the largest size that will fit all characters,
     #  vertically and horizontally,
     #  or 1 if they cannot fit
-    if(not defined $size){
-      if(not defined $lcdWidthPx or not defined $lcdHeightPx){
-        my $info = `curl @curlOpts 'http://$ipAddr/info'`;
-        if($info =~ /window:\s+(\d+)x(\d+)/){
-          $lcdWidthPx = $1;
-          $lcdHeightPx = $2;
-        }else{
-          $lcdWidthPx = $DEFAULT_LCD_WIDTH;
-          $lcdHeightPx = $DEFAULT_LCD_HEIGHT;
-        }
+    if(not defined $lcdWidthPx or not defined $lcdHeightPx){
+      my $info = `curl @curlOpts 'http://$ipAddr/info'`;
+      if($info =~ /window:\s+(\d+)x(\d+)/){
+        $lcdWidthPx = $1;
+        $lcdHeightPx = $2;
+      }else{
+        $lcdWidthPx = $DEFAULT_LCD_WIDTH;
+        $lcdHeightPx = $DEFAULT_LCD_HEIGHT;
       }
-
-      my $hSize = int($lcdWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
-      my $vSize = int($lcdHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
-      $size = $hSize < $vSize ? $hSize : $vSize;
-      $size = 1 if $size < 1;
     }
+
+    my $hSize = int($lcdWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
+    my $vSize = int($lcdHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
+    my $size = $hSize < $vSize ? $hSize : $vSize;
+    $size = 1 if $size < 1;
 
     my @messages;
     if($isLines){
@@ -698,11 +668,6 @@ sub main(@){
     for(my $i=0; $i<@messages; $i++){
       my $msg = $messages[$i];
       $msg = "[size=$size]$msg" if defined $size;
-      $msg = "[color=$color]$msg" if defined $color;
-      $msg = "[hspace=$hspace]$msg" if defined $hspace and $hspace != 1.0;
-      $msg = "[vspace=$vspace]$msg" if defined $vspace and $vspace != 1.0;
-      $msg = "[x=$x]$msg" if defined $x;
-      $msg = "[y=$y]$msg" if defined $y;
 
       print "$msg\n" unless $quiet;
 
