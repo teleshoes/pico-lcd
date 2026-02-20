@@ -359,10 +359,19 @@ sub main(@){
       }
     }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $cmd){
       $cmd = "timeout";
+      if(@_ > 0){
+        push @cmdParams, "timeoutMillis=" . shift @_;
+      }
     }elsif($arg =~ /^(--timezone|timezone)$/ and not defined $cmd){
       $cmd = "timezone";
+      if(@_ > 0){
+        push @cmdParams, "name=" . shift @_;
+      }
     }elsif($arg =~ /^(--rtc|rtc)$/ and not defined $cmd){
       $cmd = "rtc";
+      if(@_ > 0){
+        push @cmdParams, "epoch=" . shift @_;
+      }
     }elsif($arg =~ /^(--clear|clear)$/ and not defined $cmd){
       $cmd = "clear";
     }elsif($arg =~ /^(--show|show)$/ and not defined $cmd){
@@ -400,12 +409,6 @@ sub main(@){
       $cmd = "text";
       @cmdParams = (@DEFAULT_MARKUP_TEXT_PARAMS, @cmdParams);
       $isBodyPrependSize = 1 if not defined $isBodyPrependSize;
-    }elsif((defined $cmd and $cmd eq "timeout") and @cmdParams == 0){
-      push @cmdParams, "timeoutMillis=$arg";
-    }elsif((defined $cmd and $cmd eq "timezone") and @cmdParams == 0){
-      push @cmdParams, "name=$arg";
-    }elsif((defined $cmd and $cmd eq "rtc") and @cmdParams == 0){
-      push @cmdParams, "epoch=$arg";
     }else{
       die "ERROR: unknown arg $arg\n";
     }
