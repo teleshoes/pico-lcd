@@ -114,11 +114,11 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] --info|info
     fetch+show current state
-      -same as: $EXEC [OPTS] --cmd info
+    same as: $EXEC [OPTS] --cmd info
 
   $EXEC [OPTS] --connect|connect
     re-connect to wifi or setup access point
-      -same as: $EXEC [OPTS] --cmd connect
+    same as: $EXEC [OPTS] --cmd connect
 
   $EXEC [OPTS] --ssid|ssid SSID PASSWORD [TIMEOUT]
     append a network for next boot/connect
@@ -126,17 +126,17 @@ my $USAGE = "Usage:
         'TIMEOUT,SSID = PASSWORD'
         or
         'SSID = PASSWORD'
-      -same as: $EXEC [OPTS] --cmd ssid ssid=SSID password=PASSWORD [timeout=TIMEOUT]
+    same as: $EXEC [OPTS] --cmd ssid ssid=SSID password=PASSWORD [timeout=TIMEOUT]
 
   $EXEC [OPTS] --resetwifi|resetwifi
     REMOVE all configured wifi network SSIDs for next boot/connect
-      -same as: $EXEC [OPTS] --cmd resetwifi
+    same as: $EXEC [OPTS] --cmd resetwifi
 
   $EXEC [OPTS] --template|template TEMPLATE_NAME [TEMPLATE_MARKUP]
     write \"TEMPLATE_MARKUP\" to state-template-TEMPLATE_NAME file
       TEMPLATE_NAME: timeout | wifi-waiting | wifi-connected | ap-waiting | ap-active
     if TEMPLATE_MARKUP is omitted, the default markup for that template is used
-      -same as: $EXEC [OPTS] --cmd template name=TZDATA_ZONE_NAME [--data=TEMPLATE_MARKUP]
+    same as: $EXEC [OPTS] --cmd template name=TZDATA_ZONE_NAME [--data=TEMPLATE_MARKUP]
 
   $EXEC [OPTS] --timeout|timeout [TIMEOUT_MILLIS]
     write \"TIMEOUT_MILLIS\" to state-timeout file
@@ -144,46 +144,45 @@ my $USAGE = "Usage:
       clear LCD, set LCD text to 'timeout' template, and show LCD
     if TIMEOUT_MILLIS is omitted, the timeout is removed,
       and the socket blocks forever
-      -same as: $EXEC [OPTS] --cmd timeout [timeoutMillis=TIMEOUT_MILLIS]
+    same as: $EXEC [OPTS] --cmd timeout [timeoutMillis=TIMEOUT_MILLIS]
 
   $EXEC [OPTS] --timezone|timezone [TZDATA_ZONE_NAME]
     write \"TZDATA_ZONENAME\" to state-timezone file
       used for DS3231 real-time-clock in [rtc] markup
       requires calculating and installing tzdata CSV in advance
     if TZDATA_ZONE_NAME is omitted, delete state-timezone file
-      -same as: $EXEC [OPTS] --cmd timezone [name=TZDATA_ZONE_NAME]
+    same as: $EXEC [OPTS] --cmd timezone [name=TZDATA_ZONE_NAME]
 
   $EXEC [OPTS] --rtc|rtc [RTC_EPOCH]
     set the DS3231 RTC epoch to RTC_EPOCH
-      -same as: $EXEC [OPTS] --cmd rtc [epoch=RTC_EPOCH]
+    same as: $EXEC [OPTS] --cmd rtc [epoch=RTC_EPOCH]
 
   $EXEC [OPTS] --clear|clear
     clear the entire LCD memory
-      -same as: $EXEC [OPTS] --cmd clear
+    same as: $EXEC [OPTS] --cmd clear
 
   $EXEC [OPTS] --show|show
     show the framebuffer, if any
-      -same as: $EXEC [OPTS] --cmd show
+    same as: $EXEC [OPTS] --cmd show
 
   $EXEC [OPTS] --buttons|buttons
     fetch button press counts and print them
-      -same as: $EXEC [OPTS] --cmd buttons
+    same as: $EXEC [OPTS] --cmd buttons
 
   $EXEC [OPTS] --fill|fill COLOR
     fill the window with COLOR
-      -same as: $EXEC [OPTS] --cmd fill color=<COLOR>
         COLOR
           one of: white black red green blue
+    same as: $EXEC [OPTS] --cmd fill color=COLOR
 
   $EXEC [OPTS] --lcd|lcd LCD_NAME
     set the lcd model to LCD_NAME
-      -same as: $EXEC [OPTS] --cmd lcd name=<LCD_NAME>
         LCD_NAME
           one of: 1_3 2_0
+    same as: $EXEC [OPTS] --cmd lcd name=LCD_NAME
 
   $EXEC [OPTS] --orient|orient ORIENT
     set the rotation
-      -same as: $EXEC [OPTS] --cmd orient orient=<ORIENT>
         ORIENT
           landscape | 0 | normal | default
             set rotation to 0 degrees
@@ -193,9 +192,9 @@ my $USAGE = "Usage:
             set rotation to 180 degrees
           inverted-portrait | 90
             set rotation to 90 degrees
+    same as: $EXEC [OPTS] --cmd orient orient=ORIENT
 
   $EXEC [OPTS] --framebuf|framebuf FRAMEBUF
-    -same as: $EXEC [OPTS] --cmd framebuf framebuf=FRAMEBUF
         FRAMEBUF:
           <FB_W>x<FB_H>+<FB_X>+<FB_Y> = enable framebuf with WxH and offset (0, 0)
           <FB_W>x<FB_H> = same as <FB_W>x<FB_H>+0+0
@@ -219,22 +218,21 @@ my $USAGE = "Usage:
         NOTE: 'framebuf' uses a lot of memory. if memory allocation fails, framebuf is disabled
               the framebuf, if any, that is actually successfully allocated is returned
               if 'framebuf: off' is returned instead of a framebuf, allocation likely failed
+    same as: $EXEC [OPTS] --cmd framebuf framebuf=FRAMEBUF
 
   $EXEC [OPTS] --upload|upload FILE [DEST_FILENAME]
     upload file FILE to DEST_FILENAME (DEST_FILENAME defaults to FILE if omitted)
-    -same as:
-      $EXEC [OPTS] --cmd upload filename=DEST_FILENAME --upload-file=FILE
+    same as: $EXEC [OPTS] --cmd upload filename=DEST_FILENAME --upload-file=FILE
 
   $EXEC [OPTS] --delete|delete FILENAME
     delete remote file FILENAME
-    -same as: $EXEC [OPTS] --cmd delete filename=FILENAME
+    same as: $EXEC [OPTS] --cmd delete filename=FILENAME
 
   $EXEC [OPTS] --bootloader|bootloader
   $EXEC [OPTS] --bootsel|bootsel
     enter bootloader (bootsel mass storage mode)
     also sets curl --max-time to 3s, as it will hang forever otherwise
-      -same as: $EXEC [OPTS] --cmd bootloader -m 3
-
+    same as: $EXEC [OPTS] --cmd bootloader -m 3
 
   OPTS
     -q | --quiet
