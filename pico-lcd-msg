@@ -454,10 +454,6 @@ sub main(@){
   if($mode eq $MODE_CMD){
     runCurlCmd(\@curlOpts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
   }elsif($mode eq $MODE_TEXT){
-    #select the largest size that will fit all characters,
-    #  vertically and horizontally,
-    #  or 1 if they cannot fit
-
     my $msg = $text;
     if($isBodyPrependSize){
       my ($windowWidthPx, $windowHeightPx) = fetchWindowGeometry($ipAddr, [@curlOpts]);
@@ -516,6 +512,9 @@ sub calculateMaxFontSize($$$){
   my $vspace = 1;
   my $hspace = 1;
 
+  #select the largest size that will fit all characters,
+  #  vertically and horizontally,
+  #  or 1 if they cannot fit
   my $hSize = int($windowWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
   my $vSize = int($windowHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
   my $size = $hSize < $vSize ? $hSize : $vSize;
