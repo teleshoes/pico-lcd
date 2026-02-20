@@ -90,11 +90,27 @@ my $USAGE = "Usage:
     TEMPLATE_SET_NAME: " . join(" | ", sort keys %$TEMPLATE_SETS) . "
 
   $EXEC [OPTS] --cmd|cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
-    -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
-    -run: curl 'http://<IP_ADDRESS>/<CMD>?<PARAM_NAME>=<PARAM_VAL>&<PARAM_NAME>=<PARAM_VAL>'
-        PARAM_NAME=PARAM_VAL
-          pass in as URL param in curl
-          PARAM_NAME and can contain only letters, numbers, and underscores
+    -parse <IP_ADDRESS> for device from $DEVICE_CONFIG_FILE
+       -see: --ip / --ap / --dev
+    -run:
+      curl 'http://<IP_ADDRESS>/<CMD>[<HTTP_PARAM_QUERY_STRING>]' \\
+        [--data '<DATA_BODY>'] \\
+        [--upload-file '<FILENAME>'] \\
+      ;
+
+        HTTP_PARAM_QUERY_STRING
+          HTTP query string, empty if no PARAM_NAME=PARAM_VAL given, otherwise
+            consisting of a '?' character, followed by all '<PARAM_NAME>=<PARAM_VAL>'
+            params joined with '&' as separator
+          e.g.: '?param1=val1&param2=val2&param3=val3'
+        PARAM_NAME
+          can ontain only letters, numbers, and underscores
+        PARAM_VAL
+          can be any string
+        DATA_BODY
+          can be any string, see --data / --body
+        FILENAME
+          must be a file on the local filesystem, see --upload-file
 
   $EXEC [OPTS] --info|info
     fetch+show current state
