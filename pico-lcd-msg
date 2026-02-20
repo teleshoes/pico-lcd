@@ -393,9 +393,11 @@ sub main(@){
     }elsif($arg =~ /^(--upload|upload)$/ and @_ > 0 and not defined $cmd){
       $cmd = "upload";
       $cmdFile = shift @_;
-      my $destFilename = $cmdFile;
+      my $destFilename;
       if(@_ > 0){
         $destFilename = shift @_;
+      }else{
+        $destFilename = $cmdFile;
       }
       push @cmdParams, "filename=$destFilename";
     }elsif($arg =~ /^(--delete|delete)$/ and @_ > 0 and not defined $cmd){
