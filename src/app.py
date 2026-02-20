@@ -694,7 +694,7 @@ def readCommandRequest(cl):
         keyVal = keyValPair.split("=")
         if len(keyVal) == 2:
           (key, val) = keyVal
-          params[keyVal[0]] = keyVal[1]
+          params[key] = unquoteUrlStr(val)
     try:
       if line.startswith(b"Content-Length: "):
         lenStr = line[16:]
@@ -714,6 +714,29 @@ def readCommandRequest(cl):
   socketReader = SocketReader(cl, contentLen)
 
   return (cmd, params, socketReader)
+
+@micropython.native
+def unquoteUrlStr(s):
+  if s == None or s == "" or "%" not in s:
+    return s
+
+  result = ""
+  strLen = len(s)
+  i = 0
+  while i < strLen:
+    ch = s[i]
+    if ch == "%" and i < strLen-2:
+      hexByte = s[i+1:i+3]
+      try:
+        hexCh = chr(int(hexByte, 16))
+        result += hexCh
+        i += 2
+      except ValueError:
+        result += ch
+    else:
+      result += ch
+    i += 1
+  return result
 
 class SocketReader:
   def __init__(self, socket, contentLen):
