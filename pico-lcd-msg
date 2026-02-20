@@ -122,10 +122,9 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] --ssid|ssid SSID PASSWORD [TIMEOUT]
     append a network for next boot/connect
-      formatted:
-        'TIMEOUT,SSID = PASSWORD'
-        or
-        'SSID = PASSWORD'
+      SSID     = network SSID
+      PASSWORD = network password
+      TIMEOUT  = network-specific max seconds to before trying next, default is 10s
     same as: $EXEC [OPTS] --cmd ssid ssid=SSID password=PASSWORD [timeout=TIMEOUT]
 
   $EXEC [OPTS] --resetwifi|resetwifi
@@ -133,105 +132,72 @@ my $USAGE = "Usage:
     same as: $EXEC [OPTS] --cmd resetwifi
 
   $EXEC [OPTS] --template|template TEMPLATE_NAME [TEMPLATE_MARKUP]
-    write \"TEMPLATE_MARKUP\" to state-template-TEMPLATE_NAME file
-      TEMPLATE_NAME: timeout | wifi-waiting | wifi-connected | ap-waiting | ap-active
-    if TEMPLATE_MARKUP is omitted, the default markup for that template is used
+    write state-template-<TEMPLATE_NAME> file, to use dynamic markup for various scenarios
+      TEMPLATE_NAME   = timeout | wifi-waiting | wifi-connected | ap-waiting | ap-active
+      TEMPLATE_MARKUP = markup string, if omitted, use the default markup for that template
     same as: $EXEC [OPTS] --cmd template name=TZDATA_ZONE_NAME [--data=TEMPLATE_MARKUP]
 
   $EXEC [OPTS] --timeout|timeout [TIMEOUT_MILLIS]
-    write \"TIMEOUT_MILLIS\" to state-timeout file
-      after TIMEOUT_MILLIS milliseconds of no network commands,
-      clear LCD, set LCD text to 'timeout' template, and show LCD
-    if TIMEOUT_MILLIS is omitted, the timeout is removed,
-      and the socket blocks forever
+    write state-timeout file, to show timeout template after TIMEOUT_MILLIS of no socket data
+      TIMEOUT_MILLIS = delay in millis before timeout, if omitted, never timeout, block forever
     same as: $EXEC [OPTS] --cmd timeout [timeoutMillis=TIMEOUT_MILLIS]
 
   $EXEC [OPTS] --timezone|timezone [TZDATA_ZONE_NAME]
-    write \"TZDATA_ZONENAME\" to state-timezone file
-      used for DS3231 real-time-clock in [rtc] markup
-      requires calculating and installing tzdata CSV in advance
-    if TZDATA_ZONE_NAME is omitted, delete state-timezone file
+    write state-timezone file, to select the tzdata CSV file to use with DS3231 rtc
+      TZDATA_ZONE_NAME = tzdata csv file path under '/zoneinfo/' dir, remove file if omitted
     same as: $EXEC [OPTS] --cmd timezone [name=TZDATA_ZONE_NAME]
 
   $EXEC [OPTS] --rtc|rtc [RTC_EPOCH]
-    set the DS3231 RTC epoch to RTC_EPOCH
+    set the hardware DS3231 RTC epoch to RTC_EPOCH, and read the current value
+      RTC_EPOCH = unix time in seconds UTC, skip update if omitted and just read current value
     same as: $EXEC [OPTS] --cmd rtc [epoch=RTC_EPOCH]
 
   $EXEC [OPTS] --clear|clear
-    clear the entire LCD memory
+    clear the entire LCD memory and reset framebuf
     same as: $EXEC [OPTS] --cmd clear
 
   $EXEC [OPTS] --show|show
-    show the framebuffer, if any
+    show the framebuffer, if present
     same as: $EXEC [OPTS] --cmd show
 
   $EXEC [OPTS] --buttons|buttons
-    fetch button press counts and print them
+    fetch and print button press counts
     same as: $EXEC [OPTS] --cmd buttons
 
   $EXEC [OPTS] --fill|fill COLOR
-    fill the window with COLOR
-        COLOR
-          one of: white black red green blue
+    fill the LCD with COLOR
+      COLOR = any supported color string, e.g.: 'black', 'red', '#RRGGBB'
     same as: $EXEC [OPTS] --cmd fill color=COLOR
 
   $EXEC [OPTS] --lcd|lcd LCD_NAME
-    set the lcd model to LCD_NAME
-        LCD_NAME
-          one of: 1_3 2_0
+    write state-lcd-name file, to set the hardware LCD model to LCD_NAME
+      LCD_NAME = one of: 1_3 2_0 2_8
     same as: $EXEC [OPTS] --cmd lcd name=LCD_NAME
 
   $EXEC [OPTS] --orient|orient ORIENT
-    set the rotation
-        ORIENT
-          landscape | 0 | normal | default
-            set rotation to 0 degrees
-          portrait | 270 | -90
-            set rotation to 270 degrees
-          inverted-landscape | 180
-            set rotation to 180 degrees
-          inverted-portrait | 90
-            set rotation to 90 degrees
+    write state-orientation file, to set the screen orientation
+      ORIENT = 0 | 90 | 180 | 270 | landscape | portrait | inverted-landscape | inverted-portrait
     same as: $EXEC [OPTS] --cmd orient orient=ORIENT
 
   $EXEC [OPTS] --framebuf|framebuf FRAMEBUF
-        FRAMEBUF:
-          <FB_W>x<FB_H>+<FB_X>+<FB_Y> = enable framebuf with WxH and offset (0, 0)
-          <FB_W>x<FB_H> = same as <FB_W>x<FB_H>+0+0
-          off           = disable the framebuf
-          <FB_NAME>     = one of: full | left | right | top | bottom | square
-          full          = same as <LCD_W>x<LCD_H>                      e.g.: 320x240
-          left          = same as <HALF_LCD_W>x<LCD_H>                 e.g.: 160x240
-          right         = same as <HALF_LCD_W>x<LCD_H>+<HALF_LCD_W>+0  e.g.: 160x240+160+0
-          top           = same as <LCD_W>x<HALF_LCD_H>                 e.g.: 320x120
-          bottom        = same as <LCD_W>x<HALF_LCD_H>+0+<HALF_LCD_H>  e.g.: 320x120+0+120
-          square        = same as <LCD_H>x<LCD_H>                      e.g.: 240x240
-
-        <LCD_W>:      320 for lcd=2_0 or 240 for lcd=1_3
-        <LCD_H>:      240 for lcd=2_0 or 240 for lcd=1_3
-        <HALF_LCD_W>: 160 for lcd=2_0 or 120 for lcd_1_3
-        <HALF_LCD_H>: 120 for lcd_2_0 or 120 for lcd_1_3
-
-        NOTE: 'framebuf' param is *unaffected* by orientation
-              <FB_W> and <FB_X> always refer to the longest dimension of the physical LCD
-              <FB_H> and <FB_Y> always refer to the shortest dimension of the physical LCD
-        NOTE: 'framebuf' uses a lot of memory. if memory allocation fails, framebuf is disabled
-              the framebuf, if any, that is actually successfully allocated is returned
-              if 'framebuf: off' is returned instead of a framebuf, allocation likely failed
+    write state-framebuf file, to enable/disable/resize/move the in-memory raster buffer
+      FRAMEBUF = off | WxH+X+Y | WxH | full | left | right | top | bottom | square
     same as: $EXEC [OPTS] --cmd framebuf framebuf=FRAMEBUF
 
   $EXEC [OPTS] --upload|upload FILE [DEST_FILENAME]
-    upload file FILE to DEST_FILENAME (DEST_FILENAME defaults to FILE if omitted)
+    write file to remote filesystem
+      FILE          = the local path of file to upload
+      DEST_FILENAME = the remote path to write to, defaults to FILE if omitted
     same as: $EXEC [OPTS] --cmd upload filename=DEST_FILENAME --upload-file=FILE
 
   $EXEC [OPTS] --delete|delete FILENAME
-    delete remote file FILENAME
+    delete remote file
+      FILENAME = the remote path of the file to delete
     same as: $EXEC [OPTS] --cmd delete filename=FILENAME
 
   $EXEC [OPTS] --bootloader|bootloader
   $EXEC [OPTS] --bootsel|bootsel
-    enter bootloader (bootsel mass storage mode)
-    also sets curl --max-time to 3s, as it will hang forever otherwise
+    enter bootloader (bootsel mass storage mode), and set curl max-time = 3s to prevent hanging
     same as: $EXEC [OPTS] --cmd bootloader -m 3
 
   OPTS
