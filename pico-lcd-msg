@@ -71,7 +71,6 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] text   TEXT
   $EXEC [OPTS] --text TEXT
-  $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -calculate+prepend TEXT with [size] markup
     -set CLEAR to 'true'
@@ -92,7 +91,6 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] cmd   CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
   $EXEC [OPTS] --cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
-  $EXEC [OPTS] --cmd=CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -run: curl 'http://<IP_ADDRESS>/<CMD>?<PARAM_NAME>=<PARAM_VAL>&<PARAM_NAME>=<PARAM_VAL>'
         PARAM_NAME=PARAM_VAL
@@ -159,7 +157,6 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] fill   COLOR
   $EXEC [OPTS] --fill COLOR
-  $EXEC [OPTS] --fill=COLOR
     fill the window with COLOR
       -same as: $EXEC [OPTS] --cmd fill color=<COLOR>
         COLOR
@@ -167,7 +164,6 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] lcd   NAME
   $EXEC [OPTS] --lcd NAME
-  $EXEC [OPTS] --lcd=NAME
     set the lcd model to NAME
       -same as: $EXEC [OPTS] --cmd lcd name=<LCD_NAME>
         LCD_NAME
@@ -175,7 +171,6 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] orient   ORIENT
   $EXEC [OPTS] --orient ORIENT
-  $EXEC [OPTS] --orient=ORIENT
     set the rotation
       -same as: $EXEC [OPTS] --cmd orient orient=<ORIENT>
         ORIENT
@@ -190,7 +185,6 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] framebuf   FRAMEBUF
   $EXEC [OPTS] --framebuf FRAMEBUF
-  $EXEC [OPTS] --framebuf=FRAMEBUF
     -same as: $EXEC [OPTS] --cmd framebuf framebuf=FRAMEBUF
         FRAMEBUF:
           <FB_W>x<FB_H>+<FB_X>+<FB_Y> = enable framebuf with WxH and offset (0, 0)
@@ -218,14 +212,12 @@ my $USAGE = "Usage:
 
   $EXEC [OPTS] upload   FILE [DEST_FILENAME]
   $EXEC [OPTS] --upload FILE [DEST_FILENAME]
-  $EXEC [OPTS] --upload=FILE [DEST_FILENAME]
     upload file FILE to DEST_FILENAME (DEST_FILENAME defaults to FILE if omitted)
     -same as:
       $EXEC [OPTS] --cmd upload filename=DEST_FILENAME --upload-file=FILE
 
   $EXEC [OPTS] delete   FILENAME
   $EXEC [OPTS] --delete FILENAME
-  $EXEC [OPTS] --delete=FILENAME
     delete remote file FILENAME
     -same as: $EXEC [OPTS] --cmd delete filename=FILENAME
 
@@ -334,9 +326,6 @@ sub main(@){
     }elsif($arg =~ /^(--text|text)$/ and @_ > 0 and not defined $mode){
       $text = shift @_;
       $mode = $MODE_TEXT;
-    }elsif($arg =~ /^--text=(.+)$/ and not defined $mode){
-      $text = $1;
-      $mode = $MODE_TEXT;
     }elsif($arg =~ /^(--template-set|template-set)$/ and @_ > 0 and not defined $mode){
       $templateSet = shift @_;
       if(not defined $$TEMPLATE_SETS{$templateSet}){
@@ -347,12 +336,6 @@ sub main(@){
       $cmd = shift @_;
       $mode = $MODE_CMD;
       while(@_ > 0 and $_[0] =~ /^\w+=.+$/){
-        push @cmdParams, shift @_;
-      }
-    }elsif($arg =~ /^--cmd=(\w+)$/ and not defined $mode){
-      $cmd = $1;
-      $mode = $MODE_CMD;
-      while(@_ > 0 and $_[0] =~ /^\w+=\w+$/){
         push @cmdParams, shift @_;
       }
     }elsif($arg =~ /^(--data|--body)$/ and @_ > 0){
@@ -406,34 +389,18 @@ sub main(@){
       $cmd = "fill";
       $mode = $MODE_CMD;
       push @cmdParams, "color=" . shift @_;
-    }elsif($arg =~ /^--fill=(\w+)$/ and not defined $mode){
-      $cmd = "fill";
-      $mode = $MODE_CMD;
-      push @cmdParams, "color=$1";
     }elsif($arg =~ /^(--lcd|lcd)$/ and @_ > 0 and not defined $mode){
       $cmd = "lcd";
       $mode = $MODE_CMD;
       push @cmdParams, "name=" . shift @_;
-    }elsif($arg =~ /^--lcd=(\w+)$/ and not defined $mode){
-      $cmd = "lcd";
-      $mode = $MODE_CMD;
-      push @cmdParams, "name=$1";
     }elsif($arg =~ /^(--orient|orient)$/ and @_ > 0 and not defined $mode){
       $cmd = "orient";
       $mode = $MODE_CMD;
       push @cmdParams, "orient=" . shift @_;
-    }elsif($arg =~ /^--orient=(\w+)$/ and (not defined $mode or $mode eq $MODE_CMD)){
-      $cmd = "orient";
-      $mode = $MODE_CMD;
-      push @cmdParams, "orient=$1";
     }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $mode){
       $cmd = "framebuf";
       $mode = $MODE_CMD;
       push @cmdParams, "framebuf=" . shift @_;
-    }elsif($arg =~ /^--framebuf=(.+)$/ and (not defined $mode or $mode eq $MODE_CMD)){
-      $cmd = "framebuf";
-      $mode = $MODE_CMD;
-      push @cmdParams, "framebuf=$1";
     }elsif($arg =~ /^(--upload|upload)$/ and @_ > 0 and not defined $mode){
       $cmd = "upload";
       $mode = $MODE_CMD;
@@ -443,23 +410,10 @@ sub main(@){
         $destFilename = shift @_;
       }
       push @cmdParams, "filename=$destFilename";
-    }elsif($arg =~ /^--upload=(.+)$/ and not defined $mode){
-      $cmd = "upload";
-      $mode = $MODE_CMD;
-      $cmdFile = $1;
-      my $destFilename = $cmdFile;
-      if(@_ > 0){
-        $destFilename = shift @_;
-      }
-      push @cmdParams, "filename=$destFilename";
     }elsif($arg =~ /^(--delete|delete)$/ and @_ > 0 and not defined $mode){
       $cmd = "delete";
       $mode = $MODE_CMD;
       push @cmdParams, "filename=" . shift @_;
-    }elsif($arg =~ /^--delete=(.+)$/ and not defined $mode){
-      $cmd = "delete";
-      $mode = $MODE_CMD;
-      push @cmdParams, "filename=" . $1;
     }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $mode){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
