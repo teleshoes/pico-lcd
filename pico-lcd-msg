@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use File::Basename qw(basename);
 
+sub fetchWindowGeometry($$);
 sub calculateMaxFontSize($$$);
 sub runCurlCmd($$$$$$);
 sub parseConfig($);
@@ -548,14 +549,7 @@ sub main(@){
     #  vertically and horizontally,
     #  or 1 if they cannot fit
 
-    my ($windowWidthPx, $windowHeightPx);
-    my $info = `curl @curlOpts 'http://$ipAddr/info'`;
-    if($info =~ /window:\s+(\d+)x(\d+)/){
-      ($windowWidthPx, $windowHeightPx) = ($1, $2);
-    }else{
-      ($windowWidthPx, $windowHeightPx) = ($DEFAULT_LCD_WIDTH, $DEFAULT_LCD_HEIGHT);
-    }
-
+    my ($windowWidthPx, $windowHeightPx) = fetchWindowGeometry($ipAddr, [@curlOpts]);
     my $size = calculateMaxFontSize($text, $windowWidthPx, $windowHeightPx);
 
     my $msg = $text;
@@ -582,6 +576,16 @@ sub main(@){
     }
   }else{
     die "ERROR: unknown mode $mode\n";
+  }
+}
+
+sub fetchWindowGeometry($$){
+  my ($ipAddr, $curlOpts) = @_;
+  my $info = `curl @$curlOpts 'http://$ipAddr/info'`;
+  if($info =~ /window:\s+(\d+)x(\d+)/){
+    return ($1, $2);
+  }else{
+    return ($DEFAULT_LCD_WIDTH, $DEFAULT_LCD_HEIGHT);
   }
 }
 
