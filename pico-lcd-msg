@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use File::Basename qw(basename);
 
+sub calculateMaxFontSize($$$);
 sub runCurlCmd($$$$$$);
 sub parseConfig($);
 
@@ -555,35 +556,7 @@ sub main(@){
       ($windowWidthPx, $windowHeightPx) = ($DEFAULT_LCD_WIDTH, $DEFAULT_LCD_HEIGHT);
     }
 
-    my $charsTotal = length $text;
-
-    #remove '\r' chars
-    $text =~ s/\r\n/\n/g;
-    $text =~ s/\r/\n/g;
-
-    #replace '[[' literals with '[bracket]'
-    $text =~ s/\[\[/\[bracket\]/g;
-
-    #replace '[n]' markup wih literal '\n'
-    $text =~ s/\[n\]/\n/g;
-
-    my @lines = split /\n/, $text;
-
-    my $charsH = @lines;
-    my $charsW = 0;
-    for my $line(@lines){
-      $charsW = length $line if length $line > $charsW;
-    }
-    $charsW = 1 if $charsW <= 1;
-    $charsH = 1 if $charsH <= 1;
-
-    my $vspace = 1;
-    my $hspace = 1;
-
-    my $hSize = int($windowWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
-    my $vSize = int($windowHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
-    my $size = $hSize < $vSize ? $hSize : $vSize;
-    $size = 1 if $size < 1;
+    my $size = calculateMaxFontSize($text, $windowWidthPx, $windowHeightPx);
 
     my $msg = $text;
     $msg = "[size=$size]$msg" if defined $size;
@@ -610,6 +583,41 @@ sub main(@){
   }else{
     die "ERROR: unknown mode $mode\n";
   }
+}
+
+sub calculateMaxFontSize($$$){
+  my ($markup, $windowWidthPx, $windowHeightPx) = @_;
+  my $text = $markup;
+
+  #remove '\r' chars
+  $text =~ s/\r\n/\n/g;
+  $text =~ s/\r/\n/g;
+
+  #replace '[[' literals with '[bracket]'
+  $text =~ s/\[\[/\[bracket\]/g;
+
+  #replace '[n]' markup wih literal '\n'
+  $text =~ s/\[n\]/\n/g;
+
+  my @lines = split /\n/, $text;
+
+  my $charsH = @lines;
+  my $charsW = 0;
+  for my $line(@lines){
+    $charsW = length $line if length $line > $charsW;
+  }
+  $charsW = 1 if $charsW <= 1;
+  $charsH = 1 if $charsH <= 1;
+
+  my $vspace = 1;
+  my $hspace = 1;
+
+  my $hSize = int($windowWidthPx / ($charsW*($FONT_BASE_WIDTH + $hspace)));
+  my $vSize = int($windowHeightPx / ($charsH*($FONT_BASE_HEIGHT + $vspace)));
+  my $size = $hSize < $vSize ? $hSize : $vSize;
+  $size = 1 if $size < 1;
+
+  return $size;
 }
 
 sub runCurlCmd($$$$$$){
