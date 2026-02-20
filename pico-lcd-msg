@@ -70,16 +70,20 @@ my $USAGE = "Usage:
     show this message
 
   $EXEC [OPTS] MARKUP_TEXT_ARG
-    -NOTE: MARKUP_TEXT_ARG cannot start with '-'
-    -same as: $EXEC --text MARKUP_TEXT_ARG
+    draw markup on lcd using '--cmd text', with default query params and OPTS
+      MARKUP_TEXT_ARG = passed with --body, any string, cannot start with '-'
+    same as: $EXEC --text MARKUP_TEXT_ARG
 
   $EXEC [OPTS] --text|text MARKUP_TEXT
-    -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
-    -calculate+prepend MARKUP_TEXT with [size] markup (unless --no-prepend-size given)
-    -set CLEAR to 'true'
-    -otherwise:
-      -run: curl 'http://<IP_ADDRESS>/text?clear=<CLEAR>&show=true' --data '<MARKUP_TEXT>'
-
+    draw markup on lcd using '--cmd text', with default query params and OPTS
+      MARKUP_TEXT_ARG = passed with --body, any string, cannot start with '-'
+    -same as:
+      $EXEC \\
+        --prepend-size [OPTS] \\
+        --cmd text \\
+        @DEFAULT_MARKUP_TEXT_PARAMS \\
+        MARKUP_TEXT \\
+      ;
 
   $EXEC [OPTS] --template-set TEMPLATE_SET_NAME
     apply pre-configured set of markup templates
