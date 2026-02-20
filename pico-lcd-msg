@@ -19,6 +19,8 @@ my %DEVICE_IPS_BY_NAME = map {
 } @DEVICES;
 my $DEVICE_NAME_REGEX = join "|", (@DEVICE_NAMES, @DEVICE_SYNS);
 
+my @DEFAULT_MARKUP_TEXT_PARAMS = qw(clear=true show=true info=true);
+
 my $DEFAULT_LCD_WIDTH = 240;
 my $DEFAULT_LCD_HEIGHT = 240;
 
@@ -518,10 +520,7 @@ sub main(@){
 
     print "$msg\n" unless $quiet;
 
-    my @params = ();
-    @params = (@params, "clear=true");
-    @params = (@params, "info=true");
-    @params = (@params, "show=true");
+    my @params = @DEFAULT_MARKUP_TEXT_PARAMS;
 
     runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg, undef);
   }elsif($mode eq $MODE_TEMPLATE_SET){
