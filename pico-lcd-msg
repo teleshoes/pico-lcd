@@ -265,9 +265,10 @@ my $USAGE = "Usage:
     --prepend-size
       when using cmd=text, calculate the max size for the markup and prepend the markup with:
         [size=MAX_FONT_SIZE]
-      (this is the default)
+      (this is the default when '--text' or 'MARKUP_TEXT_ARG' is given)
     --no-prepend-size
       never calculate max size or prepend [size] markup
+      (this is the default for '--cmd text' is given)
 ";
 
 my $MODE_CMD = "cmd";
