@@ -257,9 +257,9 @@ sub main(@){
   my $ipAddr = undef;
   my $devName = undef;
   my $opts = {
-    quiet => 0,
+    quiet       => 0,
+    curlMaxTime => undef,
   };
-  my $curlMaxTime = undef;
 
   my $templateSet = undef;
 
@@ -277,9 +277,9 @@ sub main(@){
     }elsif($arg =~ /^(-q|--quiet)$/){
       $$opts{quiet} = 1;
     }elsif($arg =~ /^(-m|--max-time)$/ and @_ > 0 and $_[0] =~ /^(\d+|\d*\.\d+)$/){
-      $curlMaxTime = shift @_;
+      $$opts{curlMaxTime} = shift @_;
     }elsif($arg =~ /^(?:--max-time)=(\d+|\d*\.\d+)$/){
-      $curlMaxTime = $1;
+      $$opts{curlMaxTime} = $1;
     }elsif($arg =~ /^--ip=(.+)$/){
       $ipAddr = $1
     }elsif($arg =~ /^(--ap)$/){
@@ -386,7 +386,7 @@ sub main(@){
       push @cmdParams, "filename=" . shift @_;
     }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $cmd){
       $cmd = "bootloader";
-      $curlMaxTime = 3;
+      $$opts{curlMaxTime} = 3;
     }elsif($arg !~ /^-/ and not defined $cmd and not defined $cmdData){
       $cmdData = $arg;
       $cmd = "text";
@@ -410,7 +410,7 @@ sub main(@){
   }
 
   my @curlOpts = ("--no-progress-meter");
-  @curlOpts = (@curlOpts, "--max-time", $curlMaxTime) if defined $curlMaxTime;
+  @curlOpts = (@curlOpts, "--max-time", $$opts{curlMaxTime}) if defined $$opts{curlMaxTime};
 
   if($mode eq $MODE_CMD){
     if($cmd eq "text" and $isBodyPrependSize and defined $cmdData){
