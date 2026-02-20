@@ -415,13 +415,6 @@ sub main(@){
       my $size = calculateMaxFontSize($cmdData, $windowWidthPx, $windowHeightPx);
       $cmdData = "[size=$size]$cmdData";
     }
-    my $msgFmt = "running curl with"
-      . " cmd:$cmd"
-      . " params:@cmdParams"
-      . (defined $cmdData ? " data:$cmdData" : "")
-      . (defined $cmdFile ? " uploadFile:$cmdFile" : "")
-      . "\n";
-    print($msgFmt) unless $$opts{quiet};
     runCurlCmd($opts, $ipAddr, $cmd, \@cmdParams, $cmdData, $cmdFile);
   }elsif($mode eq $MODE_TEMPLATE_SET){
     my $set = $$TEMPLATE_SETS{$templateSet};
@@ -506,6 +499,8 @@ sub runCurlCmd($$$$$$){
   my @curlCmd = ("curl", @curlOpts, "http://$ipAddr/$cmd$paramsFmt");
   @curlCmd = (@curlCmd, "--data", $cmdData) if defined $cmdData;
   @curlCmd = (@curlCmd, "--upload-file", $cmdFile) if defined $cmdFile;
+
+  print "@curlCmd\n" unless $$opts{quiet};
   system @curlCmd;
 }
 
