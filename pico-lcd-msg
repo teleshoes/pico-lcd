@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use File::Basename qw(basename);
+use URI::Escape qw(uri_escape);
 
 sub fetchWindowGeometry($$);
 sub calculateMaxFontSize($$$);
@@ -106,7 +107,7 @@ my $USAGE = "Usage:
         PARAM_NAME
           can ontain only letters, numbers, and underscores
         PARAM_VAL
-          can be any string
+          can be any string, percent-encoded with URI::Escape->uri_escape()
         DATA_BODY
           can be any string, see --data / --body
         FILENAME
@@ -478,7 +479,17 @@ sub runCurlCmd($$$$$$){
   my ($curlOpts, $ipAddr, $cmd, $cmdParams, $cmdData, $cmdFile) = @_;
   my $paramsFmt = "";
   if(@$cmdParams > 0){
-    $paramsFmt = "?" . join "&", @$cmdParams;
+    my @fmtParams;
+    for my $param(@$cmdParams){
+      if($param =~ /^(\w+)=(.+)$/){
+        my ($key, $val) = ($1, $2);
+        $val = uri_escape($val);
+        push @fmtParams, "$key=$val";
+      }else{
+        die "ERROR: malformed query param KEY=VAL string '$param'\n";
+      }
+    }
+    $paramsFmt = "?" . join "&", @fmtParams;
   }
 
   my @curlCmd = ("curl", @$curlOpts, "http://$ipAddr/$cmd$paramsFmt");
