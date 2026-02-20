@@ -350,8 +350,13 @@ sub main(@){
       }
     }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $cmd){
       $cmd = "resetwifi";
-    }elsif($arg =~ /^(--template|template)$/ and not defined $cmd){
+    }elsif($arg =~ /^(--template|template)$/ and @_ >= 1 and not defined $cmd){
       $cmd = "template";
+      push @cmdParams, "templateName=" . shift @_;
+      if(@_ > 0){
+        my $templateMarkup = shift @_;
+        $cmdData = $templateMarkup;
+      }
     }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $cmd){
       $cmd = "timeout";
     }elsif($arg =~ /^(--timezone|timezone)$/ and not defined $cmd){
@@ -395,10 +400,6 @@ sub main(@){
       $cmd = "text";
       @cmdParams = (@DEFAULT_MARKUP_TEXT_PARAMS, @cmdParams);
       $isBodyPrependSize = 1 if not defined $isBodyPrependSize;
-    }elsif((defined $cmd and $cmd eq "template") and @cmdParams == 0){
-      push @cmdParams, "templateName=$arg";
-    }elsif((defined $cmd and $cmd eq "template") and @cmdParams == 1 and not defined $cmdData){
-      $cmdData = $arg;
     }elsif((defined $cmd and $cmd eq "timeout") and @cmdParams == 0){
       push @cmdParams, "timeoutMillis=$arg";
     }elsif((defined $cmd and $cmd eq "timezone") and @cmdParams == 0){
