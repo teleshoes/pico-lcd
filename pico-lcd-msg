@@ -461,11 +461,10 @@ sub calculateMaxFontSize($$$){
   $text =~ s/\r\n/\n/g;
   $text =~ s/\r/\n/g;
 
-  #replace '[[' literals with '[bracket]'
-  $text =~ s/\[\[/\[bracket\]/g;
-
-  #replace '[n]' markup wih literal '\n'
-  $text =~ s/\[n\]/\n/g;
+  #replace markup literals and remove other markup (don't count towards char counts)
+  $text =~ s/\[\[/_/g;      #[[  => _
+  $text =~ s/\[n\]/\n/g;    #[n] => \n
+  $text =~ s/\[[^\]]+\]//g; #remove all [markup]
 
   my @lines = split /\n/, $text;
 
