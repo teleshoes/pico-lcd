@@ -465,8 +465,6 @@ sub main(@){
       $msg = "[size=$size]$msg";
     }
 
-    print "$msg\n" unless $quiet;
-
     my @params = @DEFAULT_MARKUP_TEXT_PARAMS;
 
     runCurlCmd(\@curlOpts, $ipAddr, "text", \@params, $msg, undef);
