@@ -69,21 +69,17 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
-  $EXEC [OPTS] text   TEXT
-  $EXEC [OPTS] --text TEXT
+  $EXEC [OPTS] text   MARKUP_TEXT
+  $EXEC [OPTS] --text MARKUP_TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
-    -calculate+prepend TEXT with [size] markup
+    -calculate+prepend MARKUP_TEXT with [size] markup
     -set CLEAR to 'true'
     -otherwise:
-      -run: curl 'http://<IP_ADDRESS>/text?clear=<CLEAR>&show=true' --data '<TEXT>'
+      -run: curl 'http://<IP_ADDRESS>/text?clear=<CLEAR>&show=true' --data '<MARKUP_TEXT>'
 
-  $EXEC [OPTS] WORD [WORD WORD]
-    -NOTE: the first WORD cannot start with '-'
-    -combine WORD args into TEXT
-      -replace '\\n' with literal newline in WORD
-      -if TEXT is not empty, append a space character
-      -append ARG to TEXT
-    -same as: $EXEC --text=TEXT
+  $EXEC [OPTS] MARKUP_TEXT_ARG
+    -NOTE: MARKUP_TEXT_ARG cannot start with '-'
+    -same as: $EXEC --text MARKUP_TEXT_ARG
 
   $EXEC [OPTS] --template-set TEMPLATE_SET_NAME
     apply pre-configured set of markup templates
@@ -278,7 +274,7 @@ sub main(@){
   my $quiet = 0;
   my $curlMaxTime = undef;
 
-  my $text = "";
+  my $text = undef;
 
   my $templateSet = undef;
 
@@ -405,9 +401,8 @@ sub main(@){
       $cmd = "bootloader";
       $mode = $MODE_CMD;
       $curlMaxTime = 3;
-    }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
-      $text .= " " if $text ne "";
-      $text .= $arg;
+    }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode and not defined $text)){
+      $text = $arg;
       $mode = $MODE_TEXT;
     }elsif((defined $cmd and $cmd eq "template") and @cmdParams == 0){
       push @cmdParams, "templateName=$arg";
@@ -436,7 +431,10 @@ sub main(@){
     }
   }
 
-  $mode = $MODE_TEXT if not defined $mode;
+  if(not defined $mode){
+    $mode = $MODE_TEXT;
+    $text = "";
+  }
 
   my @curlOpts = ("--no-progress-meter");
   @curlOpts = (@curlOpts, "--max-time", $curlMaxTime) if defined $curlMaxTime;
