@@ -274,7 +274,7 @@ my $MODE_CMD = "cmd";
 my $MODE_TEMPLATE_SET = "template-set";
 
 sub main(@){
-  my $mode = undef;
+  my $mode = $MODE_CMD;
   my $ipAddr = undef;
   my $devName = undef;
   my $quiet = 0;
@@ -315,107 +315,83 @@ sub main(@){
       $isBodyPrependSize = 1;
     }elsif($arg =~ /^(--no-prepend-size)$/){
       $isBodyPrependSize = 0;
-    }elsif($arg =~ /^(--text|text)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--text|text)$/ and @_ > 0 and not defined $cmd){
       $cmdData = shift @_;
-      $mode = $MODE_CMD;
       $cmd = "text";
       @cmdParams = (@DEFAULT_MARKUP_TEXT_PARAMS, @cmdParams);
       $isBodyPrependSize = 1 if not defined $isBodyPrependSize;
-    }elsif($arg =~ /^(--template-set|template-set)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--template-set|template-set)$/ and @_ > 0){
+      $mode = $MODE_TEMPLATE_SET;
       $templateSet = shift @_;
       if(not defined $$TEMPLATE_SETS{$templateSet}){
         die "ERROR: unknown template set $templateSet\n";
       }
-      $mode = $MODE_TEMPLATE_SET;
-    }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $cmd){
       $cmd = shift @_;
-      $mode = $MODE_CMD;
       while(@_ > 0 and $_[0] =~ /^\w+=.+$/){
         push @cmdParams, shift @_;
       }
     }elsif($arg =~ /^(--data|--body)$/ and @_ > 0){
       $cmdData = shift @_;
-      die "ERROR: --data must follow --cmd\n" if $mode ne $MODE_CMD;
     }elsif($arg =~ /^(?:--data|--body)=(.+)$/s){
       $cmdData = $1;
-      die "ERROR: --data must follow --cmd\n" if $mode ne $MODE_CMD;
     }elsif($arg =~ /^--upload-file=(.+)$/){
       $cmdFile = $1;
-      die "ERROR: --upload-file must follow --cmd\n" if $mode ne $MODE_CMD;
-    }elsif($arg =~ /^(--info|info)$/ and not defined $mode){
+    }elsif($arg =~ /^(--info|info)$/ and not defined $cmd){
       $cmd = "info";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--connect|connect)$/ and not defined $mode){
+    }elsif($arg =~ /^(--connect|connect)$/ and not defined $cmd){
       $cmd = "connect";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--ssid|ssid)$/ and @_ >= 2 and not defined $mode){
+    }elsif($arg =~ /^(--ssid|ssid)$/ and @_ >= 2 and not defined $cmd){
       $cmd = "ssid";
-      $mode = $MODE_CMD;
       push @cmdParams, "ssid=" . shift @_;
       push @cmdParams, "password=" . shift @_;
       if(@_ > 0){
         push @cmdParams, "timeout=" . shift @_;
       }
-    }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $mode){
+    }elsif($arg =~ /^(--resetwifi|resetwifi)$/ and not defined $cmd){
       $cmd = "resetwifi";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--template|template)$/ and not defined $mode){
+    }elsif($arg =~ /^(--template|template)$/ and not defined $cmd){
       $cmd = "template";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $mode){
+    }elsif($arg =~ /^(--timeout|timeout)$/ and not defined $cmd){
       $cmd = "timeout";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--timezone|timezone)$/ and not defined $mode){
+    }elsif($arg =~ /^(--timezone|timezone)$/ and not defined $cmd){
       $cmd = "timezone";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--rtc|rtc)$/ and not defined $mode){
+    }elsif($arg =~ /^(--rtc|rtc)$/ and not defined $cmd){
       $cmd = "rtc";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--clear|clear)$/ and not defined $mode){
+    }elsif($arg =~ /^(--clear|clear)$/ and not defined $cmd){
       $cmd = "clear";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--show|show)$/ and not defined $mode){
+    }elsif($arg =~ /^(--show|show)$/ and not defined $cmd){
       $cmd = "show";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $mode){
+    }elsif($arg =~ /^(--buttons|buttons)$/ and not defined $cmd){
       $cmd = "buttons";
-      $mode = $MODE_CMD;
-    }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--fill|fill)$/ and @_ > 0 and not defined $cmd){
       $cmd = "fill";
-      $mode = $MODE_CMD;
       push @cmdParams, "color=" . shift @_;
-    }elsif($arg =~ /^(--lcd|lcd)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--lcd|lcd)$/ and @_ > 0 and not defined $cmd){
       $cmd = "lcd";
-      $mode = $MODE_CMD;
       push @cmdParams, "name=" . shift @_;
-    }elsif($arg =~ /^(--orient|orient)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--orient|orient)$/ and @_ > 0 and not defined $cmd){
       $cmd = "orient";
-      $mode = $MODE_CMD;
       push @cmdParams, "orient=" . shift @_;
-    }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $cmd){
       $cmd = "framebuf";
-      $mode = $MODE_CMD;
       push @cmdParams, "framebuf=" . shift @_;
-    }elsif($arg =~ /^(--upload|upload)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--upload|upload)$/ and @_ > 0 and not defined $cmd){
       $cmd = "upload";
-      $mode = $MODE_CMD;
       $cmdFile = shift @_;
       my $destFilename = $cmdFile;
       if(@_ > 0){
         $destFilename = shift @_;
       }
       push @cmdParams, "filename=$destFilename";
-    }elsif($arg =~ /^(--delete|delete)$/ and @_ > 0 and not defined $mode){
+    }elsif($arg =~ /^(--delete|delete)$/ and @_ > 0 and not defined $cmd){
       $cmd = "delete";
-      $mode = $MODE_CMD;
       push @cmdParams, "filename=" . shift @_;
-    }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $mode){
+    }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $cmd){
       $cmd = "bootloader";
-      $mode = $MODE_CMD;
       $curlMaxTime = 3;
-    }elsif($arg !~ /^-/ and not defined $mode and not defined $cmdData){
+    }elsif($arg !~ /^-/ and not defined $cmd and not defined $cmdData){
       $cmdData = $arg;
-      $mode = $MODE_CMD;
       $cmd = "text";
       @cmdParams = (@DEFAULT_MARKUP_TEXT_PARAMS, @cmdParams);
       $isBodyPrependSize = 1 if not defined $isBodyPrependSize;
@@ -444,12 +420,6 @@ sub main(@){
     if(not defined $ipAddr){
       die "ERROR: could not find IP address for $devName in $DEVICE_CONFIG_FILE\n";
     }
-  }
-
-  if(not defined $mode){
-    $mode = $MODE_CMD;
-    $cmd = "text";
-    $cmdData = "";
   }
 
   my @curlOpts = ("--no-progress-meter");
