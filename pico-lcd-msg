@@ -4,7 +4,7 @@ use warnings;
 use File::Basename qw(basename);
 use URI::Escape qw(uri_escape);
 
-sub fetchWindowGeometry($$);
+sub fetchWindowGeometry($);
 sub calculateMaxFontSize($$$);
 sub runCurlCmd($$$$$$);
 sub parseConfig($);
@@ -412,7 +412,7 @@ sub main(@){
 
   if($mode eq $MODE_CMD){
     if($cmd eq "text" and $isBodyPrependSize and defined $cmdData){
-      my ($windowWidthPx, $windowHeightPx) = fetchWindowGeometry($ipAddr, [@curlOpts]);
+      my ($windowWidthPx, $windowHeightPx) = fetchWindowGeometry($ipAddr);
       my $size = calculateMaxFontSize($cmdData, $windowWidthPx, $windowHeightPx);
       $cmdData = "[size=$size]$cmdData";
     }
@@ -428,9 +428,9 @@ sub main(@){
   }
 }
 
-sub fetchWindowGeometry($$){
-  my ($ipAddr, $curlOpts) = @_;
-  my $info = `curl @$curlOpts 'http://$ipAddr/info'`;
+sub fetchWindowGeometry($){
+  my ($ipAddr) = @_;
+  my $info = `curl --silent --max-time 3 'http://$ipAddr/info'`;
   if($info =~ /window:\s+(\d+)x(\d+)/){
     return ($1, $2);
   }else{
