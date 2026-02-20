@@ -72,7 +72,7 @@ my $USAGE = "Usage:
   $EXEC [OPTS] --text=TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -calculate+prepend TEXT with [size] markup
-    -set CLEAR to 'true' or 'false' based on --clear-text/--no-clear-text
+    -set CLEAR to 'true'
     -otherwise:
       -run: curl 'http://<IP_ADDRESS>/text?clear=<CLEAR>&show=true' --data '<TEXT>'
 
@@ -294,12 +294,6 @@ my $USAGE = "Usage:
     --bottom
     --square
       if specified after TEXT, send orient/framebuf params as part of the /text cmd
-
-    --clear-text
-      when setting text, clear the screen first (set clear=true)
-      (this is the default)
-    --no-clear-text | --no-clear
-        always send clear=false with all text commands
 ";
 
 my $MODE_TEXT = "text";
@@ -315,7 +309,6 @@ sub main(@){
 
   my $text = "";
   my @textParams;
-  my $isClearText = 1;
 
   my $templateSet = undef;
 
@@ -502,10 +495,6 @@ sub main(@){
       }else{
         push @textParams, "framebuf=$framebufConfName";
       }
-    }elsif($arg =~ /^(--clear-text)$/){
-      $isClearText = 1;
-    }elsif($arg =~ /^(--no-clear-text|--no-clear)$/){
-      $isClearText = 0;
     }elsif((defined $mode and $mode eq $MODE_TEXT) or ($arg !~ /^-/ and not defined $mode)){
       $text .= " " if $text ne "";
       $text .= $arg;
@@ -558,12 +547,7 @@ sub main(@){
     print "$msg\n" unless $quiet;
 
     my @params = (@textParams);
-    if($isClearText){
-      @params = (@params, "clear=true");
-    }else{
-      @params = (@params, "clear=false");
-    }
-
+    @params = (@params, "clear=true");
     @params = (@params, "info=true");
     @params = (@params, "show=true");
 
