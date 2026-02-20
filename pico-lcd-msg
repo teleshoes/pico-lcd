@@ -69,8 +69,7 @@ my $USAGE = "Usage:
   $EXEC -h | --help
     show this message
 
-  $EXEC [OPTS] text   MARKUP_TEXT
-  $EXEC [OPTS] --text MARKUP_TEXT
+  $EXEC [OPTS] --text|text MARKUP_TEXT
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -calculate+prepend MARKUP_TEXT with [size] markup (unless --no-prepend-size given)
     -set CLEAR to 'true'
@@ -85,23 +84,22 @@ my $USAGE = "Usage:
     apply pre-configured set of markup templates
     TEMPLATE_SET_NAME: " . join(" | ", sort keys %$TEMPLATE_SETS) . "
 
-  $EXEC [OPTS] cmd   CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
-  $EXEC [OPTS] --cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
+  $EXEC [OPTS] --cmd|cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
     -parse IP_ADDRESS from $DEVICE_CONFIG_FILE
     -run: curl 'http://<IP_ADDRESS>/<CMD>?<PARAM_NAME>=<PARAM_VAL>&<PARAM_NAME>=<PARAM_VAL>'
         PARAM_NAME=PARAM_VAL
           pass in as URL param in curl
           PARAM_NAME and can contain only letters, numbers, and underscores
 
-  $EXEC [OPTS] info | --info
+  $EXEC [OPTS] --info|info
     fetch+show current state
       -same as: $EXEC [OPTS] --cmd info
 
-  $EXEC [OPTS] connect | --connect
+  $EXEC [OPTS] --connect|connect
     re-connect to wifi or setup access point
       -same as: $EXEC [OPTS] --cmd connect
 
-  $EXEC [OPTS] ssid | --ssid SSID PASSWORD [TIMEOUT]
+  $EXEC [OPTS] --ssid|ssid SSID PASSWORD [TIMEOUT]
     append a network for next boot/connect
       formatted:
         'TIMEOUT,SSID = PASSWORD'
@@ -109,18 +107,17 @@ my $USAGE = "Usage:
         'SSID = PASSWORD'
       -same as: $EXEC [OPTS] --ssid ssid=SSID password=PASSWORD timeout=TIMEOUT
 
-  $EXEC [OPTS] resetwifi | --resetwifi
+  $EXEC [OPTS] --resetwifi|resetwifi
     REMOVE all configured wifi network SSIDs for next boot/connect
       -same as: $EXEC [OPTS] --cmd resetwifi
 
-  $EXEC [OPTS] template TEMPLATE_NAME [TEMPLATE_MARKUP]
+  $EXEC [OPTS] --template|template TEMPLATE_NAME [TEMPLATE_MARKUP]
     write \"TEMPLATE_MARKUP\" to state-template-TEMPLATE_NAME file
       TEMPLATE_NAME: timeout | wifi-waiting | wifi-connected | ap-waiting | ap-active
     if TEMPLATE_MARKUP is omitted, the default markup for that template is used
       -same as: $EXEC [OPTS] --template name=TZDATA_ZONE_NAME --data=TEMPLATE_MARKUP
 
-  $EXEC [OPTS] timeout [TIMEOUT_MILLIS]
-  $EXEC [OPTS] --timeout [TIMEOUT_MILLIS]
+  $EXEC [OPTS] --timeout|timeout [TIMEOUT_MILLIS]
     write \"TIMEOUT_MILLIS\" to state-timeout file
       after TIMEOUT_MILLIS milliseconds of no network commands,
       clear LCD, set LCD text to 'timeout' template, and show LCD
@@ -128,45 +125,42 @@ my $USAGE = "Usage:
       and the socket blocks forever
       -same as: $EXEC [OPTS] --cmd timeout timeoutMillis=TIMEOUT_MILLIS
 
-  $EXEC [OPTS] timezone [TZDATA_ZONE_NAME]
+  $EXEC [OPTS] --timezone|timezone [TZDATA_ZONE_NAME]
     write \"TZDATA_ZONENAME\" to state-timezone file
       used for DS3231 real-time-clock in [rtc] markup
       requires calculating and installing tzdata CSV in advance
     if TZDATA_ZONE_NAME is omitted, delete state-timezone file
       -same as: $EXEC [OPTS] --cmd timezone name=TZDATA_ZONE_NAME
 
-  $EXEC [OPTS] rtc RTC_EPOCH
+  $EXEC [OPTS] --rtc|rtc [RTC_EPOCH]
     set the DS3231 RTC epoch to RTC_EPOCH
       -same as: $EXEC [OPTS] --cmd rtc epoch=RTC_EPOCH
 
-  $EXEC [OPTS] clear | --clear
+  $EXEC [OPTS] --clear|clear
     clear the entire LCD memory
       -same as: $EXEC [OPTS] --cmd clear
 
-  $EXEC [OPTS] show | --show
+  $EXEC [OPTS] --show|show
     show the framebuffer, if any
       -same as: $EXEC [OPTS] --cmd show
 
-  $EXEC [OPTS] buttons | --buttons
+  $EXEC [OPTS] --buttons|buttons
     fetch button press counts and print them
       -same as: $EXEC [OPTS] --cmd buttons
 
-  $EXEC [OPTS] fill   COLOR
-  $EXEC [OPTS] --fill COLOR
+  $EXEC [OPTS] --fill|fill COLOR
     fill the window with COLOR
       -same as: $EXEC [OPTS] --cmd fill color=<COLOR>
         COLOR
           one of: white black red green blue
 
-  $EXEC [OPTS] lcd   NAME
-  $EXEC [OPTS] --lcd NAME
+  $EXEC [OPTS] --lcd|lcd NAME
     set the lcd model to NAME
       -same as: $EXEC [OPTS] --cmd lcd name=<LCD_NAME>
         LCD_NAME
           one of: 1_3 2_0
 
-  $EXEC [OPTS] orient   ORIENT
-  $EXEC [OPTS] --orient ORIENT
+  $EXEC [OPTS] --orient|orient ORIENT
     set the rotation
       -same as: $EXEC [OPTS] --cmd orient orient=<ORIENT>
         ORIENT
@@ -179,8 +173,7 @@ my $USAGE = "Usage:
           inverted-portrait | 90
             set rotation to 90 degrees
 
-  $EXEC [OPTS] framebuf   FRAMEBUF
-  $EXEC [OPTS] --framebuf FRAMEBUF
+  $EXEC [OPTS] --framebuf|framebuf FRAMEBUF
     -same as: $EXEC [OPTS] --cmd framebuf framebuf=FRAMEBUF
         FRAMEBUF:
           <FB_W>x<FB_H>+<FB_X>+<FB_Y> = enable framebuf with WxH and offset (0, 0)
@@ -206,18 +199,17 @@ my $USAGE = "Usage:
               the framebuf, if any, that is actually successfully allocated is returned
               if 'framebuf: off' is returned instead of a framebuf, allocation likely failed
 
-  $EXEC [OPTS] upload   FILE [DEST_FILENAME]
-  $EXEC [OPTS] --upload FILE [DEST_FILENAME]
+  $EXEC [OPTS] --upload|upload FILE [DEST_FILENAME]
     upload file FILE to DEST_FILENAME (DEST_FILENAME defaults to FILE if omitted)
     -same as:
       $EXEC [OPTS] --cmd upload filename=DEST_FILENAME --upload-file=FILE
 
-  $EXEC [OPTS] delete   FILENAME
-  $EXEC [OPTS] --delete FILENAME
+  $EXEC [OPTS] --delete|delete FILENAME
     delete remote file FILENAME
     -same as: $EXEC [OPTS] --cmd delete filename=FILENAME
 
-  $EXEC [OPTS] bootloader | --bootloader | bootsel | --bootsel
+  $EXEC [OPTS] --bootloader|bootloader
+  $EXEC [OPTS] --bootsel|bootsel
     enter bootloader (bootsel mass storage mode)
     also sets curl --max-time to 3s, as it will hang forever otherwise
       -same as: $EXEC [OPTS] --cmd bootloader -m 3
