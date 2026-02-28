@@ -91,7 +91,7 @@ my $USAGE = "Usage:
     apply pre-configured set of markup templates
     TEMPLATE_SET_NAME = " . join(" | ", sort keys %$TEMPLATE_SETS) . "
 
-  $EXEC [OPTS] --cmd|cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..]
+  $EXEC [OPTS] --cmd|cmd CMD [PARAM_NAME=PARAM_VAL PARAM_NAME=PARAM_VAL ..] [DATA_BODY]
     -parse <IP_ADDRESS> for device from $DEVICE_CONFIG_FILE
        -see: --ip / --ap / --dev
     -run:
@@ -110,7 +110,7 @@ my $USAGE = "Usage:
         PARAM_VAL
           can be any string, percent-encoded with URI::Escape->uri_escape()
         DATA_BODY
-          can be any string, see --data / --body
+          any string, cannot start with '-' unless given with --data / --body
         FILENAME
           must be a file on the local filesystem, see --upload-file
 
@@ -389,6 +389,8 @@ sub main(@){
       $$opts{curlMaxTime} = 3;
     }elsif($arg =~ /^(\w+)=(.+)$/ and $mode eq $MODE_CMD){
       push @cmdParams, "$1=$2";
+    }elsif($arg !~ /^-/ and defined $cmd and not defined $cmdData){
+      $cmdData = $arg;
     }elsif($arg !~ /^-/ and not defined $cmd and not defined $cmdData){
       $cmdData = $arg;
       $cmd = "text";
