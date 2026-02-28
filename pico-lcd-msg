@@ -312,9 +312,6 @@ sub main(@){
       }
     }elsif($arg =~ /^(--cmd|cmd)$/ and @_ > 0 and not defined $cmd){
       $cmd = shift @_;
-      while(@_ > 0 and $_[0] =~ /^\w+=.+$/){
-        push @cmdParams, shift @_;
-      }
     }elsif($arg =~ /^(--data|--body)$/ and @_ > 0){
       $cmdData = shift @_;
     }elsif($arg =~ /^(?:--data|--body)=(.+)$/s){
@@ -390,6 +387,8 @@ sub main(@){
     }elsif($arg =~ /^(--bootloader|bootloader|--bootsel|bootsel)$/ and not defined $cmd){
       $cmd = "bootloader";
       $$opts{curlMaxTime} = 3;
+    }elsif($arg =~ /^(\w+)=(.+)$/ and $mode eq $MODE_CMD){
+      push @cmdParams, "$1=$2";
     }elsif($arg !~ /^-/ and not defined $cmd and not defined $cmdData){
       $cmdData = $arg;
       $cmd = "text";
