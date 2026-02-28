@@ -186,6 +186,10 @@ my $USAGE = "Usage:
       FRAMEBUF = off | WxH+X+Y | WxH | full | left | right | top | bottom | square
     same as: $EXEC [OPTS] --cmd framebuf framebuf=FRAMEBUF
 
+  $EXEC [OPTS] --stat|stat stat
+    list all files on the filesystem, formatted <ABSPATH>,<SIZE_BYTES>b,<MTIME_EPOCH>
+    same as: $EXEC [OPTS] --cmd stat
+
   $EXEC [OPTS] --upload|upload FILE [DEST_FILENAME]
     write file to remote filesystem
       FILE          = the local path of file to upload
@@ -371,6 +375,8 @@ sub main(@){
     }elsif($arg =~ /^(--framebuf|framebuf)$/ and @_ > 0 and not defined $cmd){
       $cmd = "framebuf";
       push @cmdParams, "framebuf=" . shift @_;
+    }elsif($arg =~ /^(--stat|stat)$/ and not defined $cmd){
+      $cmd = "stat";
     }elsif($arg =~ /^(--upload|upload)$/ and @_ > 0 and not defined $cmd){
       $cmd = "upload";
       $cmdFile = shift @_;
